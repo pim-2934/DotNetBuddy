@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>BuddyDotNet</RootNamespace>
+        <LangVersion>12.0</LangVersion>
+
+        <Authors>Pim</Authors>
+        <PackageTags>EFCore;UnitOfWork;Repositories;Exceptions;Installers;Configs;</PackageTags>
+        <RepositoryUrl>https://github.com/pim-2934/DotNetBuddy</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.13"/>
+    </ItemGroup>
+</Project>

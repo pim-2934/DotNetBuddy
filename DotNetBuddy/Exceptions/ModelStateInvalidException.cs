@@ -1,0 +1,27 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
+namespace BuddyDotNet.Exceptions;
+
+/// <summary>
+/// Represents an exception that is thrown when a model's state is invalid during request validation.
+/// </summary>
+/// <remarks>
+/// This exception is used to encapsulate model validation errors detected in the
+/// <see cref="Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary"/> during a request lifecycle.
+/// It derives from <see cref="BuddyDotNet.Exceptions.Rfc9110Exception"/> to provide a standardized
+/// error message structure and HTTP status code.
+/// </remarks>
+/// <seealso cref="BuddyDotNet.Exceptions.Rfc9110Exception"/>
+/// <seealso cref="Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary"/>
+public class ModelStateInvalidException(ModelStateDictionary modelState) : Rfc9110Exception
+(
+    "One or more validation errors occurred.",
+    string.Join
+    (
+        ", ",
+        modelState
+            .Where(x => x.Value is not null && x.Value!.Errors.Any())
+            .SelectMany(x => x.Value!.Errors)
+            .Select(e => e.ErrorMessage)
+    )
+);

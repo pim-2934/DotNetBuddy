@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy", "DotNetBuddy\DotNetBuddy.csproj", "{7386C0E6-96EC-4630-95CE-2CB4B357267A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy.Tests", "DotNetBuddy.Tests\DotNetBuddy.Tests.csproj", "{CFAF833B-7914-4A86-A0DB-6CBF9FF7FE0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy.Example", "DotNetBuddy.Example\DotNetBuddy.Example.csproj", "{5EC64C3D-4D85-4367-AD0C-9FE935BF8FE1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7386C0E6-96EC-4630-95CE-2CB4B357267A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7386C0E6-96EC-4630-95CE-2CB4B357267A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7386C0E6-96EC-4630-95CE-2CB4B357267A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7386C0E6-96EC-4630-95CE-2CB4B357267A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFAF833B-7914-4A86-A0DB-6CBF9FF7FE0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFAF833B-7914-4A86-A0DB-6CBF9FF7FE0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFAF833B-7914-4A86-A0DB-6CBF9FF7FE0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFAF833B-7914-4A86-A0DB-6CBF9FF7FE0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EC64C3D-4D85-4367-AD0C-9FE935BF8FE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EC64C3D-4D85-4367-AD0C-9FE935BF8FE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EC64C3D-4D85-4367-AD0C-9FE935BF8FE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EC64C3D-4D85-4367-AD0C-9FE935BF8FE1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

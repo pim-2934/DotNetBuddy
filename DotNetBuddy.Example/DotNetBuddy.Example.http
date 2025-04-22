@@ -1,0 +1,6 @@
+@DotNetBuddy.Example_HostAddress = http://localhost:5038
+
+GET {{DotNetBuddy.Example_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
