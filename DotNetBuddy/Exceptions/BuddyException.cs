@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace BuddyDotNet.Exceptions;
+namespace DotNetBuddy.Exceptions;
 
 /// <summary>
 /// Represents a custom exception specific to the BuddyDotNet platform.

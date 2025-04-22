@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provides centralized HTTP exception handling through `Buddy.NET`.
+Provides centralized HTTP exception handling through `DotNetBuddy`.
 
 ## Usage
 

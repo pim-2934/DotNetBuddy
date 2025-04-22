@@ -1,6 +1,6 @@
-using BuddyDotNet.Repositories;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
+using DotNetBuddy.Repositories;
 
 namespace DotNetBuddy.Example.Repositories;
 

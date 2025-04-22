@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
-using BuddyDotNet.Enums;
+using DotNetBuddy.Enums;
 
-namespace BuddyDotNet;
+namespace DotNetBuddy;
 
 /// <summary>
 /// Defines a generic repository interface for managing data operations on entities.

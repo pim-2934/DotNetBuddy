@@ -1,4 +1,4 @@
-﻿namespace BuddyDotNet;
+﻿namespace DotNetBuddy;
 
 /// <summary>
 /// Defines the Unit of Work pattern to manage database transactions and repositories.

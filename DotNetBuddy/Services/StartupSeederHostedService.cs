@@ -1,9 +1,9 @@
-﻿using BuddyDotNet.Utilities;
+﻿using DotNetBuddy.Utilities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace BuddyDotNet.Services;
+namespace DotNetBuddy.Services;
 
 /// <summary>
 /// A hosted service that executes configured seeders during application startup,

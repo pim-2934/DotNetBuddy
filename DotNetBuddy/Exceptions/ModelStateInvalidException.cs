@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace BuddyDotNet.Exceptions;
+namespace DotNetBuddy.Exceptions;
 
 /// <summary>
 /// Represents an exception that is thrown when a model's state is invalid during request validation.
@@ -8,10 +8,10 @@ namespace BuddyDotNet.Exceptions;
 /// <remarks>
 /// This exception is used to encapsulate model validation errors detected in the
 /// <see cref="Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary"/> during a request lifecycle.
-/// It derives from <see cref="BuddyDotNet.Exceptions.Rfc9110Exception"/> to provide a standardized
+/// It derives from <see cref="Rfc9110Exception"/> to provide a standardized
 /// error message structure and HTTP status code.
 /// </remarks>
-/// <seealso cref="BuddyDotNet.Exceptions.Rfc9110Exception"/>
+/// <seealso cref="Rfc9110Exception"/>
 /// <seealso cref="Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary"/>
 public class ModelStateInvalidException(ModelStateDictionary modelState) : Rfc9110Exception
 (

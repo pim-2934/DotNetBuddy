@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace BuddyDotNet.Interceptors;
+namespace DotNetBuddy.Interceptors;
 
 /// <summary>
 /// Represents a custom EF Core <see cref="SaveChangesInterceptor"/> that applies auditing information to entities

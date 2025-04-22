@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
-using BuddyDotNet.Enums;
-using BuddyDotNet.Exceptions;
+using DotNetBuddy.Enums;
+using DotNetBuddy.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace BuddyDotNet.Repositories;
+namespace DotNetBuddy.Repositories;
 
 /// <inheritdoc />
 public class Repository<T>(DbContext context) : IRepository<T> where T : class, IEntity

@@ -1,7 +1,6 @@
-using BuddyDotNet;
-using BuddyDotNet.Utilities;
 using DotNetBuddy.Example.Configs;
 using DotNetBuddy.Example.Models;
+using DotNetBuddy.Utilities;
 using Microsoft.Extensions.Options;
 
 namespace DotNetBuddy.Example.Seeders;

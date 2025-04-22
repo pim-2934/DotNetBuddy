@@ -1,4 +1,4 @@
-﻿namespace BuddyDotNet;
+﻿namespace DotNetBuddy;
 
 /// <summary>
 /// Represents a contract for implementing seeders, which populate data into a database

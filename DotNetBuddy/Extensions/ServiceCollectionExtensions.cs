@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
-using BuddyDotNet.Attributes;
-using BuddyDotNet.Repositories;
+using DotNetBuddy.Attributes;
+using DotNetBuddy.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BuddyDotNet.Extensions;
+namespace DotNetBuddy.Extensions;
 
 /// <summary>
 /// Provides extension methods for configuring services in the dependency injection container.

@@ -1,8 +1,8 @@
-﻿using BuddyDotNet.Attributes;
-using BuddyDotNet.Interceptors;
+﻿using DotNetBuddy.Attributes;
+using DotNetBuddy.Interceptors;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BuddyDotNet.Installers;
+namespace DotNetBuddy.Installers;
 
 /// <summary>
 /// Represents an installer responsible for configuring interceptors within the dependency injection container.

@@ -1,9 +1,9 @@
-﻿using BuddyDotNet.Configs;
-using BuddyDotNet.Services;
+﻿using DotNetBuddy.Configs;
+using DotNetBuddy.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace BuddyDotNet.Installers;
+namespace DotNetBuddy.Installers;
 
 /// <summary>
 /// Responsible for registering all implementations of <see cref="ISeeder"/>

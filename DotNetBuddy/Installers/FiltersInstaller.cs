@@ -1,9 +1,9 @@
-using BuddyDotNet.Attributes;
-using BuddyDotNet.Filters;
+using DotNetBuddy.Attributes;
+using DotNetBuddy.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BuddyDotNet.Installers;
+namespace DotNetBuddy.Installers;
 
 /// <summary>
 /// Provides an implementation of the <see cref="IInstaller"/> interface to configure filtering behavior
@@ -11,7 +11,7 @@ namespace BuddyDotNet.Installers;
 /// </summary>
 /// <remarks>
 /// This installer customizes MVC behavior by suppressing the automatic ModelState validation filter
-/// and adds a custom validation filter, <see cref="BuddyDotNet.Filters.ModelStateValidationFilter"/>,
+/// and adds a custom validation filter, <see cref="ModelStateValidationFilter"/>,
 /// to be applied globally to all MVC actions.
 /// </remarks>
 [InstallPriority(500000)]
@@ -20,7 +20,7 @@ public class FiltersInstaller : IInstaller
     /// <summary>
     /// Configures service registrations to customize ASP.NET Core MVC behaviors.
     /// Suppresses the default ModelState validation filter and globally adds
-    /// a custom <see cref="BuddyDotNet.Filters.ModelStateValidationFilter"/>.
+    /// a custom <see cref="ModelStateValidationFilter"/>.
     /// </summary>
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> used to configure the application's services

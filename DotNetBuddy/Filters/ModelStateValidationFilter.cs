@@ -1,14 +1,14 @@
-using BuddyDotNet.Exceptions;
+using DotNetBuddy.Exceptions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace BuddyDotNet.Filters;
+namespace DotNetBuddy.Filters;
 
 /// <summary>
 /// An action filter that validates the `ModelState` before executing the action method.
 /// </summary>
 /// <remarks>
 /// This filter checks the `ModelState` for validity during the `OnActionExecuting` phase of the request pipeline.
-/// If the `ModelState` is invalid, it throws a <see cref="BuddyDotNet.Exceptions.ModelStateInvalidException"/>,
+/// If the `ModelState` is invalid, it throws a <see cref="ModelStateInvalidException"/>,
 /// which encapsulates the validation errors.
 /// </remarks>
 /// <example>
@@ -16,7 +16,7 @@ namespace BuddyDotNet.Filters;
 /// or other configuration mechanism.
 /// </example>
 /// <see cref="Microsoft.AspNetCore.Mvc.Filters.IActionFilter"/>
-/// <see cref="BuddyDotNet.Exceptions.ModelStateInvalidException"/>
+/// <see cref="ModelStateInvalidException"/>
 // ReSharper disable once ClassNeverInstantiated.Global
 public class ModelStateValidationFilter : IActionFilter
 {
@@ -27,7 +27,7 @@ public class ModelStateValidationFilter : IActionFilter
     /// The context associated with the executing action, containing information
     /// such as the `ModelState` and the HTTP request.
     /// </param>
-    /// <exception cref="BuddyDotNet.Exceptions.ModelStateInvalidException">
+    /// <exception cref="ModelStateInvalidException">
     /// Thrown if the `ModelState` is invalid, encapsulating the details of the validation errors.
     /// </exception>
     public void OnActionExecuting(ActionExecutingContext context)

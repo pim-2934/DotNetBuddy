@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Text;
 
-namespace BuddyDotNet.Utilities;
+namespace DotNetBuddy.Utilities;
 
 /// <summary>
 /// Provides helper methods for seeding entities into a repository with logic

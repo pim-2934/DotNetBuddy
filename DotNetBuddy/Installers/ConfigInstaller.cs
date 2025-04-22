@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
-using BuddyDotNet.Attributes;
+using DotNetBuddy.Attributes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BuddyDotNet.Installers;
+namespace DotNetBuddy.Installers;
 
 /// <summary>
 /// ConfigInstaller is responsible for discovering all types that implement the

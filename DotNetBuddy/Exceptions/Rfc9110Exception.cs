@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace BuddyDotNet.Exceptions;
+namespace DotNetBuddy.Exceptions;
 
 /// <summary>
 /// Represents the base exception class that conforms to the RFC 9110 standard for structured error responses.

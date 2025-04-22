@@ -1,4 +1,4 @@
-﻿namespace BuddyDotNet.Configs;
+﻿namespace DotNetBuddy.Configs;
 
 /// <summary>
 /// Represents the configuration settings for the BuddyDotNet application.

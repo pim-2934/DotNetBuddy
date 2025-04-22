@@ -1,6 +1,4 @@
-﻿using BuddyDotNet;
-
-namespace DotNetBuddy.Example.Repositories.Interfaces;
+﻿namespace DotNetBuddy.Example.Repositories.Interfaces;
 
 public interface IExtendedUnitOfWork : IUnitOfWork
 {

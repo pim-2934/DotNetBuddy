@@ -1,7 +1,6 @@
-using BuddyDotNet;
-using BuddyDotNet.Extensions;
 using DotNetBuddy.Example.Repositories;
 using DotNetBuddy.Example.Repositories.Interfaces;
+using DotNetBuddy.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Example.Installers;

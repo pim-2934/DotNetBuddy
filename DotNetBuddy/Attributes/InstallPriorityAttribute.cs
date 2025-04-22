@@ -1,4 +1,4 @@
-﻿namespace BuddyDotNet.Attributes;
+﻿namespace DotNetBuddy.Attributes;
 
 /// <summary>
 /// Specifies the installation priority of a class within the dependency injection process.

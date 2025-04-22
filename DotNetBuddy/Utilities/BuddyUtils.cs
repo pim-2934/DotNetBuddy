@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace BuddyDotNet.Utilities;
+namespace DotNetBuddy.Utilities;
 
 /// <summary>
 /// Provides utility methods to facilitate the execution of database seeders during application startup.

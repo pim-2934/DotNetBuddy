@@ -1,8 +1,8 @@
-﻿using BuddyDotNet.Interceptors;
+﻿using DotNetBuddy.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BuddyDotNet.Extensions;
+namespace DotNetBuddy.Extensions;
 
 /// <summary>
 /// Provides extension methods for configuring <see cref="DbContextOptionsBuilder"/>.

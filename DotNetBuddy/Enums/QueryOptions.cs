@@ -1,4 +1,4 @@
-namespace BuddyDotNet.Enums;
+namespace DotNetBuddy.Enums;
 
 /// <summary>
 /// Represents options that can modify the behavior of query execution in a repository.
