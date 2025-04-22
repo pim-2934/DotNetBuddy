@@ -56,7 +56,7 @@ Run seeders with:
 await BuddyUtils.RunSeeders(services);
 ```
 
-Or allow seeders to on on boot:
+Or allow seeders to run on boot:
 
 ```json
 {
