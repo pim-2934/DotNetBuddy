@@ -1,8 +1,8 @@
-# Buddy.NET
+# DotNetBuddy
 
 ## Overview
 
-**Buddy.NET** is a .NET framework designed to simplify and streamline common application concerns such as configuration,
+**DotNetBuddy** is a .NET framework designed to simplify and streamline common application concerns such as configuration,
 dependency injection, database access, auditing, exception handling, and data seeding.
 
 It encourages clean architecture principles and supports out-of-the-box patterns like Unit of Work and Repository.
@@ -11,7 +11,7 @@ It encourages clean architecture principles and supports out-of-the-box patterns
 
 ## Quick Start
 
-### 1. Install Buddy.NET
+### 1. Install DotNetBuddy
 
 ```csharp
 builder.Services.AddBuddy<DatabaseContext>(builder.Configuration);
