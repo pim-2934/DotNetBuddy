@@ -1,4 +1,5 @@
 [![Nuget](https://img.shields.io/nuget/v/DotNetBuddy?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy/)
+[![License](https://img.shields.io/github/license/pim-2934/DotNetBuddy?style=flat-square)](https://github.com/pim-2934/DotNetBuddy/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/nuget/dt/dotnetbuddy?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy/)
 [![GitHub](https://img.shields.io/badge/-source-181717.svg?logo=GitHub)](https://github.com/pim-2934/DotNetBuddy)
 
