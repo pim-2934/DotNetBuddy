@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetBuddy.Example.Seeders;
 
-public class WeatherForecastSeeder(IOptions<WeatherForecastConfig> weatherForecastConfig) : ISeeder
+public class WeatherForecastSeeder(IOptions<WeatherForecastConfig> weatherForecastConfig, IUnitOfWork unitOfWork) : ISeeder
 {
     public string[] Environments =>
     [
@@ -20,7 +20,7 @@ public class WeatherForecastSeeder(IOptions<WeatherForecastConfig> weatherForeca
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     ];
 
-    public async Task SeedAsync(IUnitOfWork unitOfWork)
+    public async Task SeedAsync()
     {
         await SeederHelper.SeedManyAsync
         (

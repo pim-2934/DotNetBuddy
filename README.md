@@ -19,7 +19,7 @@ It encourages clean architecture principles and supports out-of-the-box patterns
 ### 1. Install DotNetBuddy
 
 ```csharp
-builder.Services.AddBuddy<DatabaseContext>(builder.Configuration);
+builder.Services.AddBuddy<DatabaseContext>();
 ```
 
 ### 2. Configure Database and Auditing
@@ -40,11 +40,11 @@ app.UseBuddyExceptions();
 ### 4. Create Your First Seeder (Optional)
 
 ```csharp
-public class DevUserSeeder : ISeeder
+public class DevUserSeeder(IUnitOfWork uow) : ISeeder
 {
     public string[] Environments => new[] { "Development" };
 
-    public async Task SeedAsync(IUnitOfWork uow)
+    public async Task SeedAsync()
     {
         if (!await uow.Repository<User>().AnyAsync(u => u.Email == "admin@example.com"))
         {

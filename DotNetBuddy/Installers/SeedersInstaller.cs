@@ -38,7 +38,7 @@ public class SeedersInstaller : IInstaller
 
         foreach (var type in seederTypes)
         {
-            services.AddTransient(typeof(ISeeder), type);
+            services.AddScoped(typeof(ISeeder), type);
         }
 
         if (buddyConfig.Value.RunSeedersOnBoot)
