@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
         var concat = assemblies is not null ? AppDomain.CurrentDomain.GetAssemblies().Concat(assemblies) : [];
 
         var installers = concat
+            .DistinctBy(x => x.FullName)
             .SelectMany
             (a =>
                 {
