@@ -12,11 +12,11 @@ Allows environment-specific, idempotent database seeding.
 ## Usage
 
 ```csharp
-public class DevSeeder : ISeeder
+public class DevSeeder(IUnitOfWork uow) : ISeeder
 {
     public string[] Environments => new[] { "Development" };
 
-    public async Task SeedAsync(IUnitOfWork uow)
+    public async Task SeedAsync()
     {
         if (!await uow.Repository<User>().AnyAsync(u => u.Email == "admin@example.com"))
         {
