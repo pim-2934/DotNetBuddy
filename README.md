@@ -19,7 +19,7 @@ It encourages clean architecture principles and supports out-of-the-box patterns
 ### 1. Install DotNetBuddy
 
 ```csharp
-builder.Services.AddBuddy<DatabaseContext>(builder.Configuration);
+builder.Services.AddBuddy<DatabaseContext>();
 ```
 
 ### 2. Configure Database and Auditing

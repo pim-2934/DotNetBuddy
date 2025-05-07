@@ -1,6 +1,5 @@
 ﻿using DotNetBuddy.Utilities;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace DotNetBuddy.Services;
@@ -14,10 +13,7 @@ public class StartupSeederHostedService(IServiceProvider provider, IWebHostEnvir
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var scope = provider.CreateScope();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        
-        await BuddyUtils.RunSeeders(unitOfWork, provider, env);
+        await BuddyUtils.RunSeeders(provider, env);
     }
 
     /// <inheritdoc />

@@ -20,7 +20,6 @@ public interface ISeeder
     /// <summary>
     /// Seeds the database asynchronously by inserting required entities using the provided unit of work.
     /// </summary>
-    /// <param name="unitOfWork">The unit of work managing database transactions and repositories required for seeding.</param>
     /// <returns>A task that represents the asynchronous seeding operation.</returns>
-    public Task SeedAsync(IUnitOfWork unitOfWork);
+    public Task SeedAsync();
 }
