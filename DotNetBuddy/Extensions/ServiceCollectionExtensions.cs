@@ -2,7 +2,6 @@
 using DotNetBuddy.Attributes;
 using DotNetBuddy.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetBuddy.Extensions;
@@ -21,24 +20,25 @@ public static class ServiceCollectionExtensions
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> to which the services will be added.
     /// </param>
-    /// <param name="configuration">
-    /// An instance of <see cref="IConfiguration"/> used to bind configuration settings.
+    /// <param name="assemblies">
+    /// An array of additional  <see cref="Assembly"/> instances used to locate and run service installers. Use this if
+    /// the referenced project has installers but is not loaded yet at the time of adding buddy.
     /// </param>
-    public static void AddBuddy<T>(this IServiceCollection services, IConfiguration configuration) where T : DbContext
+    public static void AddBuddy<T>(this IServiceCollection services, params Assembly[] assemblies) where T : DbContext
     {
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork<T>>();
-            
-        FindAndRunInstallers(services);
+
+        FindAndRunInstallers(services, assemblies);
     }
 
-    private static void FindAndRunInstallers(IServiceCollection services)
+    private static void FindAndRunInstallers(IServiceCollection services, Assembly[]? assemblies)
     {
-        var installers = AppDomain.CurrentDomain
-            .GetAssemblies()
+        var concat = assemblies is not null ? AppDomain.CurrentDomain.GetAssemblies().Concat(assemblies) : [];
+
+        var installers = concat
             .SelectMany
-            (
-                a =>
+            (a =>
                 {
                     try
                     {
@@ -52,8 +52,7 @@ public static class ServiceCollectionExtensions
             )
             .Where(t => typeof(IInstaller).IsAssignableFrom(t) && t is { IsInterface: false, IsAbstract: false })
             .Select
-            (
-                t =>
+            (t =>
                 {
                     var attr = t!.GetCustomAttribute<InstallPriorityAttribute>();
 
@@ -65,7 +64,7 @@ public static class ServiceCollectionExtensions
                 }
             )
             .OrderByDescending(x => x.Priority)
-            .Select(x => (IInstaller) Activator.CreateInstance(x.Type!)!);
+            .Select(x => (IInstaller)Activator.CreateInstance(x.Type!)!);
 
         foreach (var installer in installers)
         {
