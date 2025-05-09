@@ -20,26 +20,30 @@ public static class ServiceCollectionExtensions
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> to which the services will be added.
     /// </param>
-    /// <param name="assemblies">
-    /// An array of additional  <see cref="Assembly"/> instances used to locate and run service installers. Use this if
+    /// <param name="assemblyNames">
+    /// An array of additional <see cref="Assembly"/> instances used to locate and run service installers. Use this if
     /// the referenced project has installers but is not loaded yet at the time of adding buddy.
     /// </param>
-    public static void AddBuddy<T>(this IServiceCollection services, params Assembly[] assemblies) where T : DbContext
+    public static void AddBuddy<T>(this IServiceCollection services, params AssemblyName[] assemblyNames)
+        where T : DbContext
     {
+        foreach (var assemblyName in assemblyNames)
+        {
+            Assembly.Load(assemblyName);
+        }
+
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork<T>>();
 
-        FindAndRunInstallers(services, assemblies);
+        FindAndRunInstallers(services);
     }
 
-    private static void FindAndRunInstallers(IServiceCollection services, Assembly[]? assemblies)
+    private static void FindAndRunInstallers(IServiceCollection services)
     {
-        var concat = assemblies is not null ? AppDomain.CurrentDomain.GetAssemblies().Concat(assemblies) : [];
-
-        var installers = concat
-            .DistinctBy(x => x.FullName)
+        var installers = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany
-            (a =>
+            (
+                a =>
                 {
                     try
                     {
