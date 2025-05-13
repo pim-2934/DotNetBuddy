@@ -39,7 +39,7 @@ public static class SeederHelper
     public static async Task SeedOneAsync<TEntity>(IUnitOfWork unitOfWork, string identifier, TEntity entity)
         where TEntity : class, IEntity
     {
-        var guid = GenerateDeterministicGuid(identifier);
+        var guid = BuddyUtils.GenerateDeterministicGuid(identifier);
         entity.Id = guid;
 
         if (!await unitOfWork.Repository<TEntity>().AnyAsync(guid))
@@ -85,17 +85,5 @@ public static class SeederHelper
         {
             await unitOfWork.Repository<TEntity>().AddAsync(entities);
         }
-    }
-
-    /// <summary>
-    /// Generates a deterministic GUID based on a string input using MD5 hashing.
-    /// The same input string will always produce the same GUID.
-    /// </summary>
-    /// <param name="identifier">The string input to generate the deterministic GUID from.</param>
-    /// <returns>A GUID that is deterministically generated from the input string.</returns>
-    public static Guid GenerateDeterministicGuid(string identifier)
-    {
-        var hash = System.Security.Cryptography.MD5.HashData(Encoding.UTF8.GetBytes(identifier));
-        return new Guid(hash);
     }
 }

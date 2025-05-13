@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace DotNetBuddy.Utilities;
@@ -25,5 +26,17 @@ public static class BuddyUtils
 
             await seeder.SeedAsync();
         }
+    }
+    
+    /// <summary>
+    /// Generates a deterministic GUID based on a string input using MD5 hashing.
+    /// The same input string will always produce the same GUID.
+    /// </summary>
+    /// <param name="identifier">The string input to generate the deterministic GUID from.</param>
+    /// <returns>A GUID that is deterministically generated from the input string.</returns>
+    public static Guid GenerateDeterministicGuid(string identifier)
+    {
+        var hash = System.Security.Cryptography.MD5.HashData(Encoding.UTF8.GetBytes(identifier));
+        return new Guid(hash);
     }
 }

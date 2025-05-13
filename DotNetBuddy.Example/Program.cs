@@ -6,8 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddBuddy<DatabaseContext>(); // Buddy: Default setup
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
@@ -28,3 +29,10 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Expose Program class for integration tests. This pattern allows test projects to reference
+// the Program class while preventing direct instantiation.
+namespace DotNetBuddy.Example
+{
+    public abstract class Program;
+}

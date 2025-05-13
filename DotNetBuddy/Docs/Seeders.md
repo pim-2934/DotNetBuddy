@@ -27,6 +27,30 @@ public class DevSeeder(IUnitOfWork uow) : ISeeder
 }
 ```
 
+## Usage (Deterministic Guid, SeederHelper)
+```csharp
+public class DevSeeder(IUnitOfWork uow) : ISeeder
+{
+    public string[] Environments => new[] { "Development" };
+
+    public async Task SeedAsync()
+    {
+        var guid = BuddyUtils.GenerateDeterministicGuid("admin@example.com");
+        
+        await SeederHelper.SeedOneAsync
+        (
+            unitOfWork,
+            guid,
+            new User 
+            {
+                Id = guid,
+                Email = "admin@example.com"
+            }
+        );
+    }
+}
+```
+
 ## Execution
 
 Set config:
@@ -42,7 +66,7 @@ Set config:
 Or run programmatically via:
 
 ```csharp
-await BuddyUtils.RunSeeders(services);
+await BuddyUtils.RunSeeders(services, hostEnvironment);
 ```
 
 ## Notes
