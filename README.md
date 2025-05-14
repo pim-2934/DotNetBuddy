@@ -58,7 +58,7 @@ public class DevUserSeeder(IUnitOfWork uow) : ISeeder
 Run seeders with:
 
 ```csharp
-await BuddyUtils.RunSeeders(services);
+await BuddyUtils.RunSeeders(services, hostEnvironment);
 ```
 
 Or allow seeders to run on boot:

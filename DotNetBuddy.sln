@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy", "DotNetBuddy\DotNetBuddy.csproj", "{7386C0E6-96EC-4630-95CE-2CB4B357267A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy.Tests", "DotNetBuddy.Tests\DotNetBuddy.Tests.csproj", "{CFAF833B-7914-4A86-A0DB-6CBF9FF7FE0C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy.Example.Tests", "DotNetBuddy.Example.Tests\DotNetBuddy.Example.Tests.csproj", "{CFAF833B-7914-4A86-A0DB-6CBF9FF7FE0C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy.Example", "DotNetBuddy.Example\DotNetBuddy.Example.csproj", "{5EC64C3D-4D85-4367-AD0C-9FE935BF8FE1}"
 EndProject
