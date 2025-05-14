@@ -1,3 +1,4 @@
+using DotNetBuddy.Attributes;
 using DotNetBuddy.Example.Configs;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Utilities;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetBuddy.Example.Seeders;
 
+[SeedPriority(1000)]
 public class WeatherForecastSeeder(IOptions<WeatherForecastConfig> weatherForecastConfig, IUnitOfWork unitOfWork) : ISeeder
 {
     public string[] Environments =>

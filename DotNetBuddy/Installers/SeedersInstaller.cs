@@ -1,4 +1,6 @@
-﻿using DotNetBuddy.Configs;
+﻿using System.Reflection;
+using DotNetBuddy.Attributes;
+using DotNetBuddy.Configs;
 using DotNetBuddy.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -9,6 +11,7 @@ namespace DotNetBuddy.Installers;
 /// Responsible for registering all implementations of <see cref="ISeeder"/>
 /// and optionally configuring their execution during application startup.
 /// </summary>
+[InstallPriority(3000)]
 public class SeedersInstaller : IInstaller
 {
     /// <summary>
@@ -29,11 +32,17 @@ public class SeedersInstaller : IInstaller
         var seederTypes = assemblies
             .SelectMany(a => a.GetTypes())
             .Where
-            (
-                t =>
-                    t is { IsClass: true, IsAbstract: false, IsPublic: true } &&
-                    typeof(ISeeder).IsAssignableFrom(t)
+            (t =>
+                t is { IsClass: true, IsAbstract: false, IsPublic: true } &&
+                typeof(ISeeder).IsAssignableFrom(t)
             )
+            .Select(t => new
+            {
+                Type = t,
+                Priority = t.GetCustomAttribute<SeedPriorityAttribute>()?.Weight ?? int.MaxValue
+            })
+            .OrderBy(x => x.Priority)
+            .Select(x => x.Type)
             .ToList();
 
         foreach (var type in seederTypes)
