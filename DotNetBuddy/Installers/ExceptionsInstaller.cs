@@ -11,7 +11,7 @@ namespace DotNetBuddy.Installers;
 /// injection container, including customization of problem details
 /// for enhanced error diagnostics.
 /// </summary>
-[InstallPriority(500000)]
+[InstallPriority(2000)]
 public class ExceptionsInstaller : IInstaller
 {
     /// <summary>

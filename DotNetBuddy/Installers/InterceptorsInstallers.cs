@@ -10,7 +10,7 @@ namespace DotNetBuddy.Installers;
 /// <remarks>
 /// This installer registers services related to database operation interceptors, such as auditing functionality.
 /// </remarks>
-[InstallPriority(700000)]
+[InstallPriority(3000)]
 public class InterceptorsInstallers : IInstaller
 {
     /// <summary>

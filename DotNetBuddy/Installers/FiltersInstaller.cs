@@ -14,7 +14,7 @@ namespace DotNetBuddy.Installers;
 /// and adds a custom validation filter, <see cref="ModelStateValidationFilter"/>,
 /// to be applied globally to all MVC actions.
 /// </remarks>
-[InstallPriority(500000)]
+[InstallPriority(3000)]
 public class FiltersInstaller : IInstaller
 {
     /// <summary>
