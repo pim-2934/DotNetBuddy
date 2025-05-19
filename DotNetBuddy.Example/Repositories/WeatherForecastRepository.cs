@@ -5,4 +5,4 @@ using DotNetBuddy.Repositories;
 namespace DotNetBuddy.Example.Repositories;
 
 public class WeatherForecastRepository(DatabaseContext context)
-    : Repository<WeatherForecast>(context), IWeatherForecastRepository;
+    : Repository<WeatherForecast, Guid>(context), IWeatherForecastRepository;

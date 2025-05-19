@@ -3,7 +3,7 @@
 /// <summary>
 /// Defines a contract for entities that maintain audit information, including creation and update timestamps.
 /// </summary>
-public interface IAuditableEntity : IEntity
+public interface IAuditableEntity<TKey> : IEntity<TKey>
 {
     /// <summary>
     /// Gets or sets the timestamp indicating when the entity was created.

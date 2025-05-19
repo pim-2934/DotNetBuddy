@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
             Assembly.Load(assemblyName);
         }
 
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped<IUnitOfWork, UnitOfWork<T>>();
 
         FindAndRunInstallers(services);

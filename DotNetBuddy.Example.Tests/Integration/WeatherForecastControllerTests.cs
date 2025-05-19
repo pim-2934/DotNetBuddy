@@ -1,10 +1,9 @@
 ﻿using System.Net;
 using DotNetBuddy.Example.Models;
-using DotNetBuddy.Example.Tests.Integration;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace DotNetBuddy.Example.Tests;
+namespace DotNetBuddy.Example.Tests.Integration;
 
 public class WeatherForecastControllerTests(TestWebApplicationFactory factory)
     : IClassFixture<TestWebApplicationFactory>
@@ -27,7 +26,7 @@ public class WeatherForecastControllerTests(TestWebApplicationFactory factory)
         // Act
         var response = await _client.GetAsync("/WeatherForecast/GetWeatherForecast");
         var content = await response.Content.ReadAsStringAsync();
-        var forecasts = JsonConvert.DeserializeObject<IEnumerable<WeatherForecast>>(content);
+        var forecasts = JsonConvert.DeserializeObject<List<WeatherForecast>>(content);
 
         // Assert
         Assert.NotNull(forecasts);
