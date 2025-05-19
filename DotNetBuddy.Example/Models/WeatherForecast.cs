@@ -3,10 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DotNetBuddy.Example.Models;
 
-public class WeatherForecast : IAuditableEntity
+public class WeatherForecast : IAuditableEntity<Guid>
 {
-    // IAuditableEntity
+    // IEntity
     public Guid Id { get; set; }
+    
+    // IAuditableEntity
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     

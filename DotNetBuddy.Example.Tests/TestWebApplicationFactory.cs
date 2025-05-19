@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace DotNetBuddy.Example.Tests.Integration;
+namespace DotNetBuddy.Example.Tests;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class TestWebApplicationFactory : WebApplicationFactory<Program>

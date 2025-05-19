@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 namespace DotNetBuddy.Repositories;
 
 /// <inheritdoc />
-public class Repository<T>(DbContext context) : IRepository<T> where T : class, IEntity
+public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where T : class, IEntity<TKey>
 {
     /// <summary>
     /// Represents the set of entities of a specific type that can be queried or updated within the database context.
     /// Facilitates LINQ queries and database operations for managing entity data.
     /// </summary>
-    protected readonly DbSet<T> DbSet = context.Set<T>();
+    private readonly DbSet<T> _dbSet = context.Set<T>();
 
     /// <inheritdoc />
     public async Task<IEnumerable<T>> GetAllAsync(
@@ -23,7 +23,7 @@ public class Repository<T>(DbContext context) : IRepository<T> where T : class, 
     {
         var query = includes.Aggregate<Expression<Func<T, object>>, IQueryable<T>>
         (
-            DbSet,
+            _dbSet,
             (current, include) => current.Include(include)
         );
 
@@ -44,7 +44,7 @@ public class Repository<T>(DbContext context) : IRepository<T> where T : class, 
     {
         var query = includes.Aggregate<Expression<Func<T, object>>, IQueryable<T>>
         (
-            DbSet,
+            _dbSet,
             (current, include) => current.Include(include)
         );
 
@@ -53,36 +53,36 @@ public class Repository<T>(DbContext context) : IRepository<T> where T : class, 
 
     /// <inheritdoc />
     public async Task<T?> GetAsync(
-        Guid id,
+        TKey id,
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     )
     {
         var query = includes.Aggregate<Expression<Func<T, object>>, IQueryable<T>>
         (
-            DbSet,
+            _dbSet,
             (current, include) => current.Include(include)
         );
 
-        return await ApplyQueryOptions(query, options).FirstOrDefaultAsync(x => x.Id == id);
+        return await ApplyQueryOptions(query, options).FirstOrDefaultAsync(x => EqualityComparer<TKey>.Default.Equals(x.Id, id));
     }
 
     /// <inheritdoc />
     public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, QueryOptions options = QueryOptions.None)
     {
-        return await ApplyQueryOptions(DbSet, options).AnyAsync(predicate);
+        return await ApplyQueryOptions(_dbSet, options).AnyAsync(predicate);
     }
 
     /// <inheritdoc />
-    public async Task<bool> AnyAsync(Guid id, QueryOptions options = QueryOptions.None)
+    public async Task<bool> AnyAsync(TKey id, QueryOptions options = QueryOptions.None)
     {
-        return await ApplyQueryOptions(DbSet, options).AnyAsync(x => x.Id == id);
+        return await ApplyQueryOptions(_dbSet, options).AnyAsync(x => EqualityComparer<TKey>.Default.Equals(x.Id, id));
     }
 
     /// <inheritdoc />
     public async Task<T> AddAsync(T entity)
     {
-        await DbSet.AddAsync(entity);
+        await _dbSet.AddAsync(entity);
 
         return entity;
     }
@@ -90,7 +90,7 @@ public class Repository<T>(DbContext context) : IRepository<T> where T : class, 
     /// <inheritdoc />
     public async Task<List<T>> AddAsync(List<T> entities)
     {
-        await DbSet.AddRangeAsync(entities);
+        await _dbSet.AddRangeAsync(entities);
 
         return entities;
     }
@@ -98,18 +98,18 @@ public class Repository<T>(DbContext context) : IRepository<T> where T : class, 
     /// <inheritdoc />
     public Task<T> UpdateAsync(T entity)
     {
-        DbSet.Update(entity);
+        _dbSet.Update(entity);
 
         return Task.FromResult(entity);
     }
 
     /// <inheritdoc />
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(TKey id)
     {
         var entity = await GetAsync(id);
         if (entity != null)
         {
-            DbSet.Remove(entity);
+            _dbSet.Remove(entity);
         }
     }
 

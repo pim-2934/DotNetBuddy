@@ -4,10 +4,11 @@ using DotNetBuddy.Enums;
 namespace DotNetBuddy;
 
 /// <summary>
-/// Defines a generic repository interface for managing data operations on entities.
+/// Represents a repository for managing entities, supporting generic entity type and key type parameters.
 /// </summary>
-/// <typeparam name="T">The type of entity that the repository manages, which must implement the <see cref="IEntity"/> interface.</typeparam>
-public interface IRepository<T> where T : class, IEntity
+/// <typeparam name="T">The type of entity that implements <see cref="IEntity{TKey}"/>.</typeparam>
+/// <typeparam name="TKey">The type used as a unique identifier for the entity.</typeparam>
+public interface IRepository<T, in TKey> where T : class, IEntity<TKey>
 {
     /// <summary>
     /// Retrieves a list of entities from the repository, optionally filtered by a predicate and including navigation properties.
@@ -43,7 +44,7 @@ public interface IRepository<T> where T : class, IEntity
     /// <param name="includes">An array of expressions specifying related entities to include in the query.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity if found, or null if no entity matches the specified identifier.</returns>
     Task<T?> GetAsync(
-        Guid id,
+        TKey id,
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     );
@@ -62,7 +63,7 @@ public interface IRepository<T> where T : class, IEntity
     /// <param name="id">The unique identifier of the entity to search for.</param>
     /// <param name="options">Optional query options that modify the behavior of the query execution.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether an entity with the specified ID exists.</returns>
-    Task<bool> AnyAsync(Guid id, QueryOptions options = QueryOptions.None);
+    Task<bool> AnyAsync(TKey id, QueryOptions options = QueryOptions.None);
     
     /// <summary>
     /// Adds a new entity to the repository asynchronously.
@@ -90,5 +91,5 @@ public interface IRepository<T> where T : class, IEntity
     /// </summary>
     /// <param name="id">The unique identifier of the entity to be deleted.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(TKey id);
 }

@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Text;
 
 namespace DotNetBuddy.Utilities;
 
@@ -15,17 +14,18 @@ public static class SeederHelper
     /// <param name="unitOfWork">The unit of work managing the repository and transaction.</param>
     /// <param name="predicate">A function to test the entity for a condition to determine if a match exists in the repository.</param>
     /// <param name="entity">The entity to insert if no matches are found.</param>
-    /// <typeparam name="TEntity">The type of the entity implementing the <see cref="IEntity"/> interface.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity implementing the IEntity interface.</typeparam>
+    /// <typeparam name="TKey">The type of the unique key for the entity.</typeparam>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task SeedOneAsync<TEntity>(
+    public static async Task SeedOneAsync<TEntity, TKey>(
         IUnitOfWork unitOfWork,
         Expression<Func<TEntity, bool>> predicate,
         TEntity entity
-    ) where TEntity : class, IEntity
+    ) where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity>().AnyAsync(predicate))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate))
         {
-            await unitOfWork.Repository<TEntity>().AddAsync(entity);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
         }
     }
 
@@ -36,54 +36,53 @@ public static class SeederHelper
     /// <param name="identifier">A unique string identifier used to generate a deterministic GUID for the entity.</param>
     /// <param name="entity">The entity to be seeded into the database if it does not already exist.</param>
     /// <returns>A task that represents the asynchronous operation for seeding the entity.</returns>
-    public static async Task SeedOneAsync<TEntity>(IUnitOfWork unitOfWork, string identifier, TEntity entity)
-        where TEntity : class, IEntity
+    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, string identifier, TEntity entity)
+        where TEntity : class, IEntity<TKey>
     {
-        var guid = BuddyUtils.GenerateDeterministicGuid(identifier);
-        entity.Id = guid;
-
-        if (!await unitOfWork.Repository<TEntity>().AnyAsync(guid))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(entity.Id))
         {
-            await unitOfWork.Repository<TEntity>().AddAsync(entity);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
         }
     }
 
     /// <summary>
-    /// Seeds a single entity into the repository if an entity with the specified Guid does not already exist.
+    /// Adds a single entity to the repository if an entity with the specified identifier does not already exist.
     /// </summary>
     /// <param name="unitOfWork">The unit of work managing the repository and transaction.</param>
-    /// <param name="guid">The Guid to check for an existing entity in the repository.</param>
-    /// <param name="entity">The entity to insert if no entity with the specified Guid exists.</param>
-    /// <typeparam name="TEntity">The type of the entity implementing the <see cref="IEntity"/> interface.</typeparam>
+    /// <param name="id">The identifier used to check for the existence of the entity in the repository.</param>
+    /// <param name="entity">The entity to add if no entity with the specified identifier exists.</param>
+    /// <typeparam name="TEntity">The type of the entity, which must implement the <see cref="IEntity{TKey}"/> interface.</typeparam>
+    /// <typeparam name="TKey">The type of the identifier for the entity.</typeparam>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task SeedOneAsync<TEntity>(IUnitOfWork unitOfWork, Guid guid, TEntity entity)
-        where TEntity : class, IEntity
+    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, TKey id, TEntity entity)
+        where TEntity : class, IEntity<TKey>
     {
-        entity.Id = guid;
+        entity.Id = id;
 
-        if (!await unitOfWork.Repository<TEntity>().AnyAsync(guid))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(id))
         {
-            await unitOfWork.Repository<TEntity>().AddAsync(entity);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
         }
     }
 
     /// <summary>
-    /// Inserts a list of entities into the repository if no entities matching the specified predicate currently exist.
+    /// Inserts multiple entities into the repository if no entities matching the specified predicate currently exist.
     /// </summary>
     /// <param name="unitOfWork">The unit of work managing the repository and transaction.</param>
     /// <param name="predicate">A function to test each entity for a condition to determine if any entities match existing records.</param>
     /// <param name="entities">The list of entities to insert if no matches are found.</param>
-    /// <typeparam name="TEntity">The type of the entity implementing the <see cref="IEntity"/> interface.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity implementing the <see cref="IEntity{TKey}"/> interface.</typeparam>
+    /// <typeparam name="TKey">The type of the key associated with the entity.</typeparam>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task SeedManyAsync<TEntity>(
+    public static async Task SeedManyAsync<TEntity, TKey>(
         IUnitOfWork unitOfWork,
         Expression<Func<TEntity, bool>> predicate,
         List<TEntity> entities
-    ) where TEntity : class, IEntity
+    ) where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity>().AnyAsync(predicate))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate))
         {
-            await unitOfWork.Repository<TEntity>().AddAsync(entities);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entities);
         }
     }
 }
