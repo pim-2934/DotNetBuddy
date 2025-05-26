@@ -80,11 +80,18 @@ public interface IRepository<T, in TKey> where T : class, IEntity<TKey>
     Task<List<T>> AddAsync(List<T> entities);
 
     /// <summary>
-    /// Updates the given entity in the repository and optionally overwrites its relationships.
+    /// Updates the given entity in the repository without modifying its related entities.
     /// </summary>
-    /// <param name="entity">The entity to update in the repository.</param>
+    /// <param name="entity">The entity to be updated in the repository.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the updated entity.</returns>
-    Task<T> UpdateAsync(T entity);
+    Task<T> UpdateShallowAsync(T entity);
+
+    /// <summary>
+    /// Updates an entity and its related entities in the repository.
+    /// </summary>
+    /// <param name="entity">The entity to update, along with its associated related entities.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the updated entity.</returns>
+    Task<T> UpdateDeepAsync(T entity);
 
     /// <summary>
     /// Deletes an entity from the repository based on its unique identifier.

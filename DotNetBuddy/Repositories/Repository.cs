@@ -97,7 +97,15 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public Task<T> UpdateAsync(T entity)
+    public Task<T> UpdateShallowAsync(T entity)
+    {
+        context.Entry(entity).State = EntityState.Modified;
+        
+        return Task.FromResult(entity);
+    }
+
+    /// <inheritdoc />
+    public Task<T> UpdateDeepAsync(T entity)
     {
         DbSet.Update(entity);
 
