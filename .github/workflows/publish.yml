@@ -33,11 +33,11 @@ jobs:
 
       - name: Build and Pack NuGet Packages
         run: |
-          mkdir -p ${{ env.NuGetDirectory }}
-          for PROJECT in ${{ env.PROJECTS }}
-          do
+          mkdir -p "${{ env.NuGetDirectory }}"
+          readarray -t PROJECTS <<< "${{ env.PROJECTS }}"
+          for PROJECT in "${PROJECTS[@]}"; do
             echo "Packing $PROJECT..."
-            dotnet pack $PROJECT/$PROJECT.csproj --configuration Release -p:PackageVersion=${{ env.NUPKG_VERSION }} --output ${{ env.NuGetDirectory }}
+            dotnet pack "$PROJECT/$PROJECT.csproj" --configuration Release -p:PackageVersion="${{ env.NUPKG_VERSION }}" --output "${{ env.NuGetDirectory }}"
           done
 
       - name: Upload NuGet artifacts
