@@ -36,8 +36,11 @@ jobs:
           mkdir -p "${{ env.NuGetDirectory }}"
           readarray -t PROJECTS <<< "${{ env.PROJECTS }}"
           for PROJECT in "${PROJECTS[@]}"; do
+            # Skip empty lines
+            [ -z "$PROJECT" ] && continue
             echo "Packing $PROJECT..."
-            dotnet pack "$PROJECT/$PROJECT.csproj" --configuration Release -p:PackageVersion="${{ env.NUPKG_VERSION }}" --output "${{ env.NuGetDirectory }}"
+            dotnet pack "$PROJECT/$PROJECT.csproj" --configuration Release \
+              -p:PackageVersion="${{ env.NUPKG_VERSION }}" --output "${{ env.NuGetDirectory }}"
           done
 
       - name: Upload NuGet artifacts
