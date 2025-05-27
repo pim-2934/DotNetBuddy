@@ -1,7 +1,7 @@
-using DotNetBuddy.Exceptions;
+using DotNetBuddy.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace DotNetBuddy.Filters;
+namespace DotNetBuddy.Infrastructure.Filters;
 
 /// <summary>
 /// An action filter that validates the `ModelState` before executing the action method.

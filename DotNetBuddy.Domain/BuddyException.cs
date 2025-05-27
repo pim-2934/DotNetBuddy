@@ -1,6 +1,6 @@
-using DotNetBuddy.Exceptions;
+using DotNetBuddy.Domain.Exceptions;
 
-namespace DotNetBuddy;
+namespace DotNetBuddy.Domain;
 
 /// <summary>
 /// Represents a custom exception specific to the BuddyDotNet platform.

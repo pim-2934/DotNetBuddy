@@ -1,4 +1,6 @@
-﻿namespace DotNetBuddy.Configs;
+﻿using DotNetBuddy.Domain;
+
+namespace DotNetBuddy.Infrastructure.Configs;
 
 /// <summary>
 /// Represents the configuration settings for the BuddyDotNet application.

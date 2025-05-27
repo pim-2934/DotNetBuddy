@@ -1,4 +1,4 @@
-﻿using DotNetBuddy.Utilities;
+﻿using DotNetBuddy.Application.Utilities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;

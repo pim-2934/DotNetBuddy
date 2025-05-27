@@ -1,3 +1,4 @@
+using DotNetBuddy.Domain;
 using DotNetBuddy.Example.Models;
 
 namespace DotNetBuddy.Example.Repositories.Interfaces;

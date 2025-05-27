@@ -1,4 +1,4 @@
-﻿namespace DotNetBuddy;
+﻿namespace DotNetBuddy.Domain;
 
 /// <summary>
 /// Represents a base contract for configuration objects in the application.

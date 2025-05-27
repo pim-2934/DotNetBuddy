@@ -1,5 +1,5 @@
 ﻿using DotNetBuddy.Example.Repositories.Interfaces;
-using DotNetBuddy.Repositories;
+using DotNetBuddy.Infrastructure.Repositories;
 
 namespace DotNetBuddy.Example.Repositories;
 

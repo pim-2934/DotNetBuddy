@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DotNetBuddy;
+namespace DotNetBuddy.Domain;
 
 /// <summary>
 /// Represents a base contract for entities with a unique identifier.

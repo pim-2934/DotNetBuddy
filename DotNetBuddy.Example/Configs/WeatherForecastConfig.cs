@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DotNetBuddy.Domain;
 
 namespace DotNetBuddy.Example.Configs;
 

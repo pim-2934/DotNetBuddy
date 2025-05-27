@@ -1,4 +1,4 @@
-﻿namespace DotNetBuddy.Attributes;
+﻿namespace DotNetBuddy.Domain.Attributes;
 
 /// <summary>
 /// An attribute to specify a priority for seeders when being resolved or executed.

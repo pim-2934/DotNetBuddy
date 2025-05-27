@@ -1,9 +1,10 @@
-using DotNetBuddy.Attributes;
-using DotNetBuddy.Filters;
+using DotNetBuddy.Application;
+using DotNetBuddy.Domain.Attributes;
+using DotNetBuddy.Infrastructure.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetBuddy.Installers;
+namespace DotNetBuddy.Infrastructure.Installers;
 
 /// <summary>
 /// Provides an implementation of the <see cref="IInstaller"/> interface to configure filtering behavior

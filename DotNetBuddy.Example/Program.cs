@@ -1,5 +1,6 @@
 using DotNetBuddy.Example;
-using DotNetBuddy.Extensions;
+using DotNetBuddy.Infrastructure.Extensions;
+using DotNetBuddy.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,7 +1,8 @@
-using DotNetBuddy.Attributes;
+using DotNetBuddy.Application.Utilities;
+using DotNetBuddy.Domain;
+using DotNetBuddy.Domain.Attributes;
 using DotNetBuddy.Example.Configs;
 using DotNetBuddy.Example.Models;
-using DotNetBuddy.Utilities;
 using Microsoft.Extensions.Options;
 
 namespace DotNetBuddy.Example.Seeders;

@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DotNetBuddy.Domain;
+using Microsoft.EntityFrameworkCore;
 
-namespace DotNetBuddy.Repositories;
+namespace DotNetBuddy.Infrastructure.Repositories;
 
 /// <inheritdoc />
 public class UnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext : DbContext

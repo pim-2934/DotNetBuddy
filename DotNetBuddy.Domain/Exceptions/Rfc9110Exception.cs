@@ -1,5 +1,5 @@
 
-namespace DotNetBuddy.Exceptions;
+namespace DotNetBuddy.Domain.Exceptions;
 
 /// <summary>
 /// Represents the base exception class that conforms to the RFC 9110 standard for structured error responses.

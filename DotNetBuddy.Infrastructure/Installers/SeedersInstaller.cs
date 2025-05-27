@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
-using DotNetBuddy.Attributes;
-using DotNetBuddy.Configs;
-using DotNetBuddy.Services;
+using DotNetBuddy.Application;
+using DotNetBuddy.Application.Services;
+using DotNetBuddy.Domain;
+using DotNetBuddy.Domain.Attributes;
+using DotNetBuddy.Infrastructure.Configs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace DotNetBuddy.Installers;
+namespace DotNetBuddy.Infrastructure.Installers;
 
 /// <summary>
 /// Responsible for registering all implementations of <see cref="ISeeder"/>

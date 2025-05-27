@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
-using DotNetBuddy.Enums;
+using DotNetBuddy.Domain.Enums;
 
-namespace DotNetBuddy;
+namespace DotNetBuddy.Domain;
 
 /// <summary>
 /// Represents a repository for managing entities, supporting generic entity type and key type parameters.

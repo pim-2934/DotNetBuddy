@@ -1,4 +1,4 @@
-﻿namespace DotNetBuddy;
+﻿namespace DotNetBuddy.Domain;
 
 /// <summary>
 /// Defines a contract for entities that maintain audit information, including creation and update timestamps.

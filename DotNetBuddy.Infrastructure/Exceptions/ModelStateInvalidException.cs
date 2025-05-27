@@ -1,7 +1,8 @@
+using DotNetBuddy.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace DotNetBuddy.Exceptions;
+namespace DotNetBuddy.Infrastructure.Exceptions;
 
 /// <summary>
 /// Represents an exception that is thrown when a model's state is invalid during request validation.

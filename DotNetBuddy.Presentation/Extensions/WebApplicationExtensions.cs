@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 
-namespace DotNetBuddy.Extensions;
+namespace DotNetBuddy.Presentation.Extensions;
 
 /// <summary>
 /// Provides extension methods for the WebApplication class, enabling additional functionalities.

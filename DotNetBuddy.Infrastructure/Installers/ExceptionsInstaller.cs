@@ -1,10 +1,11 @@
-using DotNetBuddy.Attributes;
-using DotNetBuddy.Exceptions;
+using DotNetBuddy.Application;
+using DotNetBuddy.Domain.Attributes;
+using DotNetBuddy.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetBuddy.Installers;
+namespace DotNetBuddy.Infrastructure.Installers;
 
 /// <summary>
 /// Configures and registers HTTP-related services into the dependency

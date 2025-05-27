@@ -1,3 +1,4 @@
+using DotNetBuddy.Domain;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;

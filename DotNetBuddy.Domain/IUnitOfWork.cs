@@ -1,4 +1,4 @@
-﻿namespace DotNetBuddy;
+﻿namespace DotNetBuddy.Domain;
 
 /// <summary>
 /// Defines the Unit of Work pattern to manage database transactions and repositories.

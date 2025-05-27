@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetBuddy;
+namespace DotNetBuddy.Application;
 
 /// <summary>
 /// Represents a contract for service installers that configure and register
