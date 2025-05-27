@@ -1,6 +1,5 @@
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
-using DotNetBuddy.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotNetBuddy.Example.Controllers;

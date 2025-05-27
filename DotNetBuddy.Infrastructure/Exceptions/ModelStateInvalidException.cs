@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace DotNetBuddy.Exceptions;
@@ -23,5 +24,6 @@ public class ModelStateInvalidException(ModelStateDictionary modelState) : Rfc91
             .Where(x => x.Value is not null && x.Value!.Errors.Any())
             .SelectMany(x => x.Value!.Errors)
             .Select(e => e.ErrorMessage)
-    )
+    ),
+    StatusCodes.Status400BadRequest
 );

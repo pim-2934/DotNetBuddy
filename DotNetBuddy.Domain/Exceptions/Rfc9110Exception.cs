@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 
 namespace DotNetBuddy.Exceptions;
 
@@ -10,8 +9,7 @@ namespace DotNetBuddy.Exceptions;
 /// It includes standard properties for specifying HTTP status codes as well as detailed error information.
 /// </remarks>
 /// <seealso cref="System.Exception"/>
-/// <seealso cref="Microsoft.AspNetCore.Http.StatusCodes"/>
-public abstract class Rfc9110Exception(string title, string detail, int statusCode = StatusCodes.Status400BadRequest)
+public abstract class Rfc9110Exception(string title, string detail, int statusCode)
     : Exception
 {
     /// <summary>

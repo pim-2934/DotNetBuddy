@@ -12,7 +12,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DotNetBuddy\DotNetBuddy.csproj" />
+      <ProjectReference Include="..\DotNetBuddy.Application\DotNetBuddy.Application.csproj" />
+      <ProjectReference Include="..\DotNetBuddy.Domain\DotNetBuddy.Domain.csproj" />
+      <ProjectReference Include="..\DotNetBuddy.Infrastructure\DotNetBuddy.Infrastructure.csproj" />
+      <ProjectReference Include="..\DotNetBuddy.Presentation\DotNetBuddy.Presentation.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Http;
+using DotNetBuddy.Exceptions;
 
-namespace DotNetBuddy.Exceptions;
+namespace DotNetBuddy;
 
 /// <summary>
 /// Represents a custom exception specific to the BuddyDotNet platform.
@@ -14,5 +14,5 @@ namespace DotNetBuddy.Exceptions;
 /// This exception can be thrown when application-specific errors occur, providing meaningful
 /// context such as a human-readable title, error message, and the relevant HTTP status code.
 /// </example>
-public class BuddyException(string title, string detail, int statusCode = StatusCodes.Status400BadRequest)
+public class BuddyException(string title, string detail, int statusCode = 400)
     : Rfc9110Exception(title, detail, statusCode);
