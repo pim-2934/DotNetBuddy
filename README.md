@@ -75,12 +75,12 @@ Or allow seeders to run on boot:
 
 ## Documentation
 
-- [Audit System](./DotNetBuddy/Docs/Audit.md)
-- [Configuration System](./DotNetBuddy/Docs/Configs.md)
-- [Database Access](./DotNetBuddy/Docs/Database.md)
-- [Exception Handling](./DotNetBuddy/Docs/Exceptions.md)
-- [Installers](./DotNetBuddy/Docs/Installers.md)
-- [Data Seeding](./DotNetBuddy/Docs/Seeders.md)
+- [Audit System](./Docs/Audit.md)
+- [Configuration System](./Docs/Configs.md)
+- [Database Access](./Docs/Database.md)
+- [Exception Handling](./Docs/Exceptions.md)
+- [Installers](./Docs/Installers.md)
+- [Data Seeding](./Docs/Seeders.md)
 
 ---
 

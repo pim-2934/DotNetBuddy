@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Enums;
-using DotNetBuddy.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Repositories;

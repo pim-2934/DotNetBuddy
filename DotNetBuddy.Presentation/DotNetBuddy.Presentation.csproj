@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <EnablePackageValidation>true</EnablePackageValidation>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>DotNetBuddy</RootNamespace>
+        <LangVersion>12.0</LangVersion>
+
+        <Authors>Pim</Authors>
+        <Description>DotNetBuddy is a .NET framework designed to simplify and streamline common application concerns.</Description>
+        <PackageTags>EFCore;UnitOfWork;Repositories;Exceptions;Installers;Configs;</PackageTags>
+        <RepositoryUrl>https://github.com/pim-2934/DotNetBuddy</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\DotNetBuddy.Application\DotNetBuddy.Application.csproj"/>
+        <ProjectReference Include="..\DotNetBuddy.Domain\DotNetBuddy.Domain.csproj"/>
+        <ProjectReference Include="..\DotNetBuddy.Infrastructure\DotNetBuddy.Infrastructure.csproj"/>
+        <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.2.25">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>
