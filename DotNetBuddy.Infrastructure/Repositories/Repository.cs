@@ -65,7 +65,8 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
             (current, include) => current.Include(include)
         );
 
-        return await ApplyQueryOptions(query, options).FirstOrDefaultAsync(x => EqualityComparer<TKey>.Default.Equals(x.Id, id));
+        return await ApplyQueryOptions(query, options)
+            .FirstOrDefaultAsync(x => EqualityComparer<TKey>.Default.Equals(x.Id, id));
     }
 
     /// <inheritdoc />
@@ -97,19 +98,15 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public Task<T> UpdateShallowAsync(T entity)
+    public void UpdateShallow(T entity)
     {
         context.Entry(entity).State = EntityState.Modified;
-        
-        return Task.FromResult(entity);
     }
 
     /// <inheritdoc />
-    public Task<T> UpdateDeepAsync(T entity)
+    public void UpdateDeep(T entity)
     {
         DbSet.Update(entity);
-
-        return Task.FromResult(entity);
     }
 
     /// <inheritdoc />

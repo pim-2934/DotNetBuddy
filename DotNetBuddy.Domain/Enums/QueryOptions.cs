@@ -1,41 +1,44 @@
 namespace DotNetBuddy.Domain.Enums;
 
 /// <summary>
-/// Represents options that can modify the behavior of query execution in a repository.
-/// These options influence tracking behavior, query filter application, or query splitting.
+/// Represents the available options that can modify the behavior of a query when interacting with the data layer.
+/// These options are designed to provide control over query execution and behavior in specific scenarios.
 /// </summary>
 [Flags]
 public enum QueryOptions
 {
     /// <summary>
-    /// Specifies that no query options are applied, meaning the query is executed with the default behavior.
-    /// This is used to indicate the absence of any modifications to the query execution process.
+    /// Denotes the default option where no specific query behavior modifications are applied.
+    /// This implies that the query operates under its standard execution settings without any additional flags.
     /// </summary>
     None = 0,
 
     /// <summary>
-    /// Specifies that the query should be executed without tracking changes to the resulting entities.
-    /// This allows for more efficient read-only operations, as entities are not tracked by the context
-    /// for change detection or updates.
+    /// Specifies that entities retrieved by the query should not be tracked in the current context.
+    /// This option is useful for read-only operations where changes to the entities are not required
+    /// to be tracked, improving performance by avoiding overhead associated with tracking.
     /// </summary>
     AsNoTracking = 1 << 0,
 
     /// <summary>
-    /// Specifies that the query should be executed without tracking changes to the resulting entities,
-    /// but ensures identity resolution is applied. This enables entities with the same identity to be
-    /// resolved to the same instance during the query execution, while maintaining a no-tracking context.
+    /// Specifies that the query is executed without tracking entities in the change tracker,
+    /// but retains identity resolution. This ensures that the same entity is returned across the query
+    /// results when it appears multiple times, maintaining consistency without enabling full tracking.
+    /// Useful for read-focused operations where entity identity is important, but persistence tracking is not required.
     /// </summary>
     AsNoTrackingWithIdentityResolution = 1 << 1,
 
     /// <summary>
-    /// Specifies that the query should ignore any defined query filters, bypassing additional filtering logic
-    /// such as tenant-based, soft-delete, or other global query constraints.
+    /// Indicates that query filters, usually defined globally in the context, should be ignored during query execution.
+    /// This allows the query to retrieve all data, bypassing any filters set for purposes such as soft deletion or multi-tenancy.
     /// </summary>
     IgnoreQueryFilters = 1 << 2,
 
     /// <summary>
-    /// Specifies that the query should be executed as a split query, which separates data loading into multiple queries
-    /// to optimize performance and reduce server-side data processing overhead.
+    /// Indicates that queries should be split into multiple SQL queries for collections,
+    /// avoiding the default behavior of generating a single SQL query. This is useful
+    /// for optimizing performance in scenarios where large collections might result in
+    /// inefficient or complex query execution.
     /// </summary>
     UseSplitQuery = 1 << 3
 }

@@ -14,10 +14,10 @@ public class DatabaseInstaller : IInstaller
 
         services.AddDbContext<DatabaseContext>
         (
-            (scopedProvider, options) =>
+            (_, options) =>
             {
                 options
-                    .AddBuddyInterceptors(scopedProvider) // Buddy: Enable auditing (CreatedAt, UpdatedAt, etc)
+                    .AddBuddyInterceptors() // Buddy: Enable auditing (CreatedAt, UpdatedAt, etc)
                     .UseInMemoryDatabase("Example")
                     .EnableDetailedErrors();
             }

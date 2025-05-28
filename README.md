@@ -76,6 +76,7 @@ Or allow seeders to run on boot:
 ## Documentation
 
 - [Audit System](./Docs/Audit.md)
+- [Soft Deletion](./Docs/SoftDelete.md)
 - [Configuration System](./Docs/Configs.md)
 - [Database Access](./Docs/Database.md)
 - [Exception Handling](./Docs/Exceptions.md)
