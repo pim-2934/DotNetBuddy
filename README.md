@@ -1,3 +1,12 @@
+# DotNetBuddy
+
+## Overview
+
+**DotNetBuddy** is a .NET framework designed to simplify and streamline common application concerns such as configuration,
+dependency injection, database access, auditing, exception handling, and data seeding.
+
+It encourages clean architecture principles and supports out-of-the-box patterns like Unit of Work and Repository.
+
 ## 📦 NuGet Packages
 
 | Project                      | Version                                                                                                              | Downloads                                                                                                                |
@@ -13,16 +22,6 @@
 
 [![Source](https://img.shields.io/badge/-Source%20Code-181717?logo=GitHub&style=flat-square)](https://github.com/pim-2934/DotNetBuddy)
 [![License](https://img.shields.io/github/license/pim-2934/DotNetBuddy?style=flat-square)](https://github.com/pim-2934/DotNetBuddy/blob/main/LICENSE)
-
-
-# DotNetBuddy
-
-## Overview
-
-**DotNetBuddy** is a .NET framework designed to simplify and streamline common application concerns such as configuration,
-dependency injection, database access, auditing, exception handling, and data seeding.
-
-It encourages clean architecture principles and supports out-of-the-box patterns like Unit of Work and Repository.
 
 ---
 
