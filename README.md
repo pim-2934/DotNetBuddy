@@ -1,8 +1,3 @@
-[![Nuget](https://img.shields.io/nuget/v/DotNetBuddy?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy/)
-[![License](https://img.shields.io/github/license/pim-2934/DotNetBuddy?style=flat-square)](https://github.com/pim-2934/DotNetBuddy/blob/main/LICENSE)
-[![Downloads](https://img.shields.io/nuget/dt/dotnetbuddy?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy/)
-[![GitHub](https://img.shields.io/badge/-source-181717.svg?logo=GitHub)](https://github.com/pim-2934/DotNetBuddy)
-
 # DotNetBuddy
 
 ## Overview
@@ -11,6 +6,22 @@
 dependency injection, database access, auditing, exception handling, and data seeding.
 
 It encourages clean architecture principles and supports out-of-the-box patterns like Unit of Work and Repository.
+
+## 📦 NuGet Packages
+
+| Project                      | Version                                                                                                              | Downloads                                                                                                                |
+|-----------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| **DotNetBuddy.Domain**       | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Domain?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Domain/)               | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Domain?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Domain/)               |
+| **DotNetBuddy.Application**  | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)     | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)     |
+| **DotNetBuddy.Infrastructure** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/) | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/) |
+| **DotNetBuddy.Presentation** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)   | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)   |
+
+---
+
+## 📚 Repository Info
+
+[![Source](https://img.shields.io/badge/-Source%20Code-181717?logo=GitHub&style=flat-square)](https://github.com/pim-2934/DotNetBuddy)
+[![License](https://img.shields.io/github/license/pim-2934/DotNetBuddy?style=flat-square)](https://github.com/pim-2934/DotNetBuddy/blob/main/LICENSE)
 
 ---
 
