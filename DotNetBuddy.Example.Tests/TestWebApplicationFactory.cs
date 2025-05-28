@@ -1,4 +1,5 @@
 ﻿using DotNetBuddy.Application.Utilities;
+using DotNetBuddy.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -19,7 +20,11 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll(typeof(DatabaseContext));
 
             var dbName = $"TestDb_{Guid.NewGuid()}";
-            services.AddDbContext<DatabaseContext>(options => options.UseInMemoryDatabase(dbName));
+            services.AddDbContext<DatabaseContext>(options =>
+                options
+                    .AddBuddyInterceptors()
+                    .UseInMemoryDatabase(dbName)
+            );
         });
 
         builder.ConfigureTestServices(services =>

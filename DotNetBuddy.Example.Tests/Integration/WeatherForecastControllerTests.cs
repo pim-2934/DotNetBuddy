@@ -31,6 +31,7 @@ public class WeatherForecastControllerTests(TestWebApplicationFactory factory)
         // Assert
         Assert.NotNull(forecasts);
         Assert.NotEmpty(forecasts);
+        Assert.Equal(5, forecasts.Count); // No soft-deleted entities
     }
 
     [Fact]

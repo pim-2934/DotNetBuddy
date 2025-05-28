@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Domain;
+using DotNetBuddy.Domain.Enums;
 
 namespace DotNetBuddy.Application.Utilities;
 
@@ -24,7 +25,7 @@ public static class SeederHelper
         TEntity entity
     ) where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate, QueryOptions.IgnoreQueryFilters))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
         }
@@ -34,13 +35,12 @@ public static class SeederHelper
     /// Seeds a single entity asynchronously if it does not already exist in the repository.
     /// </summary>
     /// <param name="unitOfWork">The unit of work to manage database transactions and the repository for persisting the entity.</param>
-    /// <param name="identifier">A unique string identifier used to generate a deterministic GUID for the entity.</param>
     /// <param name="entity">The entity to be seeded into the database if it does not already exist.</param>
     /// <returns>A task that represents the asynchronous operation for seeding the entity.</returns>
-    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, string identifier, TEntity entity)
+    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, TEntity entity)
         where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(entity.Id))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(entity.Id, QueryOptions.IgnoreQueryFilters))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
         }
@@ -60,7 +60,7 @@ public static class SeederHelper
     {
         entity.Id = id;
 
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(id))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(id, QueryOptions.IgnoreQueryFilters))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
         }
@@ -81,7 +81,7 @@ public static class SeederHelper
         List<TEntity> entities
     ) where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate))
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate, QueryOptions.IgnoreQueryFilters))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entities);
         }

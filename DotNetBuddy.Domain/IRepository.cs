@@ -84,14 +84,14 @@ public interface IRepository<T, in TKey> where T : class, IEntity<TKey>
     /// </summary>
     /// <param name="entity">The entity to be updated in the repository.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the updated entity.</returns>
-    Task<T> UpdateShallowAsync(T entity);
+    void UpdateShallow(T entity);
 
     /// <summary>
     /// Updates an entity and its related entities in the repository.
     /// </summary>
     /// <param name="entity">The entity to update, along with its associated related entities.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the updated entity.</returns>
-    Task<T> UpdateDeepAsync(T entity);
+    void UpdateDeep(T entity);
 
     /// <summary>
     /// Deletes an entity from the repository based on its unique identifier.

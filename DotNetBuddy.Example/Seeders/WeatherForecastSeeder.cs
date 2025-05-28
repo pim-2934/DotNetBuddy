@@ -42,6 +42,19 @@ public class WeatherForecastSeeder(IOptions<WeatherForecastConfig> weatherForeca
                 .ToList()
         );
 
+        await SeederHelper.SeedOneAsync
+        (
+            unitOfWork,
+            BuddyUtils.GenerateDeterministicGuid("(Soft) Deleted Weather Forecast"),
+            new WeatherForecast
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)],
+                DeletedAt = DateTime.UtcNow
+            }
+        );
+
         await unitOfWork.SaveAsync();
     }
 }

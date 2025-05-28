@@ -28,7 +28,6 @@ public class AuditInterceptor : SaveChangesInterceptor
         return base.SavingChanges(eventData, result);
     }
 
-
     /// <summary>
     /// Overrides the <see cref="SaveChangesInterceptor.SavingChangesAsync"/> method to asynchronously apply auditing information
     /// to entities implementing the <see cref="IAuditableEntity{TKey}"/> interface during save operations.
@@ -59,7 +58,6 @@ public class AuditInterceptor : SaveChangesInterceptor
 
         foreach (var entry in context.ChangeTracker.Entries())
         {
-            // Check if the entity implements IAuditableEntity<T> for any type T
             if (entry.Entity.GetType().GetInterfaces()
                     .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAuditableEntity<>)) 
                 && entry.State is EntityState.Added or EntityState.Modified)

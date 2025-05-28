@@ -1,6 +1,5 @@
 ﻿using DotNetBuddy.Infrastructure.Interceptors;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetBuddy.Infrastructure.Extensions;
 
@@ -13,15 +12,10 @@ public static class DbContextOptionsBuilderExtensions
     /// Adds Buddy interceptors, such as the <see cref="AuditInterceptor"/>, to the <see cref="DbContextOptionsBuilder"/>.
     /// </summary>
     /// <param name="builder">The <see cref="DbContextOptionsBuilder"/> to configure.</param>
-    /// <param name="provider">The <see cref="IServiceProvider"/> used to resolve the services required for the interceptor.</param>
     /// <returns>The configured <see cref="DbContextOptionsBuilder"/> including the added interceptors.</returns>
-    public static DbContextOptionsBuilder AddBuddyInterceptors(
-        this DbContextOptionsBuilder builder,
-        IServiceProvider provider
-    )
+    public static DbContextOptionsBuilder AddBuddyInterceptors(this DbContextOptionsBuilder builder)
     {
-        var auditInterceptor = provider.GetRequiredService<AuditInterceptor>();
-        builder.AddInterceptors(auditInterceptor);
+        builder.AddInterceptors(new AuditInterceptor());
 
         return builder;
     }
