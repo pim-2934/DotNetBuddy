@@ -65,8 +65,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
             (current, include) => current.Include(include)
         );
 
-        return await ApplyQueryOptions(query, options)
-            .FirstOrDefaultAsync(x => EqualityComparer<TKey>.Default.Equals(x.Id, id));
+        return await ApplyQueryOptions(query, options).FirstOrDefaultAsync(x => x.Id!.Equals(id));
     }
 
     /// <inheritdoc />
@@ -78,7 +77,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     /// <inheritdoc />
     public async Task<bool> AnyAsync(TKey id, QueryOptions options = QueryOptions.None)
     {
-        return await ApplyQueryOptions(DbSet, options).AnyAsync(x => EqualityComparer<TKey>.Default.Equals(x.Id, id));
+        return await ApplyQueryOptions(DbSet, options).AnyAsync(x => x.Id!.Equals(id));
     }
 
     /// <inheritdoc />

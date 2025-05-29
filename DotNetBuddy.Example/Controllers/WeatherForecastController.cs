@@ -15,6 +15,17 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork) :
         return await extendedUnitOfWork.WeatherForecasts.GetAllAsync();
     }
 
+    [HttpGet("GetWeatherForecast/{id:guid}")]
+    public async Task<WeatherForecast> GetWeatherForecast(Guid id)
+    {
+        var weatherForecast = await extendedUnitOfWork.WeatherForecasts.GetAsync(id);
+
+        if (weatherForecast is null)
+            throw new BuddyException("NotFound", "Weather forecast not found.", StatusCodes.Status404NotFound);
+
+        return weatherForecast;
+    }
+
     [HttpGet("GetException")]
     public Task GetException()
     {
