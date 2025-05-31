@@ -12,7 +12,7 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork) :
     [HttpGet("GetWeatherForecast")]
     public async Task<IEnumerable<WeatherForecast>> GetWeatherForecast()
     {
-        return await extendedUnitOfWork.WeatherForecasts.GetAllAsync();
+        return await extendedUnitOfWork.WeatherForecasts.GetLatestAsync(5, includes: x => x.Location!);
     }
 
     [HttpGet("GetWeatherForecast/{id:guid}")]

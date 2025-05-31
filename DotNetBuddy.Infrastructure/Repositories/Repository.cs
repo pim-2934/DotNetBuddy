@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Enums;
+using DotNetBuddy.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Infrastructure.Repositories;
@@ -22,18 +23,14 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         params Expression<Func<T, object>>[] includes
     )
     {
-        var query = includes.Aggregate<Expression<Func<T, object>>, IQueryable<T>>
-        (
-            DbSet,
-            (current, include) => current.Include(include)
-        );
+        var query = DbSet.ApplyQueryIncludes(includes).ApplyQueryOptions(options);
 
         if (predicate != null)
         {
             query = query.Where(predicate);
         }
 
-        return await ApplyQueryOptions(query, options).ToListAsync();
+        return await query.ToListAsync();
     }
 
     /// <inheritdoc />
@@ -43,13 +40,11 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         params Expression<Func<T, object>>[] includes
     )
     {
-        var query = includes.Aggregate<Expression<Func<T, object>>, IQueryable<T>>
-        (
-            DbSet,
-            (current, include) => current.Include(include)
-        );
-
-        return await ApplyQueryOptions(query, options).Where(predicate).FirstOrDefaultAsync();
+        return await DbSet
+            .ApplyQueryIncludes(includes)
+            .ApplyQueryOptions(options)
+            .Where(predicate)
+            .FirstOrDefaultAsync();
     }
 
     /// <inheritdoc />
@@ -59,25 +54,22 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         params Expression<Func<T, object>>[] includes
     )
     {
-        var query = includes.Aggregate<Expression<Func<T, object>>, IQueryable<T>>
-        (
-            DbSet,
-            (current, include) => current.Include(include)
-        );
-
-        return await ApplyQueryOptions(query, options).FirstOrDefaultAsync(x => x.Id!.Equals(id));
+        return await DbSet
+            .ApplyQueryIncludes(includes)
+            .ApplyQueryOptions(options)
+            .FirstOrDefaultAsync(x => x.Id!.Equals(id));
     }
 
     /// <inheritdoc />
     public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, QueryOptions options = QueryOptions.None)
     {
-        return await ApplyQueryOptions(DbSet, options).AnyAsync(predicate);
+        return await DbSet.ApplyQueryOptions(options).AnyAsync(predicate);
     }
 
     /// <inheritdoc />
     public async Task<bool> AnyAsync(TKey id, QueryOptions options = QueryOptions.None)
     {
-        return await ApplyQueryOptions(DbSet, options).AnyAsync(x => x.Id!.Equals(id));
+        return await DbSet.ApplyQueryOptions(options).AnyAsync(x => x.Id!.Equals(id));
     }
 
     /// <inheritdoc />
@@ -116,48 +108,5 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         {
             DbSet.Remove(entity);
         }
-    }
-
-    /// <summary>
-    /// Applies specific query options to an IQueryable instance, modifying its behavior
-    /// based on the provided flags for tracking, query filters, and execution strategy.
-    /// </summary>
-    /// <param name="query">The query to which the options will be applied.</param>
-    /// <param name="options">The options defining how the query should be modified.</param>
-    /// <returns>The modified query with the specified options applied.</returns>
-    // ReSharper disable once MemberCanBePrivate.Global
-    protected IQueryable<T> ApplyQueryOptions(IQueryable<T> query, QueryOptions options)
-    {
-        if (options.HasFlag(QueryOptions.AsNoTracking) &&
-            options.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
-        {
-            throw new BuddyException
-            (
-                "Invalid query options.",
-                "Cannot specify both AsNoTracking and AsNoTrackingWithIdentityResolution."
-            );
-        }
-
-        if (options.HasFlag(QueryOptions.AsNoTracking))
-        {
-            query = query.AsNoTracking();
-        }
-
-        if (options.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
-        {
-            query = query.AsNoTrackingWithIdentityResolution();
-        }
-
-        if (options.HasFlag(QueryOptions.IgnoreQueryFilters))
-        {
-            query = query.IgnoreQueryFilters();
-        }
-
-        if (options.HasFlag(QueryOptions.UseSplitQuery))
-        {
-            query = query.AsSplitQuery();
-        }
-
-        return query;
     }
 }
