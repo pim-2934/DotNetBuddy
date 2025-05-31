@@ -1,7 +1,8 @@
 # DotNetBuddy
+[![Source](https://img.shields.io/badge/-Source%20Code-181717?logo=GitHub&style=flat-square)](https://github.com/pim-2934/DotNetBuddy)
+[![License](https://img.shields.io/github/license/pim-2934/DotNetBuddy?style=flat-square)](https://github.com/pim-2934/DotNetBuddy/blob/main/LICENSE)
 
 ## Overview
-
 **DotNetBuddy** is a .NET framework designed to simplify and streamline common application concerns such as configuration,
 dependency injection, database access, auditing, exception handling, and data seeding.
 
@@ -15,15 +16,6 @@ It encourages clean architecture principles and supports out-of-the-box patterns
 | **DotNetBuddy.Application**  | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)     | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)     |
 | **DotNetBuddy.Infrastructure** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/) | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/) |
 | **DotNetBuddy.Presentation** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)   | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)   |
-
----
-
-## 📚 Repository Info
-
-[![Source](https://img.shields.io/badge/-Source%20Code-181717?logo=GitHub&style=flat-square)](https://github.com/pim-2934/DotNetBuddy)
-[![License](https://img.shields.io/github/license/pim-2934/DotNetBuddy?style=flat-square)](https://github.com/pim-2934/DotNetBuddy/blob/main/LICENSE)
-
----
 
 ## Quick Start
 
