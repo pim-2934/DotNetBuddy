@@ -31,7 +31,7 @@ public interface IRepository<T, in TKey> where T : class, IEntity<TKey>
     /// <param name="includes">An array of expressions specifying related entities to include in the query.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity that matches the specified condition, or null if no such entity is found.</returns>
     Task<T?> GetAsync(
-        Expression<Func<T?, bool>> predicate,
+        Expression<Func<T, bool>> predicate,
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     );

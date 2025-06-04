@@ -35,7 +35,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
 
     /// <inheritdoc />
     public async Task<T?> GetAsync(
-        Expression<Func<T?, bool>> predicate,
+        Expression<Func<T, bool>> predicate,
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     )
