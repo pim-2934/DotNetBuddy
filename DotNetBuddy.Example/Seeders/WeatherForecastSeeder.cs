@@ -29,7 +29,7 @@ public class WeatherForecastSeeder(
 
     public async Task SeedAsync()
     {
-        var locations = await unitOfWork.Repository<Location, Guid>().GetAllAsync();
+        var locations = await unitOfWork.Repository<Location, Guid>().GetRangeAsync();
         var location = locations.First();
 
         await SeederHelper.SeedManyAsync<WeatherForecast, Guid>
