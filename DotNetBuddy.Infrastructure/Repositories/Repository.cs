@@ -199,7 +199,15 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         var entity = await GetAsync(id);
         if (entity != null)
         {
-            DbSet.Remove(entity);
+            if (entity is ISoftDeletableEntity<TKey> softDeletable)
+            {
+                softDeletable.DeletedAt = DateTime.UtcNow;
+                UpdateShallow(entity);
+            }
+            else
+            {
+                DbSet.Remove(entity);
+            }
         }
     }
 
@@ -209,9 +217,21 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         var entities = await GetRangeAsync(ids);
         var entitiesList = entities.ToArray();
 
-        if (entitiesList.Length != 0)
+        if (entitiesList.Length == 0)
+            return;
+
+        var softDeletableEntities = entitiesList.Where(e => e is ISoftDeletableEntity<TKey>).ToArray();
+        var hardDeletableEntities = entitiesList.Except(softDeletableEntities).ToArray();
+
+        foreach (var entity in softDeletableEntities)
         {
-            DbSet.RemoveRange(entitiesList);
+            ((ISoftDeletableEntity<TKey>)entity).DeletedAt = DateTime.UtcNow;
+            UpdateShallow(entity);
+        }
+
+        if (hardDeletableEntities.Length > 0)
+        {
+            DbSet.RemoveRange(hardDeletableEntities);
         }
     }
 
