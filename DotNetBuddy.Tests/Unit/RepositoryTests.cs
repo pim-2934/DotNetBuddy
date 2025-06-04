@@ -1,5 +1,6 @@
 using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Infrastructure.Repositories;
+using DotNetBuddy.Tests.RepositoryEntities;
 
 namespace DotNetBuddy.Tests.Unit;
 
@@ -7,13 +8,14 @@ public class RepositoryTests
 {
     private static async Task SeedTestData(TestDbContext context, int count = 10)
     {
-        var entityRepo = new Repository<TestEntity, Guid>(context);
-        var auditableRepo = new Repository<TestAuditableEntity, Guid>(context);
-        var softDeletableRepo = new Repository<TestSoftDeletableEntity, Guid>(context);
+        var entityRepo = new Repository<Entity, Guid>(context);
+        var auditableRepo = new Repository<AuditableEntity, Guid>(context);
+        var softDeletableRepo = new Repository<SoftDeletableEntity, Guid>(context);
+        var navigationRepo = new Repository<NavigationEntity, Guid>(context);
 
         for (var i = 1; i <= count; i++)
         {
-            await entityRepo.AddAsync(new TestEntity
+            await entityRepo.AddAsync(new Entity
             {
                 Id = Guid.NewGuid(),
                 Name = $"Test Entity {i}",
@@ -21,7 +23,7 @@ public class RepositoryTests
                 CreatedAt = DateTime.UtcNow.AddDays(-i)
             });
 
-            await auditableRepo.AddAsync(new TestAuditableEntity
+            await auditableRepo.AddAsync(new AuditableEntity
             {
                 Id = Guid.NewGuid(),
                 Name = $"Auditable Entity {i}",
@@ -29,12 +31,47 @@ public class RepositoryTests
                 // No need to set CreatedAt/UpdatedAt manually
             });
 
-            await softDeletableRepo.AddAsync(new TestSoftDeletableEntity
+            await softDeletableRepo.AddAsync(new SoftDeletableEntity
             {
                 Id = Guid.NewGuid(),
                 Name = $"Soft Deletable Entity {i}",
                 Description = i % 2 == 0 ? $"Description for soft deletable entity {i}" : null,
                 DeletedAt = null
+            });
+
+            await navigationRepo.AddAsync(new NavigationEntity
+            {
+                Id = Guid.NewGuid(),
+                Parent = new NavigationEntity
+                {
+                    Id = Guid.NewGuid(),
+                    Parent = new NavigationEntity
+                    {
+                        Id = Guid.NewGuid(),
+                    },
+                    Children =
+                    [
+                        new NavigationEntity
+                        {
+                            Id = Guid.NewGuid(),
+                        },
+                        new NavigationEntity
+                        {
+                            Id = Guid.NewGuid(),
+                        }
+                    ]
+                },
+                Children =
+                [
+                    new NavigationEntity
+                    {
+                        Id = Guid.NewGuid(),
+                    },
+                    new NavigationEntity
+                    {
+                        Id = Guid.NewGuid(),
+                    }
+                ]
             });
         }
 
@@ -47,7 +84,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetRangeAsync_WithoutPredicate_ReturnsAllEntities));
         await SeedTestData(dbContext, 5);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.GetRangeAsync();
@@ -62,7 +99,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetRangeAsync_WithPredicate_ReturnsFilteredEntities));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.GetRangeAsync(e => e.Name.Contains("3"));
@@ -78,7 +115,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetRangeAsync_WithIds_ReturnsEntitiesWithMatchingIds));
         await SeedTestData(dbContext, 5);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Get all entities first to get their IDs using repository
         var allEntities = await repository.GetRangeAsync();
@@ -98,7 +135,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetPagedAsync_WithPredicate_ReturnsPaginatedResults));
         await SeedTestData(dbContext, 20);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.GetPagedAsync(2, 5);
@@ -119,7 +156,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetPagedAsync_WithIds_ReturnsPaginatedResultsForIds));
         await SeedTestData(dbContext, 20);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Get a subset of IDs using repository
         var allEntities = await repository.GetRangeAsync();
@@ -144,7 +181,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(SearchAsync_WithValidTerm_ReturnsMatchingEntities));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.SearchAsync("Entity 5");
@@ -160,7 +197,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(SearchPagedAsync_WithValidTerm_ReturnsPaginatedResults));
         await SeedTestData(dbContext, 20);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.SearchPagedAsync("Entity", 2, 5);
@@ -179,7 +216,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetAsync_WithPredicate_ReturnsMatchingEntity));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.GetAsync(e => e.Name == "Test Entity 3");
@@ -195,7 +232,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetAsync_WithId_ReturnsEntityWithMatchingId));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Get all entities to get an ID
         var entities = await repository.GetRangeAsync();
@@ -215,7 +252,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(AnyAsync_WithPredicate_ReturnsTrueForExistingEntity));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.AnyAsync(e => e.Name == "Test Entity 3");
@@ -230,7 +267,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(AnyAsync_WithId_ReturnsTrueForExistingEntityId));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Get an entity ID from repository
         var entityId = (await repository.GetRangeAsync()).First().Id;
@@ -247,8 +284,8 @@ public class RepositoryTests
     {
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(AddAsync_WithSingleEntity_AddsEntityToDatabase));
-        var repository = new Repository<TestEntity, Guid>(dbContext);
-        var entity = new TestEntity
+        var repository = new Repository<Entity, Guid>(dbContext);
+        var entity = new Entity
         {
             Id = Guid.NewGuid(),
             Name = "New Test Entity",
@@ -271,16 +308,16 @@ public class RepositoryTests
     {
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(AddAsync_WithMultipleEntities_AddsEntitiesToDatabase));
-        var repository = new Repository<TestEntity, Guid>(dbContext);
-        var entities = new List<TestEntity>
+        var repository = new Repository<Entity, Guid>(dbContext);
+        var entities = new List<Entity>
         {
-            new TestEntity
+            new Entity
             {
                 Id = Guid.NewGuid(),
                 Name = "Entity 1",
                 CreatedAt = DateTime.UtcNow
             },
-            new TestEntity
+            new Entity
             {
                 Id = Guid.NewGuid(),
                 Name = "Entity 2",
@@ -303,7 +340,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(UpdateShallow_UpdatesEntityProperties));
         await SeedTestData(dbContext, 1);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         var entity = (await repository.GetRangeAsync()).First();
         entity.Name = "Updated Name";
@@ -323,7 +360,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(UpdateDeep_UpdatesEntityAndRelatedEntities));
         await SeedTestData(dbContext, 1);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         var entity = (await repository.GetRangeAsync()).First();
         entity.Name = "Deep Updated Name";
@@ -343,7 +380,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(DeleteAsync_WithValidId_RemovesEntityFromDatabase));
         await SeedTestData(dbContext, 3);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         var entities = await repository.GetRangeAsync();
         var entityToDelete = entities.First();
@@ -363,7 +400,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(DeleteRangeAsync_WithValidIds_RemovesEntitiesFromDatabase));
         await SeedTestData(dbContext, 5);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         var entities = await repository.GetRangeAsync();
         var entitiesToDelete = entities.Take(2).ToList();
@@ -384,7 +421,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(CountAsync_WithoutPredicate_ReturnsTotalCount));
         await SeedTestData(dbContext, 7);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var count = await repository.CountAsync();
@@ -399,7 +436,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(CountAsync_WithPredicate_ReturnsFilteredCount));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var count = await repository.CountAsync(e => e.Name.Contains("5"));
@@ -414,7 +451,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(SearchAsync_WithEmptyTerm_ReturnsEmptyCollection));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.SearchAsync("");
@@ -429,7 +466,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(SearchPagedAsync_WithEmptyTerm_ReturnsEmptyPagedResult));
         await SeedTestData(dbContext);
-        var repository = new Repository<TestEntity, Guid>(dbContext);
+        var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
         var result = await repository.SearchPagedAsync("", 1, 10);
@@ -444,10 +481,10 @@ public class RepositoryTests
     {
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(AddAsync_WithAuditableEntity_SetsCreatedAndUpdatedDates));
-        var repository = new Repository<TestAuditableEntity, Guid>(dbContext);
+        var repository = new Repository<AuditableEntity, Guid>(dbContext);
         var beforeTime = DateTime.UtcNow;
 
-        var entity = new TestAuditableEntity
+        var entity = new AuditableEntity
         {
             Id = Guid.NewGuid(),
             Name = "New Auditable Entity",
@@ -481,7 +518,7 @@ public class RepositoryTests
         var dbContext =
             TestDbContext.CreateContext(nameof(UpdateShallow_WithAuditableEntity_UpdatesOnlyUpdatedAtTimestamp));
         await SeedTestData(dbContext, 1);
-        var repository = new Repository<TestAuditableEntity, Guid>(dbContext);
+        var repository = new Repository<AuditableEntity, Guid>(dbContext);
 
         var entity = (await repository.GetRangeAsync()).First();
         var originalCreatedAt = entity.CreatedAt;
@@ -519,7 +556,7 @@ public class RepositoryTests
         var dbContext =
             TestDbContext.CreateContext(nameof(UpdateDeep_WithAuditableEntity_UpdatesOnlyUpdatedAtTimestamp));
         await SeedTestData(dbContext, 1);
-        var repository = new Repository<TestAuditableEntity, Guid>(dbContext);
+        var repository = new Repository<AuditableEntity, Guid>(dbContext);
 
         var entity = (await repository.GetRangeAsync()).First();
         var originalCreatedAt = entity.CreatedAt;
@@ -555,18 +592,18 @@ public class RepositoryTests
     {
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(AddRangeAsync_WithAuditableEntities_SetsAllTimestamps));
-        var repository = new Repository<TestAuditableEntity, Guid>(dbContext);
+        var repository = new Repository<AuditableEntity, Guid>(dbContext);
         var beforeTime = DateTime.UtcNow;
 
-        var entities = new List<TestAuditableEntity>
+        var entities = new List<AuditableEntity>
         {
-            new TestAuditableEntity
+            new AuditableEntity
             {
                 Id = Guid.NewGuid(),
                 Name = "Batch Entity 1",
                 Description = "First in batch"
             },
-            new TestAuditableEntity
+            new AuditableEntity
             {
                 Id = Guid.NewGuid(),
                 Name = "Batch Entity 2",
@@ -602,10 +639,10 @@ public class RepositoryTests
         // Arrange
         var dbContext =
             TestDbContext.CreateContext(nameof(EntityChanges_AcrossMultipleOperations_MaintainsCorrectAuditTrail));
-        var repository = new Repository<TestAuditableEntity, Guid>(dbContext);
+        var repository = new Repository<AuditableEntity, Guid>(dbContext);
 
         // Add an entity
-        var entity = new TestAuditableEntity
+        var entity = new AuditableEntity
         {
             Id = Guid.NewGuid(),
             Name = "Audit Trail Test Entity",
@@ -661,7 +698,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(DeleteAsync_WithSoftDeletableEntity_SetsDeletionTimeStamp));
         await SeedTestData(dbContext, 3);
-        var repository = new Repository<TestSoftDeletableEntity, Guid>(dbContext);
+        var repository = new Repository<SoftDeletableEntity, Guid>(dbContext);
 
         var entities = await repository.GetRangeAsync();
         var entityToDelete = entities.First();
@@ -690,7 +727,7 @@ public class RepositoryTests
         var dbContext =
             TestDbContext.CreateContext(nameof(DeleteRangeAsync_WithSoftDeletableEntities_SetsDeletionTimeStamp));
         await SeedTestData(dbContext, 5);
-        var repository = new Repository<TestSoftDeletableEntity, Guid>(dbContext);
+        var repository = new Repository<SoftDeletableEntity, Guid>(dbContext);
 
         var entitiesToDelete = await repository.GetRangeAsync();
         var idsToDelete = entitiesToDelete.Take(3).Select(e => e.Id).ToList();
@@ -721,8 +758,8 @@ public class RepositoryTests
             TestDbContext.CreateContext(nameof(DeleteAsync_WithMixedEntityTypes_HandlesEachTypeAppropriately));
         await SeedTestData(dbContext, 3);
 
-        var regularRepository = new Repository<TestEntity, Guid>(dbContext);
-        var softDeletableRepository = new Repository<TestSoftDeletableEntity, Guid>(dbContext);
+        var regularRepository = new Repository<Entity, Guid>(dbContext);
+        var softDeletableRepository = new Repository<SoftDeletableEntity, Guid>(dbContext);
 
         var regularEntity = (await regularRepository.GetRangeAsync()).First();
         var softDeletableEntity = (await softDeletableRepository.GetRangeAsync()).First();
@@ -756,8 +793,8 @@ public class RepositoryTests
             TestDbContext.CreateContext(nameof(DeleteRangeAsync_WithMixedBatch_HandlesEachEntityTypeAppropriately));
         await SeedTestData(dbContext, 5);
 
-        var regularRepository = new Repository<TestEntity, Guid>(dbContext);
-        var softDeletableRepository = new Repository<TestSoftDeletableEntity, Guid>(dbContext);
+        var regularRepository = new Repository<Entity, Guid>(dbContext);
+        var softDeletableRepository = new Repository<SoftDeletableEntity, Guid>(dbContext);
 
         var regularEntities = await regularRepository.GetRangeAsync();
         var regularIds = regularEntities.Take(2).Select(e => e.Id).ToList();
@@ -792,7 +829,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetAsync_WithSoftDeletedEntity_ReturnsNull));
         await SeedTestData(dbContext, 3);
-        var repository = new Repository<TestSoftDeletableEntity, Guid>(dbContext);
+        var repository = new Repository<SoftDeletableEntity, Guid>(dbContext);
 
         var entities = await repository.GetRangeAsync();
         var entity = entities.First();
@@ -819,7 +856,7 @@ public class RepositoryTests
         // Arrange
         var dbContext = TestDbContext.CreateContext(nameof(GetRangeAsync_ExcludesSoftDeletedEntities));
         await SeedTestData(dbContext, 5);
-        var repository = new Repository<TestSoftDeletableEntity, Guid>(dbContext);
+        var repository = new Repository<SoftDeletableEntity, Guid>(dbContext);
 
         // Mark 2 entities as deleted using repository
         var entities = await repository.GetRangeAsync();
@@ -841,5 +878,40 @@ public class RepositoryTests
         // Verify all entities exist when ignoring filters
         var allEntities = await repository.GetRangeAsync(options: QueryOptions.IgnoreQueryFilters);
         Assert.Equal(5, allEntities.Count);
+    }
+
+    [Fact]
+    public async Task ApplyQueryIncludes_SupportsThreeLevelDeepNavigation()
+    {
+        // Arrange
+        var dbContext = TestDbContext.CreateContext(nameof(ApplyQueryIncludes_SupportsThreeLevelDeepNavigation));
+        await SeedTestData(dbContext, 5);
+        var repository = new Repository<NavigationEntity, Guid>(dbContext);
+
+        // Act
+        var result = await repository.GetRangeAsync(
+            x => x.Parent == null,
+            QueryOptions.None,
+            x => x.Parent!,
+            x => x.Parent!.Parent!,
+            x => x.Children,
+            x => x.Parent!.Children
+        );
+
+        // Assert
+        Assert.Equal(5, result.Count);
+
+        foreach (var entity in result)
+        {
+            Assert.NotNull(entity.Children);
+            Assert.True(entity.Children.Count > 0, "Each entity should have children based on SeedTestData");
+
+            Assert.NotNull(entity.Children[0].Children);
+            Assert.True(entity.Children[0].Children.Count > 0,
+                "Each entity should have grand children based on SeedTestData");
+
+            Assert.NotNull(entity.Children[0].Parent);
+            Assert.NotNull(entity.Children[0].Children[0].Parent!.Parent);
+        }
     }
 }

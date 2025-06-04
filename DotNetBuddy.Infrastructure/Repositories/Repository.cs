@@ -19,20 +19,26 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     protected readonly DbSet<T> DbSet = context.Set<T>();
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<T>> GetRangeAsync(QueryOptions options = QueryOptions.None, params Expression<Func<T, object>>[] includes)
+    {
+        return await DbSet
+            .ApplyQueryIncludes(includes)
+            .ApplyQueryOptions(options)
+            .ToListAsync();
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<T>> GetRangeAsync(
-        Expression<Func<T, bool>>? predicate = null,
+        Expression<Func<T, bool>> predicate,
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     )
     {
-        var query = DbSet.ApplyQueryIncludes(includes).ApplyQueryOptions(options);
-
-        if (predicate != null)
-        {
-            query = query.Where(predicate);
-        }
-
-        return await query.ToListAsync();
+        return await DbSet
+            .ApplyQueryIncludes(includes)
+            .ApplyQueryOptions(options)
+            .Where(predicate)
+            .ToListAsync();
     }
 
     /// <inheritdoc />
