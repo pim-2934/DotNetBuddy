@@ -1,13 +1,15 @@
 ﻿using DotNetBuddy.Infrastructure.Extensions;
+using DotNetBuddy.Tests.RepositoryEntities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Tests;
 
 public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(options)
 {
-    public DbSet<TestEntity> TestEntities { get; set; }
-    public DbSet<TestAuditableEntity> AuditableTestEntities { get; set; }
-    public DbSet<TestSoftDeletableEntity> SoftDeletableTestEntities { get; set; }
+    public DbSet<Entity> Entities { get; set; }
+    public DbSet<AuditableEntity> AuditableTestEntities { get; set; }
+    public DbSet<SoftDeletableEntity> SoftDeletableTestEntities { get; set; }
+    public DbSet<NavigationEntity> NavigationEntities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

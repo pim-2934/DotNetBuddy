@@ -2,9 +2,9 @@
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
 
-namespace DotNetBuddy.Tests;
+namespace DotNetBuddy.Tests.RepositoryEntities;
 
-public class TestSoftDeletableEntity : ISoftDeletableEntity<Guid>
+public class SoftDeletableEntity : ISoftDeletableEntity<Guid>
 {
     public Guid Id { get; set; }
     

@@ -18,7 +18,19 @@ public interface IRepository<T, TKey> where T : class, IEntity<TKey>
     /// <param name="includes">A set of expressions identifying navigation properties to include in the query results.</param>
     /// <returns>A task representing the asynchronous operation. The result of the task is an enumerable collection of entities matching the specified criteria.</returns>
     Task<IReadOnlyList<T>> GetRangeAsync(
-        Expression<Func<T, bool>>? predicate = null,
+        QueryOptions options = QueryOptions.None,
+        params Expression<Func<T, object>>[] includes
+    );
+    
+    /// <summary>
+    /// Retrieves a collection of entities from the repository, optionally filtered by a predicate and including specified navigation properties.
+    /// </summary>
+    /// <param name="predicate">An expression to filter the entities. Defaults to null if no filtering is applied.</param>
+    /// <param name="options">Query execution options that can modify the behavior of the operation. Defaults to QueryOptions.None.</param>
+    /// <param name="includes">A set of expressions identifying navigation properties to include in the query results.</param>
+    /// <returns>A task representing the asynchronous operation. The result of the task is an enumerable collection of entities matching the specified criteria.</returns>
+    Task<IReadOnlyList<T>> GetRangeAsync(
+        Expression<Func<T, bool>> predicate,
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     );
