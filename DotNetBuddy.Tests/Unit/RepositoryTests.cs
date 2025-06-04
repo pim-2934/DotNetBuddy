@@ -1,7 +1,7 @@
 using DotNetBuddy.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetBuddy.Tests;
+namespace DotNetBuddy.Tests.Unit;
 
 public class RepositoryTests
 {
