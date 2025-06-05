@@ -20,7 +20,7 @@ namespace DotNetBuddy.Infrastructure.Middleware;
 /// <exception cref="DotNetBuddy.Domain.Exceptions.Rfc9110Exception">
 /// Thrown when an exception conforming to the RFC 9110 standard occurs in the application.
 /// </exception>
-public class BuddyExceptionMiddleware(RequestDelegate next)
+public class ExceptionMiddleware(RequestDelegate next)
 {
     /// <summary>
     /// Handles exceptions in the HTTP request pipeline by catching <see cref="Rfc9110Exception"/>

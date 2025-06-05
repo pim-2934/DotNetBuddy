@@ -14,6 +14,6 @@ public static class WebApplicationExtensions
     /// <param name="app">The WebApplication instance this method extends.</param>
     public static void UseBuddyExceptions(this WebApplication app)
     {
-        app.UseMiddleware<BuddyExceptionMiddleware>();
+        app.UseMiddleware<ExceptionMiddleware>();
     }
 }
