@@ -1,3 +1,4 @@
+using DotNetBuddy.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Builder;
 
 namespace DotNetBuddy.Presentation.Extensions;
@@ -8,11 +9,11 @@ namespace DotNetBuddy.Presentation.Extensions;
 public static class WebApplicationExtensions
 {
     /// <summary>
-    /// Configures the application to use exception handlers.
+    /// Configures the application to use exception handlers using BuddyExceptionMiddleware.
     /// </summary>
     /// <param name="app">The WebApplication instance this method extends.</param>
     public static void UseBuddyExceptions(this WebApplication app)
     {
-        app.UseExceptionHandler();
+        app.UseMiddleware<ExceptionMiddleware>();
     }
 }

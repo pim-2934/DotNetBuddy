@@ -35,7 +35,7 @@ public class SomeService
 
     public async Task DoSomethingAsync()
     {
-        var items = await _uow.Repository<MyEntity>().GetAllAsync();
+        var items = await _uow.Repository<MyEntity>().GetRangeAsync();
         // perform actions
         await _uow.SaveAsync();
     }
@@ -54,8 +54,7 @@ public class ExtendedUnitOfWork : UnitOfWork<DatabaseContext>, IExtendedUnitOfWo
     public IFooRepository Foos { get; }
     public IBarRepository Bars { get; }
 
-    public ExtendedUnitOfWork(DatabaseContext context)
-        : base(context)
+    public ExtendedUnitOfWork(DatabaseContext context) : base(context)
     {
         Foos = new FooRepository(context);
         Bars = new BarRepository(context);
@@ -77,7 +76,7 @@ public class OrderService
 
     public async Task DoWorkAsync()
     {
-        var bars = await _uow.Bars.GetAllAsync();
+        var bars = await _uow.Bars.GetRangeAsync();
         // Custom logic
         await _uow.SaveAsync();
     }
