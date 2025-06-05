@@ -31,4 +31,10 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork) :
     {
         throw new BuddyException("This is a test exception", "Test", StatusCodes.Status418ImATeapot);
     }
+
+    [HttpGet("Crash")]
+    public Task Crash()
+    {
+        throw new ApplicationException("Crash and Burn");
+    }
 }
