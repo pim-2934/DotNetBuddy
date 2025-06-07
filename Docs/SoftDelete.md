@@ -34,17 +34,17 @@ public class MyEntity : ISoftDeletableEntity
 }
 ```
 
-## Accessing Archived (Soft Deleted) Entities
+## Accessing Soft-Deleted Entities
 
-To query archived entities (those with a non-null `DeletedAt`), use the `QueryOptions.IgnoreQueryFilters` flag when
+To query soft deleted entities (those with a non-null `DeletedAt`), use the `QueryOptions.IgnoreQueryFilters` flag when
 calling the repository methods. For example:
 
 ```csharp
-// Get only archived entities 
-var archived = await repository.GetAllAsync( e => e.DeletedAt != null, QueryOptions.IgnoreQueryFilters);
+// Get only soft-deleted entities 
+var deleted = await repository.GetRangeAsync( e => e.DeletedAt != null, QueryOptions.IgnoreQueryFilters);
 
-// Get all entities, both active and archived 
-var all = await repository.GetAllAsync( null, QueryOptions.IgnoreQueryFilters);
+// Get all entities, both active and soft-deleted 
+var all = await repository.GetRangeAsync(QueryOptions.IgnoreQueryFilters);
 ```
 
 ## Notes

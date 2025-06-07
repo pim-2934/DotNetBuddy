@@ -79,12 +79,12 @@ Or allow seeders to run on boot:
 ## Documentation
 
 - [Audit System](./Docs/Audit.md)
-- [Soft Deletion](./Docs/SoftDelete.md)
 - [Configuration System](./Docs/Configs.md)
-- [Database Access](./Docs/Database.md)
+- [Database Layer](./Docs/Database.md)
+- [Data Seeding](./Docs/Seeders.md)
 - [Exception Handling](./Docs/Exceptions.md)
 - [Installers](./Docs/Installers.md)
-- [Data Seeding](./Docs/Seeders.md)
+- [Soft Delete System](./Docs/SoftDelete.md)
 
 ---
 

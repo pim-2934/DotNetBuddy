@@ -24,18 +24,11 @@ If you need to encapsulate custom queries or more advanced logic for specific en
 ### Example Usage
 
 ```csharp
-public class SomeService
+public class SomeService(IUnitOfWork uow)
 {
-    private readonly IUnitOfWork _uow;
-
-    public SomeService(IUnitOfWork uow)
-    {
-        _uow = uow;
-    }
-
     public async Task DoSomethingAsync()
     {
-        var items = await _uow.Repository<MyEntity>().GetRangeAsync();
+        var items = await uow.Repository<MyEntity, Guid>().GetRangeAsync();
         // perform actions
         await _uow.SaveAsync();
     }
@@ -49,44 +42,30 @@ When you introduce custom repositories, it is recommended to create an `Extended
 ### Definition
 
 ```csharp
-public class ExtendedUnitOfWork : UnitOfWork<DatabaseContext>, IExtendedUnitOfWork
+public class ExtendedUnitOfWork(DatabaseContext context) : UnitOfWork<DatabaseContext>(context), IExtendedUnitOfWork
 {
-    public IFooRepository Foos { get; }
-    public IBarRepository Bars { get; }
-
-    public ExtendedUnitOfWork(DatabaseContext context) : base(context)
-    {
-        Foos = new FooRepository(context);
-        Bars = new BarRepository(context);
-    }
+    public IFooRepository Foos { get; } = new FooRepository(context);
+    public IBarRepository Bars { get; } = new BarRepository(context);
 }
 ```
 
-### Usage Example
+Registration:
+```csharp
+builder.Services.AddScoped<IExtendedUnitOfWork, ExtendedUnitOfWork>();
+```
+
+### Example Usage
 
 ```csharp
-public class OrderService
+public class OrderService(IExtendedUnitOfWork uow)
 {
-    private readonly IExtendedUnitOfWork _uow;
-
-    public OrderService(IExtendedUnitOfWork uow)
-    {
-        _uow = uow;
-    }
-
     public async Task DoWorkAsync()
     {
-        var bars = await _uow.Bars.GetRangeAsync();
+        var bars = await uow.Bars.GetRangeAsync();
         // Custom logic
         await _uow.SaveAsync();
     }
 }
-```
-
-## Registration
-
-```csharp
-builder.Services.AddScoped<IExtendedUnitOfWork, ExtendedUnitOfWork>();
 ```
 
 ## Notes
