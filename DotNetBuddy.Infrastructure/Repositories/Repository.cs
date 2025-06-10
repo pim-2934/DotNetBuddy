@@ -261,7 +261,8 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     /// </summary>
     /// <param name="searchTerm">The term to search for.</param>
     /// <returns>A predicate expression that can be used for filtering entities.</returns>
-    private static Expression<Func<T, bool>>? BuildSearchPredicate(string searchTerm)
+    // ReSharper disable once MemberCanBePrivate.Global
+    protected static Expression<Func<T, bool>>? BuildSearchPredicate(string searchTerm)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
             return null;
