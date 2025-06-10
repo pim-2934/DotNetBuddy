@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using DotNetBuddy.Example;
 using DotNetBuddy.Infrastructure.Extensions;
 using DotNetBuddy.Presentation.Extensions;
@@ -7,9 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddBuddy<DatabaseContext>(); // Buddy: Default setup
 
-builder.Services
-    .AddControllers()
-    .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 

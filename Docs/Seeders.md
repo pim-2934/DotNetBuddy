@@ -1,4 +1,4 @@
-# Data Seeders
+# Data Seeding
 
 ## Purpose
 
@@ -9,9 +9,21 @@ Allows environment-specific, idempotent database seeding.
 - `ISeeder`  
   Marker interface for seeder classes.
 
-## Usage
+## Attributes
+
+- `SeedPriority`
+  Allows for seeder priority.  Seeders with higher priority will be run first. 
+
+## Setup
 
 ```csharp
+builder.Services.AddBuddy<DatabaseContext>();
+```
+Seeder classes implementing ISeeder will be discovered and registered automatically.
+
+## Usage
+```csharp
+[SeedPriority(2000000000)]
 public class DevSeeder(IUnitOfWork uow) : ISeeder
 {
     public string[] Environments => new[] { "Development" };
@@ -27,7 +39,7 @@ public class DevSeeder(IUnitOfWork uow) : ISeeder
 }
 ```
 
-## Usage (Deterministic Guid, SeederHelper)
+## Example (Deterministic Guid, SeederHelper)
 ```csharp
 public class DevSeeder(IUnitOfWork uow) : ISeeder
 {
@@ -43,7 +55,6 @@ public class DevSeeder(IUnitOfWork uow) : ISeeder
             guid,
             new User 
             {
-                Id = guid,
                 Email = "admin@example.com"
             }
         );
@@ -51,9 +62,7 @@ public class DevSeeder(IUnitOfWork uow) : ISeeder
 }
 ```
 
-## Execution
-
-Set config:
+## Configuration
 
 ```json
 {

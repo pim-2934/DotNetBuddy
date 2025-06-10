@@ -66,11 +66,11 @@ public static class ServiceCollectionExtensions
                     return new
                     {
                         Type = t,
-                        Priority = attr?.Weight ?? int.MaxValue
+                        Priority = attr?.Priority ?? int.MinValue
                     };
                 }
             )
-            .OrderBy(x => x.Priority)
+            .OrderByDescending(x => x.Priority)
             .Select(x => (IInstaller)Activator.CreateInstance(x.Type!)!);
 
         foreach (var installer in installers)

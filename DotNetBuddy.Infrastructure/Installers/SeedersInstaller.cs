@@ -13,7 +13,7 @@ namespace DotNetBuddy.Infrastructure.Installers;
 /// Responsible for registering all implementations of <see cref="ISeeder"/>
 /// and optionally configuring their execution during application startup.
 /// </summary>
-[InstallPriority(3000)]
+[InstallPriority(1000000000)]
 public class SeedersInstaller : IInstaller
 {
     /// <summary>
@@ -41,9 +41,9 @@ public class SeedersInstaller : IInstaller
             .Select(t => new
             {
                 Type = t,
-                Priority = t.GetCustomAttribute<SeedPriorityAttribute>()?.Weight ?? int.MaxValue
+                Priority = t.GetCustomAttribute<SeedPriorityAttribute>()?.Priority ?? int.MinValue
             })
-            .OrderBy(x => x.Priority)
+            .OrderByDescending(x => x.Priority)
             .Select(x => x.Type)
             .ToList();
 

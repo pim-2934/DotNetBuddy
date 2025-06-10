@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetBuddy.Example.Seeders;
 
-[SeedPriority(1000)]
+[SeedPriority(1500000000)]
 public class WeatherForecastSeeder(
     IOptions<WeatherForecastConfig> weatherForecastConfig,
     IExtendedUnitOfWork unitOfWork)

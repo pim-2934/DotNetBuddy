@@ -22,7 +22,7 @@ services.AddDbContext<DatabaseContext>((provider, options) =>
 });
 ```
 
-## Entity Implementation
+## Usage
 
 ```csharp
 public class MyEntity : IAuditableEntity
