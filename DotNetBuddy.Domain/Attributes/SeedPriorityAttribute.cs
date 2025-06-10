@@ -18,7 +18,6 @@ public sealed class SeedPriorityAttribute(int priority) : Attribute
     /// <summary>
     /// Gets the priority weight assigned to a seed operation or handler.
     /// </summary>
-    /// <remarks>
     /// Priority is used to determine the order in which seeders are executed or resolved,
     /// with lower values indicating higher priority. If no priority is specified,
     /// the default value is <see cref="int.MaxValue"/>.
