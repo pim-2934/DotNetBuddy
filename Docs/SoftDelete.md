@@ -24,7 +24,7 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 }
 ```
 
-## Entity Implementation
+## Usage
 
 ```csharp
 public class MyEntity : ISoftDeletableEntity 
@@ -34,7 +34,7 @@ public class MyEntity : ISoftDeletableEntity
 }
 ```
 
-## Accessing Soft-Deleted Entities
+## Example (Accessing Soft-Deleted Entities)
 
 To query soft deleted entities (those with a non-null `DeletedAt`), use the `QueryOptions.IgnoreQueryFilters` flag when
 calling the repository methods. For example:

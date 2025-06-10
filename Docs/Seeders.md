@@ -21,8 +21,9 @@ builder.Services.AddBuddy<DatabaseContext>();
 ```
 Seeder classes implementing ISeeder will be discovered and registered automatically.
 
-## Usage (Simple)
+## Usage
 ```csharp
+[SeedPriority(2000000000)]
 public class DevSeeder(IUnitOfWork uow) : ISeeder
 {
     public string[] Environments => new[] { "Development" };
@@ -38,7 +39,7 @@ public class DevSeeder(IUnitOfWork uow) : ISeeder
 }
 ```
 
-## Usage (Deterministic Guid, SeederHelper)
+## Example (Deterministic Guid, SeederHelper)
 ```csharp
 public class DevSeeder(IUnitOfWork uow) : ISeeder
 {

@@ -12,7 +12,7 @@ Enable exception handling middleware:
 app.UseBuddyExceptions();
 ```
 
-## Exception Implementation
+## Usage
 
 ```csharp
 public class AccountInactiveException(string message)
@@ -24,7 +24,7 @@ public class AccountInactiveException(string message)
     );
 ```
 
-## Usage
+## Example
 
 ```csharp
 throw new AccountInactiveException("Please contact your administrator.");

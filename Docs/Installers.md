@@ -9,7 +9,19 @@ Supports modular service registration via `IInstaller` interface, optionally pri
 - `IInstaller`  
   Marker interface for installer classes.
 
-## Example
+## Attributes
+
+- `InstallPriority`
+  Allows for installer priority.  Installers with higher priority will be run first.
+
+## Setup
+
+```csharp
+builder.Services.AddBuddy<DatabaseContext>();
+```
+Installer classes implementing IInstaller will be discovered and executed automatically.
+
+## Usage
 
 ```csharp
 [InstallPriority(200000)]
@@ -22,12 +34,9 @@ public class DependencyInstaller : IInstaller
 }
 ```
 
-## Prioritized Setup
-
-Installers are executed in order of their `[InstallPriority]`.
-
 ## Notes
 
 - Helps organize DI setup across modules.
 - Use priority to control ordering (e.g., database setup before business services).
+- Buddy installers run at priority 1000000000 and up.
 
