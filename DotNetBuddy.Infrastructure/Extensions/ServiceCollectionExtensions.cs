@@ -52,16 +52,15 @@ public static class ServiceCollectionExtensions
             (t =>
                 {
                     var attr = t!.GetCustomAttribute<InstallPriorityAttribute>();
-
                     return new
                     {
                         Type = t,
-                        Priority = attr?.Priority ?? int.MinValue
+                        Priority = attr?.Priority ?? int.MaxValue
                     };
                 }
             )
             .OrderByDescending(x => x.Priority)
-            .Select(x => (IInstaller)Activator.CreateInstance(x.Type!)!);
+            .ToList();
 
         foreach (var installer in installerTypes)
         {

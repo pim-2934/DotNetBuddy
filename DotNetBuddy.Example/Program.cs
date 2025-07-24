@@ -1,4 +1,5 @@
 using DotNetBuddy.Example;
+using DotNetBuddy.Extensions.EfCore.Extensions;
 using DotNetBuddy.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
