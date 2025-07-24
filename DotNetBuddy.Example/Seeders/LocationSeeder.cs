@@ -6,7 +6,7 @@ using DotNetBuddy.Example.Repositories.Interfaces;
 
 namespace DotNetBuddy.Example.Seeders;
 
-[SeedPriority(900)]
+[SeedPriority(2000000000)]
 public class LocationSeeder(IExtendedUnitOfWork unitOfWork) : ISeeder
 {
     public string[] Environments =>

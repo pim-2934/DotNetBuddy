@@ -4,7 +4,7 @@ using DotNetBuddy.Domain;
 
 namespace DotNetBuddy.Example.Models;
 
-public class WeatherForecast : IAuditableEntity<Guid>, ISoftDeletableEntity<Guid>
+public sealed class WeatherForecast : IAuditableEntity<Guid>, ISoftDeletableEntity<Guid>
 {
     // IEntity
     public Guid Id { get; set; }
@@ -13,7 +13,7 @@ public class WeatherForecast : IAuditableEntity<Guid>, ISoftDeletableEntity<Guid
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    // IArchivableEntity
+    // ISoftDeletableEntity
     public DateTime? DeletedAt { get; set; }
 
     // Data
@@ -21,7 +21,7 @@ public class WeatherForecast : IAuditableEntity<Guid>, ISoftDeletableEntity<Guid
     public int TemperatureC { get; init; }
     [StringLength(255)] public string? Summary { get; set; }
 
-    public virtual Location? Location { get; set; }
+    public Location? Location { get; set; }
 
     [NotMapped] public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

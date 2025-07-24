@@ -21,10 +21,10 @@ public static class ModelBuilderExtensions
         {
             var clrType = entityType.ClrType;
 
-            var isArchivable = clrType.GetInterfaces().Any(i =>
+            var isSoftDeletable = clrType.GetInterfaces().Any(i =>
                 i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISoftDeletableEntity<>));
 
-            if (!isArchivable)
+            if (!isSoftDeletable)
                 continue;
 
             var interfaceType = clrType.GetInterfaces()

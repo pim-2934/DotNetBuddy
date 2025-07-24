@@ -17,7 +17,7 @@ namespace DotNetBuddy.Infrastructure.Installers;
 /// their names, binding them to related configuration sections, and validating
 /// them both via data annotations and at application startup.
 /// </remarks>
-[InstallPriority(1000)]
+[InstallPriority(2000000000)]
 public class ConfigInstaller : IInstaller
 {
     /// <summary>

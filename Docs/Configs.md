@@ -2,15 +2,24 @@
 
 ## Purpose
 
-Provides a clean abstraction over ASP.NET Core's Options pattern with validation support.
+Provides a clean abstraction over ASP.NET Core's Options pattern, with built-in support for validation.
+Simplifies registration and ensures configuration values are validated at application startup.
 
 ## Interfaces
 
 - `IConfig`  
   Marker interface for configuration classes.
 
+## Setup
+
+```csharp
+builder.Services.AddBuddy<DatabaseContext>();
+```
+Configuration classes implementing IConfig will be discovered and registered automatically.
+
 ## Usage
 
+Define a configuration class:
 ```csharp
 public class ConnectionStringsConfig : IConfig
 {
@@ -19,8 +28,7 @@ public class ConnectionStringsConfig : IConfig
 }
 ```
 
-## Accessing Config in Services
-
+Inject and access configuration:
 ```csharp
 public class SomeService
 {
@@ -35,6 +43,9 @@ public class SomeService
 
 ## Notes
 
-- Apply `[Required]` and other annotations for validation.
-- Configuration is validated on application boot.
+- Use `[Required]` and other DataAnnotations to enforce validation.
+- Configuration is validated once at application startup — invalid configuration will cause the application to fail fast.
+- Supports standard ASP.NET Core configuration sources (appsettings.json, environment variables, etc.).
+
+
 

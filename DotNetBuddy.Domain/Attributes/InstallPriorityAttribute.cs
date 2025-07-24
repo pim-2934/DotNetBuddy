@@ -1,25 +1,24 @@
 ﻿namespace DotNetBuddy.Domain.Attributes;
 
 /// <summary>
-/// Specifies the installation priority of a class within the dependency injection process.
+/// Defines the priority level of a class during the installation sequence in dependency injection.
 /// </summary>
 /// <remarks>
-/// This attribute is intended to be applied to classes that implement the IInstaller interface,
-/// enabling control over the order in which installers are executed.
-/// Installers with higher weights will be executed after installers with lower weights.
-/// If the weight is not provided, the default value will be set to <c>int.MaxValue</c>.
+/// This attribute is used to annotate classes that participate in the installation process,
+/// allowing their execution order to be determined based on a specified priority value.
+/// Classes with lower priority values will be executed earlier, and the default priority is set
+/// to <c>Int32.MaxValue</c> if no specific value is provided.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class InstallPriorityAttribute(int weight) : Attribute
+public sealed class InstallPriorityAttribute(int priority) : Attribute
 {
     /// <summary>
-    /// Gets the weight value associated with the installation priority.
+    /// Gets the priority level assigned to determine the execution order of an installer.
     /// </summary>
     /// <remarks>
-    /// The weight determines the execution order of installers during the dependency
-    /// injection process. Installers with lower weight values will be executed first,
-    /// followed by installers with higher weight values.
-    /// If no weight is specified, the default value is <c>int.MaxValue</c>.
+    /// Installers with a lower priority value will execute earlier during the dependency injection
+    /// process, while those with higher priority values will execute later. If no priority is explicitly
+    /// assigned, the default value is <c>int.MaxValue</c>.
     /// </remarks>
-    public int Weight { get; } = weight;
+    public int Priority { get; } = priority;
 }
