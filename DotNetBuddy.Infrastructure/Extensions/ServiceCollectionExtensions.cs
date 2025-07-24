@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
                     return new
                     {
                         Type = t,
-                        Priority = attr?.Priority ?? int.MaxValue
+                        Priority = attr?.Priority ?? int.MinValue
                     };
                 }
             )
