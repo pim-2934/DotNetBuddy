@@ -1,5 +1,5 @@
 using DotNetBuddy.Application;
-using DotNetBuddy.Extensions.EfCore.Extensions;
+using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Example.Repositories;
 using DotNetBuddy.Example.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;

@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DotNetBuddy.Extensions.EfCore\DotNetBuddy.Extensions.EfCore.csproj" />
+      <ProjectReference Include="..\DotNetBuddy.Extensions.EntityFrameworkCore\DotNetBuddy.Extensions.EntityFrameworkCore.csproj" />
       <ProjectReference Include="..\DotNetBuddy.Domain\DotNetBuddy.Domain.csproj" />
       <ProjectReference Include="..\DotNetBuddy.Infrastructure\DotNetBuddy.Infrastructure.csproj" />
     </ItemGroup>

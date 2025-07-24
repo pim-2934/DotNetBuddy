@@ -1,5 +1,5 @@
 using DotNetBuddy.Example;
-using DotNetBuddy.Extensions.EfCore.Extensions;
+using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);

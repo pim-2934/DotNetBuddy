@@ -1,7 +1,7 @@
 ﻿using DotNetBuddy.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetBuddy.Extensions.EfCore;
+namespace DotNetBuddy.Extensions.EntityFrameworkCore;
 
 /// <inheritdoc />
 public class UnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext : DbContext

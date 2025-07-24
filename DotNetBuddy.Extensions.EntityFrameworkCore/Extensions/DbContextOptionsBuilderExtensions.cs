@@ -1,7 +1,7 @@
-﻿using DotNetBuddy.Extensions.EfCore.Interceptors;
+﻿using DotNetBuddy.Extensions.EntityFrameworkCore.Interceptors;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetBuddy.Extensions.EfCore.Extensions;
+namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 
 /// <summary>
 /// Provides extension methods for configuring <see cref="DbContextOptionsBuilder"/>.

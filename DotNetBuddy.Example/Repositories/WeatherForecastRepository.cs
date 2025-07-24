@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
-using DotNetBuddy.Extensions.EfCore;
-using DotNetBuddy.Extensions.EfCore.Extensions;
+using DotNetBuddy.Extensions.EntityFrameworkCore;
+using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;

@@ -4,7 +4,7 @@ using DotNetBuddy.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetBuddy.Extensions.EfCore.Extensions;
+namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 
 /// <summary>
 /// Provides extension methods for adding custom services related to BuddyDotNet into an

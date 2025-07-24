@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Packages", "Packages", "{4C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{6D745703-7740-43A7-840C-87DA8397E43F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy.Extensions.EfCore", "DotNetBuddy.Extensions.EfCore\DotNetBuddy.Extensions.EfCore.csproj", "{14820AC8-9FC2-4987-A066-19894A0CB851}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuddy.Extensions.EntityFrameworkCore", "DotNetBuddy.Extensions.EntityFrameworkCore\DotNetBuddy.Extensions.EntityFrameworkCore.csproj", "{14820AC8-9FC2-4987-A066-19894A0CB851}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

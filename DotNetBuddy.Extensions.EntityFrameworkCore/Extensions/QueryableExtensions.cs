@@ -4,7 +4,7 @@ using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Infrastructure.Utilities;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetBuddy.Extensions.EfCore.Extensions;
+namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 
 /// <summary>
 /// Provides extension methods for IQueryable to enhance query functionality,

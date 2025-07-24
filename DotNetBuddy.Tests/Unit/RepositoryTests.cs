@@ -1,4 +1,4 @@
-using DotNetBuddy.Extensions.EfCore;
+using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Tests.RepositoryEntities;
 
