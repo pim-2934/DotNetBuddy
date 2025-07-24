@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
+using DotNetBuddy.Extensions.EfCore;
+using DotNetBuddy.Extensions.EfCore.Extensions;
 using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
-using DotNetBuddy.Infrastructure.Extensions;
-using DotNetBuddy.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Example.Repositories;

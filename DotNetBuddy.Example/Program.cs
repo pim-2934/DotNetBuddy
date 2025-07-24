@@ -1,11 +1,11 @@
 using System.Text.Json.Serialization;
+using DotNetBuddy.Extensions.EfCore.Extensions;
 using DotNetBuddy.Example;
-using DotNetBuddy.Infrastructure.Extensions;
 using DotNetBuddy.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddBuddy<DatabaseContext>(); // Buddy: Default setup
+builder.Services.AddBuddy<DatabaseContext>();
 
 builder.Services
     .AddControllers()

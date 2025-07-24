@@ -1,5 +1,5 @@
+using DotNetBuddy.Extensions.EfCore.Extensions;
 using DotNetBuddy.Example.Models;
-using DotNetBuddy.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Example;

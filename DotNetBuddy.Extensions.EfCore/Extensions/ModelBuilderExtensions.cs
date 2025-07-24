@@ -2,7 +2,7 @@
 using DotNetBuddy.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetBuddy.Infrastructure.Extensions;
+namespace DotNetBuddy.Extensions.EfCore.Extensions;
 
 /// <summary>
 /// Provides extension methods for the <see cref="ModelBuilder"/> class to facilitate additional configurations during model creation.

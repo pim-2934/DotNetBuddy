@@ -1,4 +1,4 @@
-﻿using DotNetBuddy.Tests.ExpressionPathEntities;
+﻿namespace DotNetBuddy.Tests.ExpressionPathEntities;
 
 public class DeepNestedEntity
 {
