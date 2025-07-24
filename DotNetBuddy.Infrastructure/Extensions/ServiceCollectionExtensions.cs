@@ -1,9 +1,6 @@
 ﻿using System.Reflection;
 using DotNetBuddy.Application;
-using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
-using DotNetBuddy.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetBuddy.Infrastructure.Extensions;
@@ -16,9 +13,6 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Adds services related to BuddyDotNet to the dependency injection container.
     /// </summary>
-    /// <typeparam name="T">
-    /// The type of the DbContext to be used by the BuddyDotNet services.
-    /// </typeparam>
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> to which the services will be added.
     /// </param>
@@ -26,23 +20,19 @@ public static class ServiceCollectionExtensions
     /// An array of additional <see cref="Assembly"/> instances used to locate and run service installers. Use this if
     /// the referenced project has installers but is not loaded yet at the time of adding buddy.
     /// </param>
-    public static void AddBuddy<T>(this IServiceCollection services, params AssemblyName[] assemblyNames)
-        where T : DbContext
+    public static void AddBuddy(this IServiceCollection services, params AssemblyName[] assemblyNames)
     {
         foreach (var assemblyName in assemblyNames)
         {
             Assembly.Load(assemblyName);
         }
-
-        services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
-        services.AddScoped<IUnitOfWork, UnitOfWork<T>>();
-
+        
         FindAndRunInstallers(services);
     }
 
     private static void FindAndRunInstallers(IServiceCollection services)
     {
-        var installers = AppDomain.CurrentDomain.GetAssemblies()
+        var installerTypes = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany
             (
                 a =>
@@ -62,20 +52,27 @@ public static class ServiceCollectionExtensions
             (t =>
                 {
                     var attr = t!.GetCustomAttribute<InstallPriorityAttribute>();
-
                     return new
                     {
                         Type = t,
-                        Priority = attr?.Priority ?? int.MinValue
+                        Priority = attr?.Priority ?? int.MaxValue
                     };
                 }
             )
             .OrderByDescending(x => x.Priority)
-            .Select(x => (IInstaller)Activator.CreateInstance(x.Type!)!);
+            .ToList();
 
-        foreach (var installer in installers)
+        foreach (var installer in installerTypes)
         {
-            installer.Install(services);
+            services.AddTransient(installer.Type!);
+        }
+
+        
+        foreach (var installer in installerTypes)
+        {
+            using var serviceProvider = services.BuildServiceProvider();
+            var resolvedInstaller = (IInstaller)serviceProvider.GetRequiredService(installer.Type!);
+            resolvedInstaller.Install(services);
         }
     }
 }

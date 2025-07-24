@@ -1,4 +1,4 @@
-﻿using DotNetBuddy.Infrastructure.Extensions;
+﻿using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Tests.RepositoryEntities;
 using Microsoft.EntityFrameworkCore;
 

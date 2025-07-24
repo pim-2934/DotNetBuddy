@@ -31,7 +31,18 @@ public class ConfigInstaller : IInstaller
     public void Install(IServiceCollection services)
     {
         using var provider = services.BuildServiceProvider();
-        var configuration = provider.GetRequiredService<IConfiguration>();
+
+        var configuration = provider.GetService<IConfiguration>();
+        if (configuration is null)
+        {
+            configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+            
+            services.AddSingleton(configuration);
+        }
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 

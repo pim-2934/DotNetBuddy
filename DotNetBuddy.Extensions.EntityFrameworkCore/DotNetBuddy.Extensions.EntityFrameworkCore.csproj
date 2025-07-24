@@ -17,8 +17,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\DotNetBuddy.Application\DotNetBuddy.Application.csproj"/>
-        <ProjectReference Include="..\DotNetBuddy.Domain\DotNetBuddy.Domain.csproj"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.13"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\DotNetBuddy.Infrastructure\DotNetBuddy.Infrastructure.csproj" />
         <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.2.25">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
