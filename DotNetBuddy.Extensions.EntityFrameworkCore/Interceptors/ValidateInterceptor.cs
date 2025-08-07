@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DotNetBuddy.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -76,11 +77,15 @@ public class ValidateInterceptor : SaveChangesInterceptor
 
         foreach (var entity in entities)
         {
-            if (entity is not IValidatableObject validatableObject) continue;
-            var validationContext = new ValidationContext(validatableObject);
+            if (!entity.GetType().GetInterfaces().Any(i =>
+                    i.IsGenericType &&
+                    i.GetGenericTypeDefinition() == typeof(IValidatableEntity<>)
+                )) continue;
+
+            var validationContext = new ValidationContext(entity);
             var validationResults = new List<ValidationResult>();
 
-            if (Validator.TryValidateObject(validatableObject, validationContext, validationResults, true)) continue;
+            if (Validator.TryValidateObject(entity, validationContext, validationResults, true)) continue;
             var errors = string.Join("; ", validationResults.Select(r => r.ErrorMessage));
             throw new ValidationException($"Entity validation failed: {errors}");
         }
