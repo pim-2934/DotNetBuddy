@@ -84,6 +84,7 @@ Or allow seeders to run on boot:
 
 ## Extension: EntityFrameworkCore
 - [Audit System](./Docs/Audit.md)
+- [Entity Validation](./Docs/Validation.md)
 - [Database Access](./Docs/Database.md)
 - [Data Seeding](./Docs/Seeders.md)
 - [Soft Deletion](./Docs/SoftDelete.md)
