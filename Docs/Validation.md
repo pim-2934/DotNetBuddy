@@ -24,33 +24,47 @@ services.AddDbContext<DatabaseContext>((provider, options) =>
 ## Usage
 
 ```csharp 
-public class ComplexEntity : IValidatableEntity { 
-    public Guid Id { get; set; } 
-    public int Foo { get; set; } 
-    public int Bar { get; set; }
+public class ComplexEntity : IValidatableEntity<Guid>
+{
+    public Guid Id { get; set; }
+    public int BaseValue { get; set; }
+    public int BelowBaseValue { get; set; }
+    public int UnchangeableValue { get; set; }
     
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (Bar > Foo)
+        // Basic validation - ensure BelowBaseValue doesn't exceed BaseValue
+        if (BelowBaseValue > BaseValue)
         {
-            yield return new ValidationResult("Bar is not allowed to be greater than Foo.", [nameof(Bar)]);
+            yield return new ValidationResult("BelowBaseValue is not allowed to be greater than BaseValue.", [nameof(BelowBaseValue)]);
         }
         
         // You can access entity state and original values from the validation context
-        if (validationContext.Items.TryGetValue(ValidationContextKeys.EntityState, out var entityState))
+        if (validationContext.Items.TryGetValue(ValidationContextKeys.EntityState, out var entityState) &&
+            entityState is EntityState.Modified)
         {
             // Access the entity state (Added, Modified, Deleted, etc.)
             // This helps customize validation based on the current state of the entity
-        }
-        
-        if (validationContext.Items.TryGetValue(ValidationContextKeys.OriginalValues, out var originalValues))
-        {
-            // Access original property values before changes
-            // Useful for validation rules that depend on what changed
+            if (validationContext.Items.TryGetValue(ValidationContextKeys.OriginalValues, out var originalValues) &&
+                originalValues is Dictionary<string, object?> originalValuesDict)
+            {
+                // Access original property values before changes
+                // Useful for validation rules that depend on what changed
+                
+                // Example: Prevent UnchangeableValue from being modified once set
+                if (originalValuesDict.TryGetValue(nameof(UnchangeableValue), out var originalValue) &&
+                    originalValue is int originalIntValue &&
+                    originalIntValue != UnchangeableValue)
+                {
+                    yield return new ValidationResult(
+                        "UnchangeableValue cannot be modified once set.",
+                        [nameof(UnchangeableValue)]
+                    );
+                }
+            }
         }
     }
 }
-
 ```
 
 ## Additional Context Information
