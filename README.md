@@ -10,12 +10,13 @@ It encourages clean architecture principles and supports out-of-the-box patterns
 
 ## 📦 NuGet Packages
 
-| Project                      | Version                                                                                                              | Downloads                                                                                                                |
-|-----------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| **DotNetBuddy.Domain**       | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Domain?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Domain/)               | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Domain?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Domain/)               |
-| **DotNetBuddy.Application**  | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)     | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)     |
-| **DotNetBuddy.Infrastructure** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/) | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/) |
-| **DotNetBuddy.Presentation** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)   | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)   |
+| Project                                        | Version                                                                                                                                                                | Downloads                                                                                                                                                      |
+|------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **DotNetBuddy.Domain**                         | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Domain?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Domain/)                                    | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Domain?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Domain/)                       |
+| **DotNetBuddy.Application**                    | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)                          | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Application?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Application/)             |
+| **DotNetBuddy.Infrastructure**                 | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/)                    | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Infrastructure?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Infrastructure/)       |
+| **DotNetBuddy.Presentation**                   | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)                        | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)           |
+| **DotNetBuddy.Extensions.EntityFrameworkCore** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Extensions.EntityFrameworkCore?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Extensions.EntityFrameworkCore/) | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Extensions.EntityFrameworkCore?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Extensions.EntityFrameworkCore/) |
 
 ## Quick Start
 
@@ -77,14 +78,15 @@ Or allow seeders to run on boot:
 ---
 
 ## Documentation
-
-- [Audit System](./Docs/Audit.md)
 - [Configuration System](./Docs/Configs.md)
-- [Database Layer](./Docs/Database.md)
-- [Data Seeding](./Docs/Seeders.md)
 - [Exception Handling](./Docs/Exceptions.md)
 - [Installers](./Docs/Installers.md)
-- [Soft Delete System](./Docs/SoftDelete.md)
+
+## Extension: EntityFrameworkCore
+- [Audit System](./Docs/Audit.md)
+- [Database Access](./Docs/Database.md)
+- [Data Seeding](./Docs/Seeders.md)
+- [Soft Deletion](./Docs/SoftDelete.md)
 
 ---
 

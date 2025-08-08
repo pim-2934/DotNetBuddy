@@ -17,6 +17,7 @@ env:
     DotNetBuddy.Application
     DotNetBuddy.Infrastructure
     DotNetBuddy.Presentation
+    DotNetBuddy.Extensions.EntityFrameworkCore
 
 jobs:
   create_nuget:

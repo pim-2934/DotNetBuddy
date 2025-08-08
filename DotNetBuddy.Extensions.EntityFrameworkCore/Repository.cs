@@ -1,12 +1,12 @@
 ﻿using System.Linq.Expressions;
+using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
 using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
-using DotNetBuddy.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetBuddy.Infrastructure.Repositories;
+namespace DotNetBuddy.Extensions.EntityFrameworkCore;
 
 /// <inheritdoc />
 public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where T : class, IEntity<TKey>

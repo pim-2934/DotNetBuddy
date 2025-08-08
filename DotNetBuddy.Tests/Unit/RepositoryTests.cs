@@ -1,5 +1,5 @@
+using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
-using DotNetBuddy.Infrastructure.Repositories;
 using DotNetBuddy.Tests.RepositoryEntities;
 
 namespace DotNetBuddy.Tests.Unit;
