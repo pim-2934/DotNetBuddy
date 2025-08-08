@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Domain;
+using DotNetBuddy.Domain.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -72,20 +73,35 @@ public class ValidateInterceptor : SaveChangesInterceptor
         if (dbContext == null) return;
 
         var entities = dbContext.ChangeTracker.Entries()
-            .Where(e => e.State is EntityState.Added or EntityState.Modified)
-            .Select(e => e.Entity);
+            .Where(e => e.State is EntityState.Added or EntityState.Modified);
 
-        foreach (var entity in entities)
+        foreach (var entityEntry in entities)
         {
+            var entity = entityEntry.Entity;
+
             if (!entity.GetType().GetInterfaces().Any(i =>
                     i.IsGenericType &&
                     i.GetGenericTypeDefinition() == typeof(IValidatableEntity<>)
                 )) continue;
 
-            var validationContext = new ValidationContext(entity);
-            var validationResults = new List<ValidationResult>();
+            var originalValues = new Dictionary<string, object?>();
+            if (entityEntry.State == EntityState.Modified)
+            {
+                foreach (var property in entityEntry.Properties)
+                {
+                    originalValues[property.Metadata.Name] = property.OriginalValue;
+                }
+            }
 
+            var validationContext = new ValidationContext(entity, new Dictionary<object, object?>
+            {
+                { ValidationContextKeys.EntityState, entityEntry.State },
+                { ValidationContextKeys.OriginalValues, originalValues }
+            });
+
+            var validationResults = new List<ValidationResult>();
             if (Validator.TryValidateObject(entity, validationContext, validationResults, true)) continue;
+
             var errors = string.Join("; ", validationResults.Select(r => r.ErrorMessage));
             throw new ValidationException($"Entity validation failed: {errors}");
         }

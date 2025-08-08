@@ -3,11 +3,12 @@
 namespace DotNetBuddy.Domain;
 
 /// <summary>
-/// Provides a contract for an entity that supports validation rules
-/// and has a unique identifier. Extends the functionality of both IEntity
-/// for identification and IValidatableObject for validation.
+/// Defines a contract for an entity that combines unique identification and
+/// data validation capabilities. This interface integrates IEntity for unique
+/// identity representation and IValidatableObject for implementation of custom
+/// validation logic.
 /// </summary>
 /// <typeparam name="TKey">
-/// The type of the unique identifier for the entity.
+/// Specifies the type of the unique identifier used in the entity.
 /// </typeparam>
 public interface IValidatableEntity<TKey> : IEntity<TKey>, IValidatableObject;
