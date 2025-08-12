@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
         {
             Assembly.Load(assemblyName);
         }
-        
+
         FindAndRunInstallers(services);
     }
 
@@ -67,7 +67,7 @@ public static class ServiceCollectionExtensions
             services.AddTransient(installer.Type!);
         }
 
-        
+
         foreach (var installer in installerTypes)
         {
             using var serviceProvider = services.BuildServiceProvider();

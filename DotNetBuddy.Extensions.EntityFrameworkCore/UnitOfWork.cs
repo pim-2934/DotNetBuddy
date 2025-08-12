@@ -13,13 +13,13 @@ public class UnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext
     {
         if (_repositories.ContainsKey(typeof(T)))
         {
-            return (IRepository<T, TKey>) _repositories[typeof(T)];
+            return (IRepository<T, TKey>)_repositories[typeof(T)];
         }
 
         var repositoryInstance = new Repository<T, TKey>(context);
         _repositories[typeof(T)] = repositoryInstance;
 
-        return (IRepository<T, TKey>) _repositories[typeof(T)];
+        return (IRepository<T, TKey>)_repositories[typeof(T)];
     }
 
     /// <inheritdoc />

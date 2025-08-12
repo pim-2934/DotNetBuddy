@@ -13,7 +13,7 @@ Simplifies registration and ensures configuration values are validated at applic
 ## Setup
 
 ```csharp
-builder.Services.AddBuddy<DatabaseContext>();
+builder.Services.AddBuddy();
 ```
 Configuration classes implementing IConfig will be discovered and registered automatically.
 

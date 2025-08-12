@@ -17,7 +17,7 @@ Supports modular service registration via `IInstaller` interface, optionally pri
 ## Setup
 
 ```csharp
-builder.Services.AddBuddy<DatabaseContext>();
+builder.Services.AddBuddy();
 ```
 Installer classes implementing IInstaller will be discovered and executed automatically.
 

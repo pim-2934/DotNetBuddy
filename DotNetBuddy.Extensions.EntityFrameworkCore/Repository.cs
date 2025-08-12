@@ -279,12 +279,12 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         Expression? combinedExpression = null;
 
         foreach (var containsExpression in from property in searchableProperties
-                 where property.PropertyType == typeof(string)
-                 select Expression.Property(entityParameter, property)
+                                           where property.PropertyType == typeof(string)
+                                           select Expression.Property(entityParameter, property)
                  into propertyExpression
-                 let containsMethod = typeof(string).GetMethod("Contains", [typeof(string)])
-                 let searchTermExpression = Expression.Constant(searchTerm)
-                 select Expression.Call(propertyExpression, containsMethod!, searchTermExpression))
+                                           let containsMethod = typeof(string).GetMethod("Contains", [typeof(string)])
+                                           let searchTermExpression = Expression.Constant(searchTerm)
+                                           select Expression.Call(propertyExpression, containsMethod!, searchTermExpression))
         {
             if (combinedExpression == null)
             {

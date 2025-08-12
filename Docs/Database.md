@@ -18,7 +18,8 @@ Encapsulates data access using Repository and Unit of Work patterns for separati
 ## Setup
 
 ```csharp
-builder.Services.AddBuddy<DatabaseContext>();
+builder.Services.AddBuddy();
+builder.Services.AddBuddyEfExtension<DatabaseContext>();
 ```
 
 ## Usage

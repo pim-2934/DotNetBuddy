@@ -59,7 +59,7 @@ public class AuditInterceptor : SaveChangesInterceptor
         foreach (var entry in context.ChangeTracker.Entries())
         {
             if (entry.Entity.GetType().GetInterfaces()
-                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAuditableEntity<>)) 
+                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAuditableEntity<>))
                 && entry.State is EntityState.Added or EntityState.Modified)
             {
                 dynamic entity = entry.Entity;

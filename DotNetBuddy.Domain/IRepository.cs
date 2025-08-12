@@ -20,7 +20,7 @@ public interface IRepository<T, TKey> where T : class, IEntity<TKey>
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     );
-    
+
     /// <summary>
     /// Retrieves a collection of entities from the repository, optionally filtered by a predicate and including specified navigation properties.
     /// </summary>
@@ -80,7 +80,7 @@ public interface IRepository<T, TKey> where T : class, IEntity<TKey>
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes
     );
-    
+
     /// <summary>
     /// Searches for entities that have searchable properties containing the specified search term.
     /// </summary>
