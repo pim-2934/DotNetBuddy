@@ -17,7 +17,7 @@ Allows environment-specific, idempotent database seeding.
 ## Setup
 
 ```csharp
-builder.Services.AddBuddy<DatabaseContext>();
+builder.Services.AddBuddy();
 ```
 Seeder classes implementing ISeeder will be discovered and registered automatically.
 

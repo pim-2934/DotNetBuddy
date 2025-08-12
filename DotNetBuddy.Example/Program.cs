@@ -1,10 +1,12 @@
 using DotNetBuddy.Example;
 using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
+using DotNetBuddy.Infrastructure.Extensions;
 using DotNetBuddy.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddBuddy<DatabaseContext>();
+builder.Services.AddBuddy();
+builder.Services.AddBuddyEfExtension<DatabaseContext>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {

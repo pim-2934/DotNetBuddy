@@ -1,34 +1,28 @@
-﻿using System.Reflection;
-using DotNetBuddy.Domain;
-using DotNetBuddy.Infrastructure.Extensions;
+﻿using DotNetBuddy.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 
 /// <summary>
-/// Provides extension methods for adding custom services related to BuddyDotNet into an
-/// <see cref="IServiceCollection"/> dependency injection container.
+/// Provides extension methods for configuring and registering services
+/// within an <see cref="IServiceCollection"/> to support Entity Framework Core operations
+/// and repository/unit of work patterns.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds services related to BuddyDotNet to the dependency injection container.
+    /// Adds the Buddy EF Core extension to the dependency injection container.
     /// </summary>
     /// <typeparam name="T">
-    /// The type of the DbContext to be used by the BuddyDotNet services.
+    /// The type of the DbContext.
     /// </typeparam>
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> to which the services will be added.
     /// </param>
-    /// <param name="assemblyNames">
-    /// An array of additional <see cref="Assembly"/> instances used to locate and run service installers. Use this if
-    /// the referenced project has installers but is not loaded yet at the time of adding buddy.
-    /// </param>
-    public static void AddBuddy<T>(this IServiceCollection services, params AssemblyName[] assemblyNames)
+    public static void AddBuddyEfExtension<T>(this IServiceCollection services)
         where T : DbContext
     {
-        services.AddBuddy(assemblyNames);
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped<IUnitOfWork, UnitOfWork<T>>();
     }
