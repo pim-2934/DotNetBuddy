@@ -27,16 +27,15 @@ public static class ExpressionPathVisitor
         // Handle different expression types for property paths
         return expression switch
         {
-            MemberExpression memberExpr => 
+            MemberExpression memberExpr =>
                 GetMemberExpressionPath(memberExpr),
-                
-            MethodCallExpression methodCallExpr when IsSelectMethod(methodCallExpr) => 
+
+            MethodCallExpression methodCallExpr when IsSelectMethod(methodCallExpr) =>
                 GetSelectMethodPath(methodCallExpr),
-                
-            UnaryExpression unaryExpr when unaryExpr.NodeType == ExpressionType.Convert || 
-                                           unaryExpr.NodeType == ExpressionType.ConvertChecked => 
+
+            UnaryExpression { NodeType: ExpressionType.Convert or ExpressionType.ConvertChecked } unaryExpr =>
                 GetPropertyPathInternal(unaryExpr.Operand),
-                
+
             _ => string.Empty
         };
     }
@@ -54,7 +53,7 @@ public static class ExpressionPathVisitor
 
     private static bool IsSelectMethod(MethodCallExpression methodCallExpr)
     {
-        return methodCallExpr.Method.Name == "Select" && 
+        return methodCallExpr.Method.Name == "Select" &&
                methodCallExpr.Arguments.Count == 2 &&
                methodCallExpr.Method.DeclaringType is { FullName: not null } &&
                methodCallExpr.Method.DeclaringType.FullName.StartsWith("System.Linq");
@@ -69,22 +68,18 @@ public static class ExpressionPathVisitor
 
         // Get the property path from the selector lambda
         string propertyPath;
-        if (methodCallExpr.Arguments[1] is UnaryExpression { Operand: LambdaExpression lambdaFromUnary })
+        switch (methodCallExpr.Arguments[1])
         {
-            propertyPath = GetPropertyPathInternal(lambdaFromUnary.Body);
-        }
-        else if (methodCallExpr.Arguments[1] is LambdaExpression lambdaExpr)
-        {
-            propertyPath = GetPropertyPathInternal(lambdaExpr.Body);
-        }
-        else
-        {
-            return collectionPath;
+            case UnaryExpression { Operand: LambdaExpression lambdaFromUnary }:
+                propertyPath = GetPropertyPathInternal(lambdaFromUnary.Body);
+                break;
+            case LambdaExpression lambdaExpr:
+                propertyPath = GetPropertyPathInternal(lambdaExpr.Body);
+                break;
+            default:
+                return collectionPath;
         }
 
-        if (string.IsNullOrEmpty(propertyPath))
-            return collectionPath;
-            
-        return $"{collectionPath}.{propertyPath}";
+        return string.IsNullOrEmpty(propertyPath) ? collectionPath : $"{collectionPath}.{propertyPath}";
     }
 }

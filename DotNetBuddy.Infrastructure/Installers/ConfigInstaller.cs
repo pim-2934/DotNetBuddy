@@ -40,7 +40,7 @@ public class ConfigInstaller : IInstaller
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
-            
+
             services.AddSingleton(configuration);
         }
 
@@ -106,7 +106,8 @@ public class ConfigInstaller : IInstaller
                 (
                     null,
                     [
-                        optionsBuilder!, section
+                        optionsBuilder!,
+                        section
                     ]
                 );
 

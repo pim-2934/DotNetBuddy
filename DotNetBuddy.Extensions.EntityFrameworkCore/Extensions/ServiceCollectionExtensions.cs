@@ -1,6 +1,7 @@
 ﻿using DotNetBuddy.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 
@@ -23,7 +24,7 @@ public static class ServiceCollectionExtensions
     public static void AddBuddyEfExtension<T>(this IServiceCollection services)
         where T : DbContext
     {
-        services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
-        services.AddScoped<IUnitOfWork, UnitOfWork<T>>();
+        services.TryAddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+        services.TryAddScoped<IUnitOfWork, UnitOfWork<T>>();
     }
 }

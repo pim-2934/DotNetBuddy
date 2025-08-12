@@ -28,7 +28,7 @@ public static class BuddyUtils
             await seeder.SeedAsync();
         }
     }
-    
+
     /// <summary>
     /// Generates a deterministic GUID based on a string input using MD5 hashing.
     /// The same input string will always produce the same GUID.
