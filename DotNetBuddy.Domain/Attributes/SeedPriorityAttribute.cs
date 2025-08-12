@@ -9,8 +9,8 @@
 /// The priority defined by this attribute helps determine the order of execution for multiple seeders.
 /// </remarks>
 /// <param name="priority">
-/// The numeric value representing the priority of the seeder. Lower values indicate higher priority.
-/// If a seeder class does not have this attribute, it will default to a priority of <see cref="int.MaxValue"/>.
+/// The numeric value representing the priority of the seeder. Higher values indicate higher priority.
+/// If a seeder class does not have this attribute, it will default to a priority of <see cref="int.MinValue"/>.
 /// </param>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class SeedPriorityAttribute(int priority) : Attribute
@@ -19,7 +19,7 @@ public sealed class SeedPriorityAttribute(int priority) : Attribute
     /// Gets the priority weight assigned to a seed operation or handler.
     /// </summary>
     /// Priority is used to determine the order in which seeders are executed or resolved,
-    /// with lower values indicating higher priority. If no priority is specified,
-    /// the default value is <see cref="int.MaxValue"/>.
+    /// with higher values indicating higher priority. If no priority is specified,
+    /// the default value is <see cref="int.MinValue"/>.
     public int Priority { get; } = priority;
 }
