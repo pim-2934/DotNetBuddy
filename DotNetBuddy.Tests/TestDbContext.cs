@@ -8,6 +8,7 @@ public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(
 {
     public DbSet<Entity> Entities { get; set; }
     public DbSet<AuditableEntity> AuditableTestEntities { get; set; }
+    public DbSet<ComplexEntity> ComplexTestEntities { get; set; }
     public DbSet<SoftDeletableEntity> SoftDeletableTestEntities { get; set; }
     public DbSet<NavigationEntity> NavigationEntities { get; set; }
 

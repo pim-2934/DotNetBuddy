@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Tests.RepositoryEntities;
@@ -311,13 +312,13 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
         var entities = new List<Entity>
         {
-            new Entity
+            new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Entity 1",
                 CreatedAt = DateTime.UtcNow
             },
-            new Entity
+            new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Entity 2",
@@ -597,13 +598,13 @@ public class RepositoryTests
 
         var entities = new List<AuditableEntity>
         {
-            new AuditableEntity
+            new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Batch Entity 1",
                 Description = "First in batch"
             },
-            new AuditableEntity
+            new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Batch Entity 2",
@@ -914,4 +915,238 @@ public class RepositoryTests
             Assert.NotNull(entity.Children[0].Children[0].Parent!.Parent);
         }
     }
+
+    [Fact]
+    public async Task AddAsync_WithInvalidComplexEntity_ThrowsValidationException()
+    {
+        // Arrange
+        var dbContext =
+            TestDbContext.CreateContext(nameof(AddAsync_WithInvalidComplexEntity_ThrowsValidationException));
+        var repository = new Repository<ComplexEntity, Guid>(dbContext);
+
+        var invalidEntity = new ComplexEntity
+        {
+            Id = Guid.NewGuid(),
+            BaseValue = 5,
+            BelowBaseValue = 10 // Invalid: Bar > Foo violates validation rule
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(async () =>
+        {
+            await repository.AddAsync(invalidEntity);
+            await dbContext.SaveChangesAsync();
+        });
+
+        // Verify the validation message matches our expectation
+        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Message);
+    }
+
+    [Fact]
+    public async Task AddAsync_WithValidComplexEntity_AddsEntityToDatabase()
+    {
+        // Arrange
+        var dbContext = TestDbContext.CreateContext(nameof(AddAsync_WithValidComplexEntity_AddsEntityToDatabase));
+        var repository = new Repository<ComplexEntity, Guid>(dbContext);
+
+        var validEntity = new ComplexEntity
+        {
+            Id = Guid.NewGuid(),
+            BaseValue = 10,
+            BelowBaseValue = 5 // Valid: Bar < Foo
+        };
+
+        // Act
+        await repository.AddAsync(validEntity);
+        await dbContext.SaveChangesAsync();
+
+        // Assert
+        var savedEntity = await repository.GetAsync(validEntity.Id);
+        Assert.NotNull(savedEntity);
+        Assert.Equal(validEntity.Id, savedEntity.Id);
+        Assert.Equal(10, savedEntity.BaseValue);
+        Assert.Equal(5, savedEntity.BelowBaseValue);
+    }
+
+    [Fact]
+    public async Task UpdateShallow_WithInvalidComplexEntity_ThrowsValidationException()
+    {
+        // Arrange
+        var dbContext =
+            TestDbContext.CreateContext(nameof(UpdateShallow_WithInvalidComplexEntity_ThrowsValidationException));
+        var repository = new Repository<ComplexEntity, Guid>(dbContext);
+
+        // First add a valid entity
+        var entity = new ComplexEntity
+        {
+            Id = Guid.NewGuid(),
+            BaseValue = 10,
+            BelowBaseValue = 5
+        };
+
+        await repository.AddAsync(entity);
+        await dbContext.SaveChangesAsync();
+
+        // Now try to update it with invalid values
+        var retrievedEntity = await repository.GetAsync(entity.Id);
+        Assert.NotNull(retrievedEntity);
+
+        retrievedEntity.BaseValue = 3; // Reduce Foo to make Bar > Foo
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(async () =>
+        {
+            repository.UpdateShallow(retrievedEntity);
+            await dbContext.SaveChangesAsync();
+        });
+
+        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDeep_WithInvalidComplexEntity_ThrowsValidationException()
+    {
+        // Arrange
+        var dbContext =
+            TestDbContext.CreateContext(nameof(UpdateDeep_WithInvalidComplexEntity_ThrowsValidationException));
+        var repository = new Repository<ComplexEntity, Guid>(dbContext);
+
+        // First add a valid entity
+        var entity = new ComplexEntity
+        {
+            Id = Guid.NewGuid(),
+            BaseValue = 10,
+            BelowBaseValue = 5
+        };
+
+        await repository.AddAsync(entity);
+        await dbContext.SaveChangesAsync();
+
+        // Now try to update it with invalid values
+        var retrievedEntity = await repository.GetAsync(entity.Id);
+        Assert.NotNull(retrievedEntity);
+
+        retrievedEntity.BelowBaseValue = 15; // Increase Bar to make Bar > Foo
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(async () =>
+        {
+            repository.UpdateDeep(retrievedEntity);
+            await dbContext.SaveChangesAsync();
+        });
+
+        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Message);
+    }
+    
+    [Fact]
+public async Task UpdateShallow_WithChangedUnchangeableValue_ThrowsValidationException()
+{
+    // Arrange
+    var dbContext = TestDbContext.CreateContext(nameof(UpdateShallow_WithChangedUnchangeableValue_ThrowsValidationException));
+    var repository = new Repository<ComplexEntity, Guid>(dbContext);
+    
+    // First add a valid entity with an initial UnchangeableValue
+    var entity = new ComplexEntity
+    {
+        Id = Guid.NewGuid(),
+        BaseValue = 10,
+        BelowBaseValue = 5,
+        UnchangeableValue = 42
+    };
+    
+    await repository.AddAsync(entity);
+    await dbContext.SaveChangesAsync();
+    
+    // Now try to update it with a modified UnchangeableValue
+    var retrievedEntity = await repository.GetAsync(entity.Id);
+    Assert.NotNull(retrievedEntity);
+    
+    retrievedEntity.UnchangeableValue = 100; // Try to change the unchangeable value
+    
+    // Act & Assert
+    var exception = await Assert.ThrowsAsync<ValidationException>(async () =>
+    {
+        repository.UpdateShallow(retrievedEntity);
+        await dbContext.SaveChangesAsync();
+    });
+    
+    // Verify the validation message matches our expectation
+    Assert.Contains("UnchangeableValue cannot be modified once set", exception.Message);
+}
+
+[Fact]
+public async Task UpdateDeep_WithChangedUnchangeableValue_ThrowsValidationException()
+{
+    // Arrange
+    var dbContext = TestDbContext.CreateContext(nameof(UpdateDeep_WithChangedUnchangeableValue_ThrowsValidationException));
+    var repository = new Repository<ComplexEntity, Guid>(dbContext);
+    
+    // First add a valid entity with an initial UnchangeableValue
+    var entity = new ComplexEntity
+    {
+        Id = Guid.NewGuid(),
+        BaseValue = 10,
+        BelowBaseValue = 5,
+        UnchangeableValue = 42
+    };
+    
+    await repository.AddAsync(entity);
+    await dbContext.SaveChangesAsync();
+    
+    // Now try to update it with a modified UnchangeableValue
+    var retrievedEntity = await repository.GetAsync(entity.Id);
+    Assert.NotNull(retrievedEntity);
+    
+    retrievedEntity.UnchangeableValue = 100; // Try to change the unchangeable value
+    
+    // Act & Assert
+    var exception = await Assert.ThrowsAsync<ValidationException>(async () =>
+    {
+        repository.UpdateDeep(retrievedEntity);
+        await dbContext.SaveChangesAsync();
+    });
+    
+    // Verify the validation message matches our expectation
+    Assert.Contains("UnchangeableValue cannot be modified once set", exception.Message);
+}
+
+[Fact]
+public async Task Update_WithSameUnchangeableValue_Succeeds()
+{
+    // Arrange
+    var dbContext = TestDbContext.CreateContext(nameof(Update_WithSameUnchangeableValue_Succeeds));
+    var repository = new Repository<ComplexEntity, Guid>(dbContext);
+    
+    // First add a valid entity with an initial UnchangeableValue
+    var entity = new ComplexEntity
+    {
+        Id = Guid.NewGuid(),
+        BaseValue = 10,
+        BelowBaseValue = 5,
+        UnchangeableValue = 42
+    };
+    
+    await repository.AddAsync(entity);
+    await dbContext.SaveChangesAsync();
+    
+    // Now try to update other properties but keep UnchangeableValue the same
+    var retrievedEntity = await repository.GetAsync(entity.Id);
+    Assert.NotNull(retrievedEntity);
+    
+    retrievedEntity.BaseValue = 20; // Change other property
+    retrievedEntity.BelowBaseValue = 10; // Change other property
+    // UnchangeableValue remains the same
+    
+    // Act
+    repository.UpdateShallow(retrievedEntity);
+    await dbContext.SaveChangesAsync();
+    
+    // Assert
+    var updatedEntity = await repository.GetAsync(entity.Id);
+    Assert.NotNull(updatedEntity);
+    Assert.Equal(20, updatedEntity.BaseValue);
+    Assert.Equal(10, updatedEntity.BelowBaseValue);
+    Assert.Equal(42, updatedEntity.UnchangeableValue);
+}
+
 }
