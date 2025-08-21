@@ -19,7 +19,9 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     protected readonly DbSet<T> DbSet = context.Set<T>();
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> GetRangeAsync(QueryOptions options = QueryOptions.None, params Expression<Func<T, object>>[] includes)
+    public async Task<IReadOnlyList<T>> GetRangeAsync(
+        QueryOptions options = QueryOptions.None,
+        params Expression<Func<T, object>>[] includes)
     {
         return await DbSet
             .ApplyQueryIncludes(includes)
@@ -200,12 +202,13 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public async Task DeleteAsync(TKey id)
+    public async Task DeleteAsync(TKey id, bool forceHardDelete = false)
     {
         var entity = await GetAsync(id);
+
         if (entity != null)
         {
-            if (entity is ISoftDeletableEntity<TKey> softDeletable)
+            if (!forceHardDelete && entity is ISoftDeletableEntity<TKey> softDeletable)
             {
                 softDeletable.DeletedAt = DateTime.UtcNow;
                 UpdateShallow(entity);
@@ -218,7 +221,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public async Task DeleteRangeAsync(IEnumerable<TKey> ids)
+    public async Task DeleteRangeAsync(IEnumerable<TKey> ids, bool forceHardDelete = false)
     {
         var entities = await GetRangeAsync(ids);
         var entitiesList = entities.ToArray();
@@ -226,12 +229,15 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         if (entitiesList.Length == 0)
             return;
 
-        var softDeletableEntities = entitiesList.Where(e => e is ISoftDeletableEntity<TKey>).ToArray();
+        var softDeletableEntities =
+            !forceHardDelete ? entitiesList.Where(e => e is ISoftDeletableEntity<TKey>).ToArray() : [];
+
         var hardDeletableEntities = entitiesList.Except(softDeletableEntities).ToArray();
 
+        var deletedAt = DateTime.UtcNow;
         foreach (var entity in softDeletableEntities)
         {
-            ((ISoftDeletableEntity<TKey>)entity).DeletedAt = DateTime.UtcNow;
+            ((ISoftDeletableEntity<TKey>)entity).DeletedAt = deletedAt;
             UpdateShallow(entity);
         }
 
@@ -279,12 +285,12 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         Expression? combinedExpression = null;
 
         foreach (var containsExpression in from property in searchableProperties
-                                           where property.PropertyType == typeof(string)
-                                           select Expression.Property(entityParameter, property)
+                 where property.PropertyType == typeof(string)
+                 select Expression.Property(entityParameter, property)
                  into propertyExpression
-                                           let containsMethod = typeof(string).GetMethod("Contains", [typeof(string)])
-                                           let searchTermExpression = Expression.Constant(searchTerm)
-                                           select Expression.Call(propertyExpression, containsMethod!, searchTermExpression))
+                 let containsMethod = typeof(string).GetMethod("Contains", [typeof(string)])
+                 let searchTermExpression = Expression.Constant(searchTerm)
+                 select Expression.Call(propertyExpression, containsMethod!, searchTermExpression))
         {
             if (combinedExpression == null)
             {
