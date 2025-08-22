@@ -183,15 +183,17 @@ public interface IRepository<T, TKey> where T : class, IEntity<TKey>
     /// Deletes an entity from the repository based on its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the entity to be deleted.</param>
+    /// <param name="forceHardDelete">A flag indicating whether the deletion should be a hard delete. If set to true, the entity is permanently removed. Defaults to false, which performs a soft delete if supported.</param>
     /// <returns>A task that represents the asynchronous deletion operation.</returns>
-    Task DeleteAsync(TKey id);
+    Task DeleteAsync(TKey id, bool forceHardDelete = false);
 
     /// <summary>
     /// Deletes a range of entities from the repository identified by their unique keys.
     /// </summary>
     /// <param name="ids">A collection of unique identifiers corresponding to the entities to be deleted.</param>
+    /// <param name="forceHardDelete">Indicates whether to perform a hard delete, bypassing soft delete mechanisms. Defaults to false.</param>
     /// <returns>A task that represents the asynchronous operation of deleting the specified entities.</returns>
-    Task DeleteRangeAsync(IEnumerable<TKey> ids);
+    Task DeleteRangeAsync(IEnumerable<TKey> ids, bool forceHardDelete = false);
 
     /// <summary>
     /// Counts the total number of entities in the repository that match the specified predicate.

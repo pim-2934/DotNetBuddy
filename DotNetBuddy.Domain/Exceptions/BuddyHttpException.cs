@@ -1,6 +1,4 @@
-using DotNetBuddy.Domain.Exceptions;
-
-namespace DotNetBuddy.Domain;
+namespace DotNetBuddy.Domain.Exceptions;
 
 /// <summary>
 /// Represents a custom exception specific to the BuddyDotNet platform.
@@ -14,5 +12,5 @@ namespace DotNetBuddy.Domain;
 /// This exception can be thrown when application-specific errors occur, providing meaningful
 /// context such as a human-readable title, error message, and the relevant HTTP status code.
 /// </example>
-public class BuddyException(string title, string detail, int statusCode = 400)
+public class BuddyHttpException(string title, string detail, int statusCode = 400)
     : Rfc9110Exception(title, detail, statusCode);

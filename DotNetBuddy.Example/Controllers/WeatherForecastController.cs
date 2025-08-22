@@ -1,4 +1,4 @@
-using DotNetBuddy.Domain;
+using DotNetBuddy.Domain.Exceptions;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -20,16 +20,14 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork) :
     {
         var weatherForecast = await extendedUnitOfWork.WeatherForecasts.GetAsync(id);
 
-        if (weatherForecast is null)
-            throw new BuddyException("NotFound", "Weather forecast not found.", StatusCodes.Status404NotFound);
-
-        return weatherForecast;
+        return weatherForecast ??
+               throw new BuddyHttpException("NotFound", "Weather forecast not found.", StatusCodes.Status404NotFound);
     }
 
     [HttpGet("GetException")]
     public Task GetException()
     {
-        throw new BuddyException("This is a test exception", "Test", StatusCodes.Status418ImATeapot);
+        throw new BuddyHttpException("This is a test exception", "Test", StatusCodes.Status418ImATeapot);
     }
 
     [HttpGet("Crash")]

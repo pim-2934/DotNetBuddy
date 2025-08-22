@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
-using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Enums;
+using DotNetBuddy.Domain.Exceptions;
 using DotNetBuddy.Infrastructure.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -61,11 +61,7 @@ public static class QueryableExtensions
         if (options.HasFlag(QueryOptions.AsNoTracking) &&
             options.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
         {
-            throw new BuddyException
-            (
-                "Invalid query options.",
-                "Cannot specify both AsNoTracking and AsNoTrackingWithIdentityResolution."
-            );
+            throw new BuddyException("Cannot specify both AsNoTracking and AsNoTrackingWithIdentityResolution.");
         }
 
         if (options.HasFlag(QueryOptions.AsNoTracking))
