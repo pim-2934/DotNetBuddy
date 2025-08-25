@@ -87,7 +87,6 @@ public class QuerySpecification<T>
     /// <summary>
     /// Represents a base implementation for constructing specifications used to query entities.
     /// </summary>
-    /// <typeparam name="T">The type of the entity to which the specification applies.</typeparam>
     public QuerySpecification()
     {
         Includes = [];
@@ -97,7 +96,6 @@ public class QuerySpecification<T>
     /// <summary>
     /// Represents a query specification that provides filtering, sorting, includes, and pagination capabilities for querying entities.
     /// </summary>
-    /// <typeparam name="T">The type of entity to which this specification applies.</typeparam>
     public QuerySpecification(Expression<Func<T, bool>> predicate) : this()
     {
         Predicate = predicate;
