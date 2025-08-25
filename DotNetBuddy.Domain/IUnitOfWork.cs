@@ -13,5 +13,5 @@ public interface IUnitOfWork : IDisposable
 
     /// Asynchronously saves all changes made in the current unit of work's context to the underlying database.
     /// <returns>The number of state entries written to the database.</returns>
-    Task<int> SaveAsync();
+    Task<int> SaveAsync(CancellationToken cancellationToken = default);
 }
