@@ -19,10 +19,14 @@ public class LocationSeeder(IExtendedUnitOfWork unitOfWork) : ISeeder
 
     private static readonly string[] Locations =
     [
-        "Grand Canyon", "Great Barrier Reef", "Mount Everest", "Victoria Falls", "Northern Lights"
+        "Grand Canyon",
+        "Great Barrier Reef",
+        "Mount Everest",
+        "Victoria Falls",
+        "Northern Lights"
     ];
 
-    public async Task SeedAsync()
+    public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         foreach (var location in Locations)
         {
@@ -32,10 +36,11 @@ public class LocationSeeder(IExtendedUnitOfWork unitOfWork) : ISeeder
                 new Location
                 {
                     Name = location
-                }
+                },
+                cancellationToken
             );
         }
-        
-        await unitOfWork.SaveAsync();
+
+        await unitOfWork.SaveAsync(cancellationToken);
     }
 }

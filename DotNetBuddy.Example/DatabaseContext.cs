@@ -11,7 +11,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.ApplySoftDeleteQueryFilters(); // Add support for soft-deletes (ISoftDeletableEntity)
     }
 }

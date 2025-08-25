@@ -21,5 +21,5 @@ public interface ISeeder
     /// Seeds the database asynchronously by inserting required entities using the provided unit of work.
     /// </summary>
     /// <returns>A task that represents the asynchronous seeding operation.</returns>
-    public Task SeedAsync();
+    public Task SeedAsync(CancellationToken cancellationToken = default);
 }

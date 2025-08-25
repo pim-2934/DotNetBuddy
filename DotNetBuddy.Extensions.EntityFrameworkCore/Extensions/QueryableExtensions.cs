@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Domain.Exceptions;
 using DotNetBuddy.Infrastructure.Utilities;
@@ -12,6 +13,53 @@ namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 /// </summary>
 public static class QueryableExtensions
 {
+    /// <summary>
+    /// Applies the specified query specification to the provided IQueryable data source.
+    /// This includes filtering, ordering, pagination, and the inclusion of related entities.
+    /// </summary>
+    /// <typeparam name="T">The type of the entities in the data source.</typeparam>
+    /// <param name="query">The IQueryable data source to which the specification will be applied.</param>
+    /// <param name="spec">The specification containing the rules and options to apply to the query.</param>
+    /// <param name="applyPaging">Indicates whether paging should be applied. If set to true, pagination logic will be executed.</param>
+    /// <returns>The IQueryable data source modified according to the supplied specification rules.</returns>
+    public static IQueryable<T> ApplySpecification<T>(
+        this IQueryable<T> query,
+        QuerySpecification<T> spec,
+        bool applyPaging = true) where T : class
+    {
+        if (spec.Predicate is not null)
+            query = query.Where(spec.Predicate);
+
+        query = query.ApplyQueryOptions(spec.Options);
+        query = query.ApplyQueryIncludes(spec.Includes.ToArray());
+
+        if (spec.OrderBy.Count > 0)
+        {
+            var isFirst = true;
+            foreach (var (keySelector, ascending) in spec.OrderBy)
+            {
+                if (isFirst)
+                {
+                    query = ascending
+                        ? query.OrderBy(keySelector)
+                        : query.OrderByDescending(keySelector);
+                    isFirst = false;
+                }
+                else
+                {
+                    query = ascending
+                        ? ((IOrderedQueryable<T>)query).ThenBy(keySelector)
+                        : ((IOrderedQueryable<T>)query).ThenByDescending(keySelector);
+                }
+            }
+        }
+
+        if (applyPaging && spec.Page is not null)
+            query = query.Skip((spec.Page.Value - 1) * spec.PageSize).Take(spec.PageSize);
+
+        return query;
+    }
+
     /// <summary>
     /// Applies the specified query includes to the provided queryable data source.
     /// This allows for the inclusion of related entities in the query result.

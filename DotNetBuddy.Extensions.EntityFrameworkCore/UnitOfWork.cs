@@ -23,9 +23,9 @@ public class UnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext
     }
 
     /// <inheritdoc />
-    public async Task<int> SaveAsync()
+    public async Task<int> SaveAsync(CancellationToken cancellationToken = default)
     {
-        return await context.SaveChangesAsync();
+        return await context.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc />

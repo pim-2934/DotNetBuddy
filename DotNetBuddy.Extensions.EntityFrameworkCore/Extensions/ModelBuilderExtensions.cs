@@ -27,9 +27,9 @@ public static class ModelBuilderExtensions
             if (!isSoftDeletable)
                 continue;
 
-            if (entityType.BaseType != null) 
+            if (entityType.BaseType != null)
                 continue;
-            
+
             var interfaceType = clrType.GetInterfaces()
                 .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISoftDeletableEntity<>));
             var deletedAtProperty = interfaceType.GetProperty(nameof(ISoftDeletableEntity<object>.DeletedAt));

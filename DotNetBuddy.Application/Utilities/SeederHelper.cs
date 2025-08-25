@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Domain;
+using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
 
 namespace DotNetBuddy.Application.Utilities;
@@ -16,33 +17,43 @@ public static class SeederHelper
     /// <param name="unitOfWork">The unit of work managing the repository and transaction.</param>
     /// <param name="predicate">A function to test the entity for a condition to determine if a match exists in the repository.</param>
     /// <param name="entity">The entity to insert if no matches are found.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
     /// <typeparam name="TEntity">The type of the entity implementing the IEntity interface.</typeparam>
     /// <typeparam name="TKey">The type of the unique key for the entity.</typeparam>
     /// <returns>A task that represents the asynchronous operation.</returns>
     public static async Task SeedOneAsync<TEntity, TKey>(
         IUnitOfWork unitOfWork,
         Expression<Func<TEntity, bool>> predicate,
-        TEntity entity
+        TEntity entity,
+        CancellationToken cancellationToken = default
     ) where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate, QueryOptions.IgnoreQueryFilters))
+        var spec = new QuerySpecification<TEntity>(predicate).SetOptions(QueryOptions.IgnoreQueryFilters);
+
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(spec, cancellationToken))
         {
-            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
     }
 
     /// <summary>
-    /// Seeds a single entity asynchronously if it does not already exist in the repository.
+    /// Seeds a single entity into the repository asynchronously if it does not already exist based on the specified conditions.
     /// </summary>
-    /// <param name="unitOfWork">The unit of work to manage database transactions and the repository for persisting the entity.</param>
-    /// <param name="entity">The entity to be seeded into the database if it does not already exist.</param>
-    /// <returns>A task that represents the asynchronous operation for seeding the entity.</returns>
-    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, TEntity entity)
+    /// <param name="unitOfWork">The unit of work that provides access to the repository and manages database transactions.</param>
+    /// <param name="entity">The entity to be added to the repository if it does not already exist.</param>
+    /// <param name="cancellationToken">A token to cancel the asynchronous operation if necessary.</param>
+    /// <typeparam name="TEntity">The type of the entity to be seeded, implementing the IEntity interface.</typeparam>
+    /// <typeparam name="TKey">The type of the unique identifier for the entity.</typeparam>
+    /// <returns>A task representing the asynchronous operation of seeding the entity.</returns>
+    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, TEntity entity,
+        CancellationToken cancellationToken = default)
         where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(entity.Id, QueryOptions.IgnoreQueryFilters))
+        var spec = new QuerySpecification<TEntity>().SetOptions(QueryOptions.IgnoreQueryFilters);
+
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(entity.Id, spec, cancellationToken))
         {
-            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
     }
 
@@ -50,19 +61,23 @@ public static class SeederHelper
     /// Adds a single entity to the repository if an entity with the specified identifier does not already exist.
     /// </summary>
     /// <param name="unitOfWork">The unit of work managing the repository and transaction.</param>
-    /// <param name="id">The identifier used to check for the existence of the entity in the repository.</param>
+    /// <param name="id">The unique identifier used to check for the existence of the entity in the repository.</param>
     /// <param name="entity">The entity to add if no entity with the specified identifier exists.</param>
+    /// <param name="cancellationToken">A token that allows the operation to be canceled.</param>
     /// <typeparam name="TEntity">The type of the entity, which must implement the <see cref="IEntity{TKey}"/> interface.</typeparam>
     /// <typeparam name="TKey">The type of the identifier for the entity.</typeparam>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, TKey id, TEntity entity)
+    public static async Task SeedOneAsync<TEntity, TKey>(IUnitOfWork unitOfWork, TKey id, TEntity entity,
+        CancellationToken cancellationToken = default)
         where TEntity : class, IEntity<TKey>
     {
         entity.Id = id;
 
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(id, QueryOptions.IgnoreQueryFilters))
+        var spec = new QuerySpecification<TEntity>().SetOptions(QueryOptions.IgnoreQueryFilters);
+
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(id, spec, cancellationToken))
         {
-            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
     }
 
@@ -72,18 +87,22 @@ public static class SeederHelper
     /// <param name="unitOfWork">The unit of work managing the repository and transaction.</param>
     /// <param name="predicate">A function to test each entity for a condition to determine if any entities match existing records.</param>
     /// <param name="entities">The list of entities to insert if no matches are found.</param>
-    /// <typeparam name="TEntity">The type of the entity implementing the <see cref="IEntity{TKey}"/> interface.</typeparam>
-    /// <typeparam name="TKey">The type of the key associated with the entity.</typeparam>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <typeparam name="TEntity">The type of the entity implementing the IEntity interface.</typeparam>
+    /// <typeparam name="TKey">The type of the unique key for the entity.</typeparam>
     /// <returns>A task that represents the asynchronous operation.</returns>
     public static async Task SeedManyAsync<TEntity, TKey>(
         IUnitOfWork unitOfWork,
         Expression<Func<TEntity, bool>> predicate,
-        List<TEntity> entities
+        List<TEntity> entities,
+        CancellationToken cancellationToken = default
     ) where TEntity : class, IEntity<TKey>
     {
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(predicate, QueryOptions.IgnoreQueryFilters))
+        var spec = new QuerySpecification<TEntity>(predicate).SetOptions(QueryOptions.IgnoreQueryFilters);
+
+        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(spec, cancellationToken))
         {
-            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entities);
+            await unitOfWork.Repository<TEntity, TKey>().AddAsync(entities, cancellationToken);
         }
     }
 }

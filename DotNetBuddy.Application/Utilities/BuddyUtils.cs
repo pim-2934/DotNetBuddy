@@ -15,8 +15,10 @@ public static class BuddyUtils
     /// </summary>
     /// <param name="provider">The application's service provider to resolve registered seeders.</param>
     /// <param name="env">The hosting environment information used to filter seeders by environment name.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public static async Task RunSeeders(IServiceProvider provider, IHostEnvironment env)
+    public static async Task RunSeeders(IServiceProvider provider, IHostEnvironment env,
+        CancellationToken cancellationToken = default)
     {
         foreach (var seeder in provider.CreateScope().ServiceProvider.GetServices<ISeeder>())
         {
@@ -25,16 +27,16 @@ public static class BuddyUtils
                 continue;
             }
 
-            await seeder.SeedAsync();
+            await seeder.SeedAsync(cancellationToken);
         }
     }
 
     /// <summary>
     /// Generates a deterministic GUID based on a string input using MD5 hashing.
-    /// The same input string will always produce the same GUID.
+    /// The resulting GUID is consistent for the same input string.
     /// </summary>
-    /// <param name="identifier">The string input to generate the deterministic GUID from.</param>
-    /// <returns>A GUID that is deterministically generated from the input string.</returns>
+    /// <param name="identifier">The input string used to generate the deterministic GUID.</param>
+    /// <returns>A GUID deterministically generated from the specified input string.</returns>
     public static Guid GenerateDeterministicGuid(string identifier)
     {
         var hash = System.Security.Cryptography.MD5.HashData(Encoding.UTF8.GetBytes(identifier));
