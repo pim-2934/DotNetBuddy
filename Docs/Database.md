@@ -4,15 +4,17 @@
 
 Encapsulates data access using Repository and Unit of Work patterns for separation of concerns and transactional safety.
 
+We extend the power of LINQ with small helpers (extensions and repository utilities). We do not replace LINQ with a separate query language or a heavy specification layer.
+
 ## Interfaces
 
-- `IEntity`  
-  Basic entity with `Guid Id`.
+- `IEntity<TKey>`
+  Basic entity contract that includes an `Id` of type `TKey`.
 
-- `IRepository<T>`  
-  Generic data access for entities.
+- `IRepository<T, TKey>`
+  Generic data access for entities. Provides CRUD helpers and LINQ-friendly overloads that accept `IQueryable<T>`.
 
-- `IUnitOfWork`  
+- `IUnitOfWork`
   Manages repositories and coordinates transactions.
 
 ## Setup
@@ -24,105 +26,119 @@ builder.Services.AddBuddyEfExtension<DatabaseContext>();
 
 ## Usage
 
-The `IUnitOfWork` interface provides access to all your data through generic repositories. This is the default way to perform standard CRUD operations across your entities.
+The `IUnitOfWork` interface provides access to your data through generic repositories. Use the repository to perform standard CRUD operations and to help start queries; compose the rest of the query with standard LINQ (Where, Select, Include, OrderBy, etc.).
 
 If you need to encapsulate custom queries or more advanced logic for specific entities, you can define a dedicated repository.
 
 ```csharp
 public class SomeService(IUnitOfWork uow)
 {
-    public async Task DoSomethingAsync()
+    public async Task DoSomethingAsync(CancellationToken ct)
     {
-        var items = await uow.Repository<MyEntity, Guid>().GetRangeAsync();
+        var repo = uow.Repository<MyEntity, Guid>();
+
+        // Start with a base query (optionally with query options)
+        var query = repo.MakeQuery(); // or: repo.MakeQuery(QueryOptions.WithSoftDeleted)
+
+        // Compose with LINQ like normal
+        query = query
+            .Where(e => e.IsActive)
+            .OrderByDescending(e => e.CreatedAt);
+
+        var items = await repo.GetRangeAsync(query, ct);
         // perform actions
-        await _uow.SaveAsync();
+        await uow.SaveAsync(ct);
     }
 }
 ```
 
-## Querying with QuerySpecification
+## Querying with LINQ + Repository Extensions
 
-QuerySpecification<T> centralizes filtering (Predicates), includes (Includes), ordering (OrderBy), options (Options), and paging (Page/PageSize). The repository exposes overloads that accept a specification and is the preferred approach. Older overloads with predicates/options/includes are marked [Obsolete].
+- Start queries with `MakeQuery(QueryOptions options = QueryOptions.None)` when you want a DbSet-based query with helper options applied.
+- Compose the rest with LINQ. Use EF Core's `Include`/`ThenInclude` for navigation properties.
+- Pass the resulting `IQueryable<T>` into repository methods like `GetRangeAsync`, `GetPagedAsync`, `GetAsync`, `AnyAsync`, and `CountAsync`.
 
-- Basic filtering, including, and ordering:
+### Examples
+
+Basic filtering and ordering:
 ```csharp
 var repo = uow.Repository<MyEntity, Guid>();
-var spec = repo.MakeSpecification()
-    .AddPredicate(e => e.IsActive)
-    .AddInclude(e => e.Category)
-    .AddOrderBy(e => e.CreatedAt, SortDirection.Descending)
-    .SetOptions(QueryOptions.AsNoTracking);
+var query = repo.MakeQuery()
+    .Where(e => e.IsActive)
+    .OrderByDescending(e => e.CreatedAt);
 
-var items = await repo.GetRangeAsync(spec);
+var items = await repo.GetRangeAsync(query, cancellationToken);
 ```
 
-- Get by IDs with a specification:
+Including related entities:
+```csharp
+using Microsoft.EntityFrameworkCore; // for Include/ThenInclude
+
+var query = repo.MakeQuery()
+    .Include(e => e.Category)
+    .ThenInclude(c => c.Parent);
+
+var items = await repo.GetRangeAsync(query, cancellationToken);
+```
+
+Get by IDs with additional includes/filters:
 ```csharp
 var ids = new [] { id1, id2, id3 };
-var spec = repo.MakeSpecification().AddInclude(e => e.RelatedDetails);
-var items = await repo.GetRangeAsync(ids, spec);
+var query = repo.MakeQuery()
+    .Include(e => e.RelatedDetails);
+
+var items = await repo.GetRangeAsync(ids, query, cancellationToken);
 ```
 
-- Single item by spec:
+Single item via query:
 ```csharp
-var spec = repo.MakeSpecification().AddPredicate(e => e.Code == code);
-var entity = await repo.GetAsync(spec);
+var query = repo.MakeQuery().Where(e => e.Code == code);
+var entity = await repo.GetAsync(query, cancellationToken);
 ```
 
-- Any/Count by spec:
+Any/Count using a query:
 ```csharp
-var hasActives = await repo.AnyAsync(repo.MakeSpecification().AddPredicate(e => e.IsActive));
-var count = await repo.CountAsync(repo.MakeSpecification().AddPredicate(e => e.Type == MyType.Special));
+var hasActives = await repo.AnyAsync(repo.MakeQuery().Where(e => e.IsActive), cancellationToken);
+var specialCount = await repo.CountAsync(repo.MakeQuery().Where(e => e.Type == MyType.Special), cancellationToken);
 ```
 
-- Paging with spec:
+Paging with a query:
 ```csharp
-var spec = repo.MakeSpecification()
-    .AddPredicate(e => e.IsActive)
-    .AddOrderBy(e => e.Name)
-    .SetPage(pageNumber: 2, pageSize: 10);
+int page = 2;
+int pageSize = 10;
 
-var paged = await repo.GetPagedAsync(spec);
-// paged.Items, paged.TotalCount, paged.PageNumber, paged.PageSize, etc.
+var query = repo.MakeQuery()
+    .Where(e => e.IsActive)
+    .OrderBy(e => e.Name);
+
+var paged = await repo.GetPagedAsync(query, page, pageSize, cancellationToken);
+// paged.Items, paged.TotalCount, paged.PageNumber, paged.PageSize
 ```
 
-- Searching with spec:
+Using query options (e.g., include soft-deleted rows):
 ```csharp
-// Properties marked with [Searchable] are used by the search builder.
-var spec = repo.MakeSpecification()
-    .AddInclude(e => e.Category);
-
-var results = await repo.SearchAsync("foo", spec);
-
-// Paged search
-var paged = await repo.SearchPagedAsync("foo", spec.SetPage(1, 20));
+var allQuery = repo.MakeQuery(QueryOptions.WithSoftDeleted);
+var all = await repo.GetRangeAsync(allQuery, cancellationToken);
 ```
-
-Migration note: Prefer the specification-based methods. The legacy overloads that take predicate/options/includes remain for backward compatibility but are obsolete and may be removed in a future version.
 
 ## Example (Custom Repository)
 
 ```csharp
 public interface IFooRepository : IRepository<Foo, Guid>
 {
-    // Add methods here.
-    // 
-    // Guidelines (Specification-based):
-    // - Prefer accepting a QuerySpecification<Foo> for read/query methods.
-    // - Internally use DbSet.ApplySpecification(spec) for filtering, includes, ordering, options, and paging.
-    // - Avoid exposing raw include arrays or option flags in public APIs; keep them inside the specification.
-    // 
-    // This ensures that:
-    // - Consumers can control which related entities are loaded in a type-safe way via spec.AddInclude(...).
-    // - Consumers can apply sorting, paging, and filtering consistently via the specification.
-    // - Query composition remains reusable, testable, and discoverable.
+    // Add methods here that return tasks or values.
+    // Design guidance:
+    // - Accept and/or build LINQ queries with IQueryable<Foo>.
+    // - Use repo.MakeQuery(options) to start queries consistently.
+    // - Let consumers use Include/ThenInclude and other LINQ operators.
 }
 ```
 
 ```csharp
 public class FooRepository(DatabaseContext context) : Repository<Foo, Guid>(context), IFooRepository
 {
-    // Implement repository methods here following the specification-based guidelines above.
+    // Implement repository methods here that internally compose LINQ queries
+    // and use the base methods like GetRangeAsync(query), GetPagedAsync(query, ...), etc.
 }
 ```
 
@@ -146,26 +162,24 @@ builder.Services.AddScoped<IExtendedUnitOfWork, ExtendedUnitOfWork>();
 ```
 
 ### Example Usage
-
 ```csharp
 public class OrderService(IExtendedUnitOfWork uow)
 {
-    public async Task DoWorkAsync()
+    public async Task DoWorkAsync(CancellationToken ct)
     {
-        var bars = await uow.Bars.GetRangeAsync();
+        var bars = await uow.Bars.GetRangeAsync(ct);
         // Custom logic
-        await _uow.SaveAsync();
+        await uow.SaveAsync(ct);
     }
 }
 ```
 
 ## Notes
 
-- Models must implement `IEntity` directly or indirectly.
-- Prefer specification-based repository methods (GetRangeAsync(spec), GetPagedAsync(spec), SearchAsync(searchTerm, spec), etc.). Legacy overloads with predicate/options/includes are [Obsolete].
-- Use `AddInclude(e => e.Nav.Prop)` on QuerySpecification to include related data. Includes use type-safe expressions and are converted internally via ExpressionPathVisitor.
-- Search methods rely on properties marked with `[Searchable]` and the SearchPredicateBuilder to construct search expressions.
+- Models must implement `IEntity<TKey>`.
+- We extend LINQ; we do not replace it. Prefer composing queries using standard LINQ operators and EF Core `Include/ThenInclude`.
 - Use `IUnitOfWork` when no custom queries are needed—it simplifies testing and keeps code generic.
 - Prefer `ExtendedUnitOfWork` when working with multiple custom repositories to ensure cleaner service constructors and better discoverability.
-- Avoid using static repositories or data access helpers to prevent issues with DbContext lifetime and transaction scope.
+- To include soft-deleted entities in queries, use `repo.MakeQuery(QueryOptions.WithSoftDeleted)` or the `ApplyQueryOptions(QueryOptions.WithSoftDeleted)` extension on `IQueryable<T>`.
+- Avoid static repositories or global helpers that might conflict with DbContext lifetime and transaction scope.
 

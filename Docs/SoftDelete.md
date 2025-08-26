@@ -36,19 +36,24 @@ public class MyEntity : ISoftDeletableEntity
 
 ## Example (Accessing Soft-Deleted Entities)
 
-To query soft deleted entities (those with a non-null `DeletedAt`), set the `QueryOptions.IgnoreQueryFilters` flag on a QuerySpecification and use the specification-based repository methods. For example:
+To query soft-deleted entities (those with a non-null `DeletedAt`), use `QueryOptions.WithSoftDeleted` when starting your query via the repository, or apply options to an existing `IQueryable<T>` using the extension methods.
 
 ```csharp
-// Get only soft-deleted entities
-var specDeleted = repository.MakeSpecification()
-    .SetOptions(QueryOptions.IgnoreQueryFilters)
-    .AddPredicate(e => e.DeletedAt != null);
-var deleted = await repository.GetRangeAsync(specDeleted);
+// Using repository.MakeQuery with options
+var queryDeleted = repository
+    .MakeQuery(QueryOptions.WithSoftDeleted)
+    .Where(e => e.DeletedAt != null);
+var deleted = await repository.GetRangeAsync(queryDeleted);
 
 // Get all entities, both active and soft-deleted
-var specAll = repository.MakeSpecification()
-    .SetOptions(QueryOptions.IgnoreQueryFilters);
-var all = await repository.GetRangeAsync(specAll);
+var queryAll = repository.MakeQuery(QueryOptions.WithSoftDeleted);
+var all = await repository.GetRangeAsync(queryAll);
+
+// Alternatively, apply options to an existing IQueryable<T>
+var baseQuery = repository.MakeQuery();
+var all2 = await repository.GetRangeAsync(
+    baseQuery.ApplyQueryOptions(QueryOptions.WithSoftDeleted)
+);
 ```
 
 ## Notes
