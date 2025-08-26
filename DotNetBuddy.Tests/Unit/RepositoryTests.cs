@@ -105,7 +105,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetRangeAsync(repository.MakeQuery().Where(e => e.Name.Contains('3')));
+        var result = await repository.GetRangeAsync(x => x.Where(e => e.Name.Contains('3')));
 
         // Assert
         Assert.Single(result);
@@ -141,7 +141,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetPagedAsync(repository.MakeQuery(), 2, 5);
+        var result = await repository.GetPagedAsync(2, 5);
 
         // Assert
         Assert.Equal(5, result.Items.Count);
@@ -162,7 +162,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetRangeAsync(repository.MakeQuery().Search("Entity 5"));
+        var result = await repository.GetRangeAsync(x => x.Search("Entity 5"));
 
         // Assert
         Assert.Single(result);
@@ -178,7 +178,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetPagedAsync(repository.MakeQuery().Search("Entity"), 2, 5);
+        var result = await repository.GetPagedAsync(x => x.Search("Entity"), 2, 5);
 
         // Assert
         Assert.Equal(5, result.Items.Count());
@@ -197,7 +197,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetAsync(repository.MakeQuery().Where(e => e.Name == "Test Entity 3"));
+        var result = await repository.GetAsync(x => x.Where(e => e.Name == "Test Entity 3"));
 
         // Assert
         Assert.NotNull(result);
@@ -233,7 +233,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.AnyAsync(repository.MakeQuery().Where(e => e.Name == "Test Entity 3"));
+        var result = await repository.AnyAsync(x => x.Where(e => e.Name == "Test Entity 3"));
 
         // Assert
         Assert.True(result);
@@ -417,7 +417,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var count = await repository.CountAsync(repository.MakeQuery().Where(e => e.Name.Contains('5')));
+        var count = await repository.CountAsync(x => x.Where(e => e.Name.Contains('5')));
 
         // Assert
         Assert.Equal(1, count);
@@ -662,7 +662,8 @@ public class RepositoryTests
 
         // But we can verify it exists with DeletedAt set by using IgnoreQueryFilters
         var deletedEntityIgnoringFilters = await repository.GetAsync(
-            repository.MakeQuery(QueryOptions.WithSoftDeleted).Where(e => e.Id == entityId)
+            entityId,
+            QueryOptions.WithSoftDeleted
         );
 
         Assert.NotNull(deletedEntityIgnoringFilters);
@@ -692,7 +693,8 @@ public class RepositoryTests
 
         // But we can verify they exist with DeletedAt set by using IgnoreQueryFilters
         var deletedEntities = await repository.GetRangeAsync(
-            repository.MakeQuery(QueryOptions.WithSoftDeleted).Where(e => idsToDelete.Contains(e.Id))
+            x => x.Where(e => idsToDelete.Contains(e.Id)),
+            QueryOptions.WithSoftDeleted
         );
 
         Assert.Equal(3, deletedEntities.Count);
@@ -727,7 +729,8 @@ public class RepositoryTests
 
         // Verify soft-deletable entity exists when ignoring filters
         var deletedSoftEntity = await softDeletableRepository.GetAsync(
-            softDeletableRepository.MakeQuery(QueryOptions.WithSoftDeleted).Where(e => e.Id == softDeletableEntity.Id)
+            x => x.Where(e => e.Id == softDeletableEntity.Id),
+            QueryOptions.WithSoftDeleted
         );
 
         Assert.NotNull(deletedSoftEntity);
@@ -765,7 +768,8 @@ public class RepositoryTests
 
         // But they should be visible when ignoring filters
         var deletedSoftEntities = await softDeletableRepository.GetRangeAsync(
-            softDeletableRepository.MakeQuery(QueryOptions.WithSoftDeleted).Where(e => softDeletableIds.Contains(e.Id))
+            x => x.Where(e => softDeletableIds.Contains(e.Id)),
+            QueryOptions.WithSoftDeleted
         );
 
         Assert.Equal(2, deletedSoftEntities.Count);
@@ -795,7 +799,7 @@ public class RepositoryTests
 
         // Verify the entity still exists when ignoring filters
         var softDeletedEntity =
-            await repository.GetAsync(repository.MakeQuery(QueryOptions.WithSoftDeleted).Where(e => e.Id == entity.Id));
+            await repository.GetAsync(x => x.Where(e => e.Id == entity.Id), QueryOptions.WithSoftDeleted);
         Assert.NotNull(softDeletedEntity);
         Assert.NotNull(softDeletedEntity.DeletedAt);
     }
@@ -826,7 +830,7 @@ public class RepositoryTests
         Assert.Equal(3, result.Count);
 
         // Verify all entities exist when ignoring filters
-        var allEntities = await repository.GetRangeAsync(repository.MakeQuery(QueryOptions.WithSoftDeleted));
+        var allEntities = await repository.GetRangeAsync(QueryOptions.WithSoftDeleted);
         Assert.Equal(5, allEntities.Count);
     }
 
@@ -839,14 +843,13 @@ public class RepositoryTests
         var repository = new Repository<NavigationEntity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetRangeAsync(
-            repository.MakeQuery()
-                .Where(x => x.Parent == null)
-                .Include(x => x.Parent)
-                .ThenInclude(x => x!.Parent)
-                .Include(x => x.Parent)
-                .ThenInclude(x => x!.Children)
-                .Include(x => x.Children)
+        var result = await repository.GetRangeAsync(x => x
+            .Where(y => y.Parent == null)
+            .Include(y => y.Parent)
+            .ThenInclude(y => y!.Parent)
+            .Include(y => y.Parent)
+            .ThenInclude(y => y!.Children)
+            .Include(y => y.Children)
         );
 
         // Assert

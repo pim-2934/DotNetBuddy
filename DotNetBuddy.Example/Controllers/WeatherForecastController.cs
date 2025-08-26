@@ -13,17 +13,17 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork) :
     [HttpGet("GetWeatherForecast")]
     public async Task<IEnumerable<WeatherForecast>> GetWeatherForecast(CancellationToken cancellationToken = default)
     {
-        var query = extendedUnitOfWork.WeatherForecasts.MakeQuery()
-            .Take(5)
-            .Include(x => x.Location);
-
-        return await extendedUnitOfWork.WeatherForecasts.GetRangeAsync(query, cancellationToken);
+        return await extendedUnitOfWork.WeatherForecasts.GetRangeAsync(x => x
+                .Take(5)
+                .Include(y => y.Location),
+            cancellationToken: cancellationToken
+        );
     }
 
     [HttpGet("GetWeatherForecast/{id:guid}")]
     public async Task<WeatherForecast> GetWeatherForecast(Guid id, CancellationToken cancellationToken = default)
     {
-        var weatherForecast = await extendedUnitOfWork.WeatherForecasts.GetAsync(id, cancellationToken);
+        var weatherForecast = await extendedUnitOfWork.WeatherForecasts.GetAsync(id, cancellationToken: cancellationToken);
 
         return weatherForecast ??
                throw new BuddyHttpException("NotFound", "Weather forecast not found.", StatusCodes.Status404NotFound);

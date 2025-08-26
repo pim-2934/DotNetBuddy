@@ -38,7 +38,8 @@ public class WeatherForecastSeeder(
 
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        var locations = await unitOfWork.Repository<Location, Guid>().GetRangeAsync(cancellationToken);
+        var locations = await unitOfWork.Repository<Location, Guid>()
+            .GetRangeAsync(cancellationToken: cancellationToken);
         var location = locations.First();
 
         await SeederHelper.SeedManyAsync<WeatherForecast, Guid>

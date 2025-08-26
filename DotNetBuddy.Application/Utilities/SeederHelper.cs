@@ -27,9 +27,8 @@ public static class SeederHelper
         CancellationToken cancellationToken = default
     ) where TEntity : class, IEntity<TKey>
     {
-        var query = unitOfWork.Repository<TEntity, TKey>().MakeQuery(QueryOptions.WithSoftDeleted).Where(predicate);
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(query, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(x => x.Where(predicate), QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
@@ -48,10 +47,8 @@ public static class SeederHelper
         CancellationToken cancellationToken = default)
         where TEntity : class, IEntity<TKey>
     {
-        var query = unitOfWork.Repository<TEntity, TKey>().MakeQuery(QueryOptions.WithSoftDeleted)
-            .Where(x => x.Id!.Equals(entity.Id));
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(query, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(entity.Id, QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
@@ -73,9 +70,8 @@ public static class SeederHelper
     {
         entity.Id = id;
 
-        var query = unitOfWork.Repository<TEntity, TKey>().MakeQuery(QueryOptions.WithSoftDeleted);
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(query, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(entity.Id, QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
@@ -98,9 +94,8 @@ public static class SeederHelper
         CancellationToken cancellationToken = default
     ) where TEntity : class, IEntity<TKey>
     {
-        var query = unitOfWork.Repository<TEntity, TKey>().MakeQuery(QueryOptions.WithSoftDeleted).Where(predicate);
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(query, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(x => x.Where(predicate), QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entities, cancellationToken);
         }

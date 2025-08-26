@@ -1,7 +1,7 @@
-﻿using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
-using DotNetBuddy.Domain;
+﻿using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
+using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore;
@@ -17,38 +17,65 @@ public class Repository<TEntity, TKey>(DbContext context)
     protected readonly DbSet<TEntity> DbSet = context.Set<TEntity>();
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(CancellationToken cancellationToken = default)
-    {
-        return await DbSet.ToListAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(IQueryable<TEntity> queryable,
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(
+        QueryOptions queryOptions = QueryOptions.None,
         CancellationToken cancellationToken = default)
     {
-        return await queryable.ToListAsync(cancellationToken);
+        return await DbSet.ApplyQueryOptions(queryOptions).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(IEnumerable<TKey> ids,
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> configureQuery,
+        QueryOptions queryOptions = QueryOptions.None,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.Where(x => ids.Contains(x.Id!)).ToListAsync(cancellationToken);
+        return await configureQuery(DbSet).ApplyQueryOptions(queryOptions).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(IEnumerable<TKey> ids, IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(
+        IEnumerable<TKey> ids,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
     {
-        return await queryable.Where(x => ids.Contains(x.Id!)).ToListAsync(cancellationToken);
+        return await DbSet.ApplyQueryOptions(queryOptions).Where(x => ids.Contains(x.Id!))
+            .ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IEntityPagedResult<TEntity, TKey>> GetPagedAsync(IQueryable<TEntity> queryable, int page,
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(
+        IEnumerable<TKey> ids,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> configureQuery,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
+    {
+        return await configureQuery(DbSet)
+            .ApplyQueryOptions(queryOptions)
+            .Where(x => ids.Contains(x.Id!))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IEntityPagedResult<TEntity, TKey>> GetPagedAsync(
+        int page,
         int pageSize,
+        QueryOptions queryOptions = QueryOptions.None,
         CancellationToken cancellationToken = default)
     {
-        var totalCount = await queryable.CountAsync(cancellationToken);
-        var items = await queryable
+        return await GetPagedAsync(x => x, page, pageSize, queryOptions, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IEntityPagedResult<TEntity, TKey>> GetPagedAsync(
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> configureQuery,
+        int page,
+        int pageSize,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
+    {
+        var totalCount = await configureQuery(DbSet).ApplyQueryOptions(queryOptions).CountAsync(cancellationToken);
+        var items = await configureQuery(DbSet).ApplyQueryOptions(queryOptions)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -57,34 +84,52 @@ public class Repository<TEntity, TKey>(DbContext context)
     }
 
     /// <inheritdoc />
-    public async Task<TEntity?> GetAsync(IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
-    {
-        return await queryable.FirstOrDefaultAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<TEntity?> GetAsync(TKey id, CancellationToken cancellationToken = default)
-    {
-        return await DbSet.FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<TEntity?> GetAsync(TKey id, IQueryable<TEntity> queryable,
+    public async Task<TEntity?> GetAsync(
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> configureQuery,
+        QueryOptions queryOptions = QueryOptions.None,
         CancellationToken cancellationToken = default)
     {
-        return await queryable.FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
+        return await configureQuery(DbSet).ApplyQueryOptions(queryOptions).FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<bool> AnyAsync(IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetAsync(
+        TKey id,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
     {
-        return await queryable.AnyAsync(cancellationToken);
+        return await DbSet.ApplyQueryOptions(queryOptions)
+            .FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<bool> AnyAsync(TKey id, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetAsync(
+        TKey id,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> configureQuery,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
     {
-        return await DbSet.AnyAsync(x => x.Id!.Equals(id), cancellationToken);
+        return await configureQuery(DbSet)
+            .ApplyQueryOptions(queryOptions)
+            .FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> AnyAsync(
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> configureQuery,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
+    {
+        return await configureQuery(DbSet).ApplyQueryOptions(queryOptions).AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> AnyAsync(
+        TKey id,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ApplyQueryOptions(queryOptions).AnyAsync(x => x.Id!.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -96,7 +141,8 @@ public class Repository<TEntity, TKey>(DbContext context)
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<TEntity>> AddAsync(IEnumerable<TEntity> entities,
+    public async Task<IReadOnlyList<TEntity>> AddAsync(
+        IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default)
     {
         var entitiesList = entities.ToArray();
@@ -120,7 +166,7 @@ public class Repository<TEntity, TKey>(DbContext context)
     /// <inheritdoc />
     public async Task DeleteAsync(TKey id, bool forceHardDelete = false, CancellationToken cancellationToken = default)
     {
-        var entity = await GetAsync(id, cancellationToken);
+        var entity = await GetAsync(id, QueryOptions.None, cancellationToken);
 
         if (entity != null)
         {
@@ -137,10 +183,12 @@ public class Repository<TEntity, TKey>(DbContext context)
     }
 
     /// <inheritdoc />
-    public async Task DeleteRangeAsync(IEnumerable<TKey> ids, bool forceHardDelete = false,
+    public async Task DeleteRangeAsync(
+        IEnumerable<TKey> ids,
+        bool forceHardDelete = false,
         CancellationToken cancellationToken = default)
     {
-        var entities = await GetRangeAsync(ids, cancellationToken);
+        var entities = await GetRangeAsync(ids, QueryOptions.None, cancellationToken);
 
         var entitiesList = entities.ToArray();
 
@@ -166,20 +214,19 @@ public class Repository<TEntity, TKey>(DbContext context)
     }
 
     /// <inheritdoc />
-    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    public async Task<int> CountAsync(
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
     {
-        return await DbSet.CountAsync(cancellationToken);
+        return await DbSet.ApplyQueryOptions(queryOptions).CountAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<int> CountAsync(IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
+    public async Task<int> CountAsync(
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> configureQuery,
+        QueryOptions queryOptions = QueryOptions.None,
+        CancellationToken cancellationToken = default)
     {
-        return await queryable.CountAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public IQueryable<TEntity> MakeQuery(QueryOptions options = QueryOptions.None)
-    {
-        return DbSet.ApplyQueryOptions(options).AsQueryable();
+        return await configureQuery(DbSet).ApplyQueryOptions(queryOptions).CountAsync(cancellationToken);
     }
 }
