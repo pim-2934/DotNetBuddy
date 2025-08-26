@@ -40,6 +40,66 @@ public class SomeService(IUnitOfWork uow)
 }
 ```
 
+## Querying with QuerySpecification
+
+QuerySpecification<T> centralizes filtering (Predicates), includes (Includes), ordering (OrderBy), options (Options), and paging (Page/PageSize). The repository exposes overloads that accept a specification and is the preferred approach. Older overloads with predicates/options/includes are marked [Obsolete].
+
+- Basic filtering, including, and ordering:
+```csharp
+var repo = uow.Repository<MyEntity, Guid>();
+var spec = repo.MakeSpecification()
+    .AddPredicate(e => e.IsActive)
+    .AddInclude(e => e.Category)
+    .AddOrderBy(e => e.CreatedAt, SortDirection.Descending)
+    .SetOptions(QueryOptions.AsNoTracking);
+
+var items = await repo.GetRangeAsync(spec);
+```
+
+- Get by IDs with a specification:
+```csharp
+var ids = new [] { id1, id2, id3 };
+var spec = repo.MakeSpecification().AddInclude(e => e.RelatedDetails);
+var items = await repo.GetRangeAsync(ids, spec);
+```
+
+- Single item by spec:
+```csharp
+var spec = repo.MakeSpecification().AddPredicate(e => e.Code == code);
+var entity = await repo.GetAsync(spec);
+```
+
+- Any/Count by spec:
+```csharp
+var hasActives = await repo.AnyAsync(repo.MakeSpecification().AddPredicate(e => e.IsActive));
+var count = await repo.CountAsync(repo.MakeSpecification().AddPredicate(e => e.Type == MyType.Special));
+```
+
+- Paging with spec:
+```csharp
+var spec = repo.MakeSpecification()
+    .AddPredicate(e => e.IsActive)
+    .AddOrderBy(e => e.Name)
+    .SetPage(pageNumber: 2, pageSize: 10);
+
+var paged = await repo.GetPagedAsync(spec);
+// paged.Items, paged.TotalCount, paged.PageNumber, paged.PageSize, etc.
+```
+
+- Searching with spec:
+```csharp
+// Properties marked with [Searchable] are used by the search builder.
+var spec = repo.MakeSpecification()
+    .AddInclude(e => e.Category);
+
+var results = await repo.SearchAsync("foo", spec);
+
+// Paged search
+var paged = await repo.SearchPagedAsync("foo", spec.SetPage(1, 20));
+```
+
+Migration note: Prefer the specification-based methods. The legacy overloads that take predicate/options/includes remain for backward compatibility but are obsolete and may be removed in a future version.
+
 ## Example (Custom Repository)
 
 ```csharp
@@ -47,21 +107,22 @@ public interface IFooRepository : IRepository<Foo, Guid>
 {
     // Add methods here.
     // 
-    // Guidelines:
-    // - Methods should accept query options (IQueryOptions) and include expressions (IEnumerable<Expression<Func<Foo, object>>>) as parameters when appropriate.
-    // - Use DbSet.ApplyQueryIncludes(includes).ApplyQueryOptions(options) to apply includes and filtering, sorting, paging, etc.
+    // Guidelines (Specification-based):
+    // - Prefer accepting a QuerySpecification<Foo> for read/query methods.
+    // - Internally use DbSet.ApplySpecification(spec) for filtering, includes, ordering, options, and paging.
+    // - Avoid exposing raw include arrays or option flags in public APIs; keep them inside the specification.
     // 
     // This ensures that:
-    // - Consumers can control which related entities are loaded (avoiding over-fetching).
-    // - Consumers can apply sorting, paging, and filtering in a consistent way.
-    // - Query composition remains reusable and testable.
+    // - Consumers can control which related entities are loaded in a type-safe way via spec.AddInclude(...).
+    // - Consumers can apply sorting, paging, and filtering consistently via the specification.
+    // - Query composition remains reusable, testable, and discoverable.
 }
 ```
 
 ```csharp
 public class FooRepository(DatabaseContext context) : Repository<Foo, Guid>(context), IFooRepository
 {
-    // Implement repository methods here following the guidelines above.
+    // Implement repository methods here following the specification-based guidelines above.
 }
 ```
 
@@ -101,6 +162,9 @@ public class OrderService(IExtendedUnitOfWork uow)
 ## Notes
 
 - Models must implement `IEntity` directly or indirectly.
+- Prefer specification-based repository methods (GetRangeAsync(spec), GetPagedAsync(spec), SearchAsync(searchTerm, spec), etc.). Legacy overloads with predicate/options/includes are [Obsolete].
+- Use `AddInclude(e => e.Nav.Prop)` on QuerySpecification to include related data. Includes use type-safe expressions and are converted internally via ExpressionPathVisitor.
+- Search methods rely on properties marked with `[Searchable]` and the SearchPredicateBuilder to construct search expressions.
 - Use `IUnitOfWork` when no custom queries are needed—it simplifies testing and keeps code generic.
 - Prefer `ExtendedUnitOfWork` when working with multiple custom repositories to ensure cleaner service constructors and better discoverability.
 - Avoid using static repositories or data access helpers to prevent issues with DbContext lifetime and transaction scope.

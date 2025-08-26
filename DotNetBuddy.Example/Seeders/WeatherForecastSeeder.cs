@@ -1,6 +1,7 @@
 using DotNetBuddy.Application.Utilities;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
+using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Example.Configs;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
@@ -24,12 +25,22 @@ public class WeatherForecastSeeder(
 
     private static readonly string[] Summaries =
     [
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        "Freezing",
+        "Bracing",
+        "Chilly",
+        "Cool",
+        "Mild",
+        "Warm",
+        "Balmy",
+        "Hot",
+        "Sweltering",
+        "Scorching"
     ];
 
-    public async Task SeedAsync()
+    public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        var locations = await unitOfWork.Repository<Location, Guid>().GetRangeAsync();
+        var locations = await unitOfWork.Repository<Location, Guid>()
+            .GetRangeAsync(new QuerySpecification<Location>(), cancellationToken);
         var location = locations.First();
 
         await SeederHelper.SeedManyAsync<WeatherForecast, Guid>
@@ -39,14 +50,15 @@ public class WeatherForecastSeeder(
             Enumerable.Range(1, weatherForecastConfig.Value.OutputResults)
                 .Select
                 (index => new WeatherForecast
-                    {
-                        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                        TemperatureC = Random.Shared.Next(-20, 55),
-                        Summary = Summaries[Random.Shared.Next(Summaries.Length)],
-                        Location = location
-                    }
+                {
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                    TemperatureC = Random.Shared.Next(-20, 55),
+                    Summary = Summaries[Random.Shared.Next(Summaries.Length)],
+                    Location = location
+                }
                 )
-                .ToList()
+                .ToList(),
+            cancellationToken
         );
 
         await SeederHelper.SeedOneAsync
@@ -60,9 +72,10 @@ public class WeatherForecastSeeder(
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)],
                 Location = location,
                 DeletedAt = DateTime.UtcNow
-            }
+            },
+            cancellationToken
         );
 
-        await unitOfWork.SaveAsync();
+        await unitOfWork.SaveAsync(cancellationToken);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Domain;
-using DotNetBuddy.Domain.Attributes;
 using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
+using DotNetBuddy.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore;
@@ -15,7 +15,6 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     /// Represents the set of entities of a specific type that can be queried or updated within the database context.
     /// Facilitates LINQ queries and database operations for managing entity data.
     /// </summary>
-    // ReSharper disable once MemberCanBePrivate.Global
     protected readonly DbSet<T> DbSet = context.Set<T>();
 
     /// <inheritdoc />
@@ -27,6 +26,13 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
             .ApplyQueryIncludes(includes)
             .ApplyQueryOptions(options)
             .ToListAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<T>> GetRangeAsync(QuerySpecification<T> spec,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ApplySpecification(spec).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -44,6 +50,13 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<T>> GetRangeAsync(IEnumerable<TKey> ids, QuerySpecification<T> spec,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.Where(x => ids.Contains(x.Id!)).ApplySpecification(spec).ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<T>> GetRangeAsync(
         IEnumerable<TKey> ids,
         QueryOptions options = QueryOptions.None,
@@ -57,6 +70,19 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
+    public async Task<IEntityPagedResult<T, TKey>> GetPagedAsync(QuerySpecification<T> spec,
+        CancellationToken cancellationToken = default)
+    {
+        if (spec.Page is null)
+            throw new BuddyException("Page number must be set in the specification.");
+
+        var totalCount = await DbSet.ApplySpecification(spec, false).CountAsync(cancellationToken);
+        var items = await DbSet.ApplySpecification(spec).ToListAsync(cancellationToken);
+
+        return new EntityPagedResult<T, TKey>(items, totalCount, spec.Page!.Value, spec.PageSize);
+    }
+
+    /// <inheritdoc />
     public async Task<IEntityPagedResult<T, TKey>> GetPagedAsync(
         int pageNumber,
         int pageSize,
@@ -66,10 +92,8 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     {
         var query = DbSet.ApplyQueryIncludes(includes).ApplyQueryOptions(options);
 
-        if (predicate != null)
-        {
+        if (predicate is not null)
             query = query.Where(predicate);
-        }
 
         var totalCount = await query.CountAsync();
 
@@ -106,16 +130,41 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<T>> SearchAsync(string searchTerm, QuerySpecification<T> spec,
+        CancellationToken cancellationToken = default)
+    {
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
+        if (predicate is not null)
+            spec.AddPredicate(predicate);
+
+        return await GetRangeAsync(spec, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<T>> SearchAsync(
         string searchTerm,
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes)
     {
-        var predicate = BuildSearchPredicate(searchTerm);
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
         if (predicate is null)
             return [];
 
         return await GetRangeAsync(predicate, options, includes);
+    }
+
+    /// <inheritdoc />
+    public async Task<IEntityPagedResult<T, TKey>> SearchPagedAsync(string searchTerm, QuerySpecification<T> spec,
+        CancellationToken cancellationToken = default)
+    {
+        if (spec.Page is null)
+            throw new BuddyException("Page number must be set in the specification.");
+
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
+        if (predicate is not null)
+            spec.AddPredicate(predicate);
+
+        return await GetPagedAsync(spec, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -126,11 +175,17 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes)
     {
-        var predicate = BuildSearchPredicate(searchTerm);
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
         if (predicate is null)
             return new EntityPagedResult<T, TKey>([], 0, pageNumber, pageSize);
 
         return await GetPagedAsync(pageNumber, pageSize, predicate, options, includes);
+    }
+
+    /// <inheritdoc />
+    public async Task<T?> GetAsync(QuerySpecification<T> spec, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ApplySpecification(spec).FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -148,6 +203,12 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
+    public async Task<T?> GetAsync(TKey id, QuerySpecification<T> spec, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ApplySpecification(spec).FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<T?> GetAsync(
         TKey id,
         QueryOptions options = QueryOptions.None,
@@ -161,9 +222,21 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
+    public async Task<bool> AnyAsync(QuerySpecification<T> spec, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ApplySpecification(spec).AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, QueryOptions options = QueryOptions.None)
     {
         return await DbSet.ApplyQueryOptions(options).AnyAsync(predicate);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> AnyAsync(TKey id, QuerySpecification<T> spec, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ApplySpecification(spec).AnyAsync(x => x.Id!.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -173,18 +246,18 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public async Task<T> AddAsync(T entity)
+    public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
-        await DbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity, cancellationToken);
 
         return entity;
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> AddAsync(IEnumerable<T> entities)
+    public async Task<IReadOnlyList<T>> AddAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
     {
         var entitiesList = entities.ToArray();
-        await DbSet.AddRangeAsync(entitiesList);
+        await DbSet.AddRangeAsync(entitiesList, cancellationToken);
 
         return entitiesList;
     }
@@ -202,9 +275,9 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public async Task DeleteAsync(TKey id, bool forceHardDelete = false)
+    public async Task DeleteAsync(TKey id, bool forceHardDelete = false, CancellationToken cancellationToken = default)
     {
-        var entity = await GetAsync(id);
+        var entity = await GetAsync(id, MakeSpecification(), cancellationToken);
 
         if (entity != null)
         {
@@ -221,9 +294,11 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public async Task DeleteRangeAsync(IEnumerable<TKey> ids, bool forceHardDelete = false)
+    public async Task DeleteRangeAsync(IEnumerable<TKey> ids, bool forceHardDelete = false,
+        CancellationToken cancellationToken = default)
     {
-        var entities = await GetRangeAsync(ids);
+        var entities = await GetRangeAsync(ids, MakeSpecification(), cancellationToken);
+
         var entitiesList = entities.ToArray();
 
         if (entitiesList.Length == 0)
@@ -248,6 +323,12 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
+    public async Task<int> CountAsync(QuerySpecification<T> spec, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ApplySpecification(spec).CountAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<int> CountAsync(
         Expression<Func<T, bool>>? predicate = null,
         QueryOptions options = QueryOptions.None)
@@ -262,48 +343,15 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         return await query.CountAsync();
     }
 
-    /// <summary>
-    /// Builds a predicate that searches across all properties marked with the Searchable attribute.
-    /// </summary>
-    /// <param name="searchTerm">The term to search for.</param>
-    /// <returns>A predicate expression that can be used for filtering entities.</returns>
-    // ReSharper disable once MemberCanBePrivate.Global
-    protected static Expression<Func<T, bool>>? BuildSearchPredicate(string searchTerm)
+    /// <inheritdoc />
+    public IQueryable<T> Query()
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-            return null;
+        return DbSet.AsQueryable();
+    }
 
-        var searchableProperties = typeof(T)
-            .GetProperties()
-            .Where(p => p.GetCustomAttributes(typeof(SearchableAttribute), true).Length != 0)
-            .ToList();
-
-        if (searchableProperties.Count == 0)
-            return null;
-
-        var entityParameter = Expression.Parameter(typeof(T), "x");
-        Expression? combinedExpression = null;
-
-        foreach (var containsExpression in from property in searchableProperties
-                 where property.PropertyType == typeof(string)
-                 select Expression.Property(entityParameter, property)
-                 into propertyExpression
-                 let containsMethod = typeof(string).GetMethod("Contains", [typeof(string)])
-                 let searchTermExpression = Expression.Constant(searchTerm)
-                 select Expression.Call(propertyExpression, containsMethod!, searchTermExpression))
-        {
-            if (combinedExpression == null)
-            {
-                combinedExpression = containsExpression;
-            }
-            else
-            {
-                combinedExpression = Expression.OrElse(combinedExpression, containsExpression);
-            }
-        }
-
-        return combinedExpression == null
-            ? null
-            : Expression.Lambda<Func<T, bool>>(combinedExpression, entityParameter);
+    /// <inheritdoc />
+    public QuerySpecification<T> MakeSpecification()
+    {
+        return new QuerySpecification<T>();
     }
 }

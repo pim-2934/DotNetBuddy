@@ -1,3 +1,4 @@
+using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Exceptions;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
@@ -10,15 +11,24 @@ namespace DotNetBuddy.Example.Controllers;
 public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork) : ControllerBase
 {
     [HttpGet("GetWeatherForecast")]
-    public async Task<IEnumerable<WeatherForecast>> GetWeatherForecast()
+    public async Task<IEnumerable<WeatherForecast>> GetWeatherForecast(CancellationToken cancellationToken = default)
     {
-        return await extendedUnitOfWork.WeatherForecasts.GetLatestAsync(5, includes: x => x.Location!);
+        var spec = extendedUnitOfWork.WeatherForecasts
+            .MakeSpecification()
+            .SetPage(1, 5)
+            .AddInclude(x => x.Location!);
+
+        return await extendedUnitOfWork.WeatherForecasts.GetRangeAsync(spec, cancellationToken);
     }
 
     [HttpGet("GetWeatherForecast/{id:guid}")]
-    public async Task<WeatherForecast> GetWeatherForecast(Guid id)
+    public async Task<WeatherForecast> GetWeatherForecast(Guid id, CancellationToken cancellationToken = default)
     {
-        var weatherForecast = await extendedUnitOfWork.WeatherForecasts.GetAsync(id);
+        var weatherForecast = await extendedUnitOfWork.WeatherForecasts.GetAsync(
+            id,
+            new QuerySpecification<WeatherForecast>(),
+            cancellationToken
+        );
 
         return weatherForecast ??
                throw new BuddyHttpException("NotFound", "Weather forecast not found.", StatusCodes.Status404NotFound);
