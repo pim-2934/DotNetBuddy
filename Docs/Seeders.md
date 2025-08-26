@@ -30,9 +30,9 @@ public class DevSeeder(IUnitOfWork uow) : ISeeder
 
     public async Task SeedAsync()
     {
-        if (!await uow.Repository<User>().AnyAsync(u => u.Email == "admin@example.com"))
+        if (!await uow.Repository<User, Guid>().AnyAsync(u => u.Email == "admin@example.com"))
         {
-            await uow.Repository<User>().AddAsync(new User { Email = "admin@example.com" });
+            await uow.Repository<User, Guid>().AddAsync(new User { Email = "admin@example.com" });
             await uow.SaveAsync();
         }
     }

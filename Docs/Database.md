@@ -12,7 +12,7 @@ We extend the power of LINQ with small helpers (extensions and repository utilit
   Basic entity contract that includes an `Id` of type `TKey`.
 
 - `IRepository<T, TKey>`
-  Generic data access for entities. Provides CRUD helpers and LINQ-friendly overloads that accept `IQueryable<T>`.
+  Generic data access for entities. Provides CRUD helpers and LINQ-friendly overloads that accept a query configuration lambda.
 
 - `IUnitOfWork`
   Manages repositories and coordinates transactions.
@@ -26,7 +26,7 @@ builder.Services.AddBuddyEfExtension<DatabaseContext>();
 
 ## Usage
 
-The `IUnitOfWork` interface provides access to your data through generic repositories. Use the repository to perform standard CRUD operations and to help start queries; compose the rest of the query with standard LINQ (Where, Select, Include, OrderBy, etc.).
+The `IUnitOfWork` interface provides access to your data through generic repositories. Use the repository to perform standard CRUD operations and to compose queries with standard LINQ (Where, Select, Include, OrderBy, etc.) via a query configuration lambda.
 
 If you need to encapsulate custom queries or more advanced logic for specific entities, you can define a dedicated repository.
 
@@ -37,69 +37,77 @@ public class SomeService(IUnitOfWork uow)
     {
         var repo = uow.Repository<MyEntity, Guid>();
 
-        // Start with a base query (optionally with query options)
-        var query = repo.MakeQuery(); // or: repo.MakeQuery(QueryOptions.WithSoftDeleted)
+        // Compose with LINQ via the query configuration lambda
+        var items = await repo.GetRangeAsync(
+            q => q.Where(e => e.IsActive)
+                  .OrderByDescending(e => e.CreatedAt),
+            cancellationToken: ct
+        );
 
-        // Compose with LINQ like normal
-        query = query
-            .Where(e => e.IsActive)
-            .OrderByDescending(e => e.CreatedAt);
-
-        var items = await repo.GetRangeAsync(query, ct);
         // perform actions
         await uow.SaveAsync(ct);
     }
 }
 ```
 
-## Querying with LINQ + Repository Extensions
+## Querying with LINQ + Repository Helpers
 
-- Start queries with `MakeQuery(QueryOptions options = QueryOptions.None)` when you want a DbSet-based query with helper options applied.
-- Compose the rest with LINQ. Use EF Core's `Include`/`ThenInclude` for navigation properties.
-- Pass the resulting `IQueryable<T>` into repository methods like `GetRangeAsync`, `GetPagedAsync`, `GetAsync`, `AnyAsync`, and `CountAsync`.
+- Compose queries using the configuration lambda (Func<IQueryable<T>, IQueryable<T>>).
+- Use EF Core's `Include`/`ThenInclude` for navigation properties inside the lambda.
+- Pass `QueryOptions` when needed (e.g., include soft-deleted rows) using the named argument `queryOptions:` or with the `ApplyQueryOptions` extension inside the lambda.
 
 ### Examples
 
 Basic filtering and ordering:
 ```csharp
 var repo = uow.Repository<MyEntity, Guid>();
-var query = repo.MakeQuery()
-    .Where(e => e.IsActive)
-    .OrderByDescending(e => e.CreatedAt);
-
-var items = await repo.GetRangeAsync(query, cancellationToken);
+var items = await repo.GetRangeAsync(
+    q => q.Where(e => e.IsActive)
+          .OrderByDescending(e => e.CreatedAt),
+    cancellationToken: cancellationToken
+);
 ```
 
 Including related entities:
 ```csharp
 using Microsoft.EntityFrameworkCore; // for Include/ThenInclude
 
-var query = repo.MakeQuery()
-    .Include(e => e.Category)
-    .ThenInclude(c => c.Parent);
-
-var items = await repo.GetRangeAsync(query, cancellationToken);
+var items = await repo.GetRangeAsync(
+    q => q.Include(e => e.Category)
+          .ThenInclude(c => c.Parent),
+    cancellationToken: cancellationToken
+);
 ```
 
 Get by IDs with additional includes/filters:
 ```csharp
 var ids = new [] { id1, id2, id3 };
-var query = repo.MakeQuery()
-    .Include(e => e.RelatedDetails);
-
-var items = await repo.GetRangeAsync(ids, query, cancellationToken);
+var items = await repo.GetRangeAsync(
+    ids,
+    q => q.Include(e => e.RelatedDetails),
+    cancellationToken: cancellationToken
+);
 ```
 
 Single item via query:
 ```csharp
-var query = repo.MakeQuery().Where(e => e.Code == code);
-var entity = await repo.GetAsync(query, cancellationToken);
+var entity = await repo.GetAsync(
+    q => q.Where(e => e.Code == code),
+    cancellationToken: cancellationToken
+);
 ```
 
 Any/Count using a query:
 ```csharp
-var hasActives = await repo.AnyAsync(repo.MakeQuery().Where(e => e.IsActive), cancellationToken);
-var specialCount = await repo.CountAsync(repo.MakeQuery().Where(e => e.Type == MyType.Special), cancellationToken);
+var hasActives = await repo.AnyAsync(
+    q => q.Where(e => e.IsActive),
+    cancellationToken: cancellationToken
+);
+
+var specialCount = await repo.CountAsync(
+    q => q.Where(e => e.Type == MyType.Special),
+    cancellationToken: cancellationToken
+);
 ```
 
 Paging with a query:
@@ -107,18 +115,26 @@ Paging with a query:
 int page = 2;
 int pageSize = 10;
 
-var query = repo.MakeQuery()
-    .Where(e => e.IsActive)
-    .OrderBy(e => e.Name);
-
-var paged = await repo.GetPagedAsync(query, page, pageSize, cancellationToken);
+var paged = await repo.GetPagedAsync(
+    q => q.Where(e => e.IsActive)
+          .OrderBy(e => e.Name),
+    page,
+    pageSize,
+    cancellationToken: cancellationToken
+);
 // paged.Items, paged.TotalCount, paged.PageNumber, paged.PageSize
 ```
 
 Using query options (e.g., include soft-deleted rows):
 ```csharp
-var allQuery = repo.MakeQuery(QueryOptions.WithSoftDeleted);
-var all = await repo.GetRangeAsync(allQuery, cancellationToken);
+// Option A: pass QueryOptions via argument
+var all = await repo.GetRangeAsync(queryOptions: QueryOptions.WithSoftDeleted, cancellationToken: cancellationToken);
+
+// Option B: apply options inside the lambda
+var all2 = await repo.GetRangeAsync(
+    q => q.ApplyQueryOptions(QueryOptions.WithSoftDeleted),
+    cancellationToken: cancellationToken
+);
 ```
 
 ## Example (Custom Repository)
@@ -128,9 +144,8 @@ public interface IFooRepository : IRepository<Foo, Guid>
 {
     // Add methods here that return tasks or values.
     // Design guidance:
-    // - Accept and/or build LINQ queries with IQueryable<Foo>.
-    // - Use repo.MakeQuery(options) to start queries consistently.
-    // - Let consumers use Include/ThenInclude and other LINQ operators.
+    // - Accept and/or build LINQ queries via the configuration lambda.
+    // - Allow consumers to use Include/ThenInclude and other LINQ operators inside the lambda.
 }
 ```
 
@@ -138,7 +153,7 @@ public interface IFooRepository : IRepository<Foo, Guid>
 public class FooRepository(DatabaseContext context) : Repository<Foo, Guid>(context), IFooRepository
 {
     // Implement repository methods here that internally compose LINQ queries
-    // and use the base methods like GetRangeAsync(query), GetPagedAsync(query, ...), etc.
+    // and use the base methods like GetRangeAsync(q => ...), GetPagedAsync(q => ..., ...), etc.
 }
 ```
 
@@ -180,6 +195,6 @@ public class OrderService(IExtendedUnitOfWork uow)
 - We extend LINQ; we do not replace it. Prefer composing queries using standard LINQ operators and EF Core `Include/ThenInclude`.
 - Use `IUnitOfWork` when no custom queries are needed—it simplifies testing and keeps code generic.
 - Prefer `ExtendedUnitOfWork` when working with multiple custom repositories to ensure cleaner service constructors and better discoverability.
-- To include soft-deleted entities in queries, use `repo.MakeQuery(QueryOptions.WithSoftDeleted)` or the `ApplyQueryOptions(QueryOptions.WithSoftDeleted)` extension on `IQueryable<T>`.
+- To include soft-deleted entities in queries, use the `QueryOptions.WithSoftDeleted` flag (either via method arguments or `ApplyQueryOptions`).
 - Avoid static repositories or global helpers that might conflict with DbContext lifetime and transaction scope.
 
