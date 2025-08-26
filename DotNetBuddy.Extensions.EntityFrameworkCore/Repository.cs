@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Domain;
-using DotNetBuddy.Domain.Attributes;
 using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Domain.Exceptions;
@@ -134,7 +133,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     public async Task<IReadOnlyList<T>> SearchAsync(string searchTerm, QuerySpecification<T> spec,
         CancellationToken cancellationToken = default)
     {
-        var predicate = BuildSearchPredicate(searchTerm);
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
         if (predicate is not null)
             spec.AddPredicate(predicate);
 
@@ -147,7 +146,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes)
     {
-        var predicate = BuildSearchPredicate(searchTerm);
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
         if (predicate is null)
             return [];
 
@@ -161,7 +160,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         if (spec.Page is null)
             throw new BuddyException("Page number must be set in the specification.");
 
-        var predicate = BuildSearchPredicate(searchTerm);
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
         if (predicate is not null)
             spec.AddPredicate(predicate);
 
@@ -176,7 +175,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
         QueryOptions options = QueryOptions.None,
         params Expression<Func<T, object>>[] includes)
     {
-        var predicate = BuildSearchPredicate(searchTerm);
+        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
         if (predicate is null)
             return new EntityPagedResult<T, TKey>([], 0, pageNumber, pageSize);
 
@@ -345,199 +344,14 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
+    public IQueryable<T> Query()
+    {
+        return DbSet.AsQueryable();
+    }
+
+    /// <inheritdoc />
     public QuerySpecification<T> MakeSpecification()
     {
         return new QuerySpecification<T>();
-    }
-
-    /// <summary>
-    /// Constructs a search predicate based on the provided search term. The predicate
-    /// is used to perform filtering on searchable string properties, single navigation
-    /// properties, and collection navigation properties of the given entity type.
-    /// </summary>
-    /// <param name="searchTerm">The search term used to build the filtering criteria.</param>
-    /// <returns>An expression representing the search predicate, or null if the search term is null or empty.</returns>
-    protected static Expression<Func<T, bool>>? BuildSearchPredicate(string searchTerm)
-    {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-            return null;
-
-        var entityParameter = Expression.Parameter(typeof(T), "x");
-        Expression? combinedExpression = null;
-
-        // Get searchable properties directly on the entity
-        var searchableProperties = typeof(T)
-            .GetProperties()
-            .Where(p => p.GetCustomAttributes(typeof(SearchableAttribute), true).Length != 0)
-            .ToList();
-
-        // Process direct searchable string properties
-        foreach (var property in searchableProperties)
-        {
-            if (property.PropertyType == typeof(string))
-            {
-                var propertyExpression = Expression.Property(entityParameter, property);
-                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
-                var searchTermExpression = Expression.Constant(searchTerm);
-                var containsExpression = Expression.Call(propertyExpression, containsMethod!, searchTermExpression);
-
-                combinedExpression = combinedExpression == null
-                    ? containsExpression
-                    : Expression.OrElse(combinedExpression, containsExpression);
-            }
-        }
-
-        // Get single navigation properties (non-collection references)
-        var singleNavigationProperties = typeof(T)
-            .GetProperties()
-            .Where(p =>
-                p.PropertyType.IsClass &&
-                p.PropertyType != typeof(string) &&
-                !p.PropertyType.IsArray &&
-                !IsCollectionType(p.PropertyType)
-            )
-            .ToList();
-
-        // Process each single navigation property
-        foreach (var navProperty in singleNavigationProperties)
-        {
-            var relatedType = navProperty.PropertyType;
-            var relatedSearchableProperties = relatedType
-                .GetProperties()
-                .Where(p => p.GetCustomAttributes(typeof(SearchableAttribute), true).Length != 0 &&
-                            p.PropertyType == typeof(string))
-                .ToList();
-
-            if (relatedSearchableProperties.Count == 0)
-                continue;
-
-            foreach (var relatedProperty in relatedSearchableProperties)
-            {
-                // Build a nested property access: x => x.RelatedEntity.SearchableProperty
-                var relatedEntityExpression = Expression.Property(entityParameter, navProperty);
-
-                // Check for null related entity to avoid null reference exceptions
-                var nullCheck = Expression.NotEqual(relatedEntityExpression,
-                    Expression.Constant(null, navProperty.PropertyType));
-                var relatedPropertyExpression = Expression.Property(relatedEntityExpression, relatedProperty);
-
-                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
-                var searchTermExpression = Expression.Constant(searchTerm);
-
-                // Create condition: x.RelatedEntity != null && x.RelatedEntity.SearchableProperty.Contains(searchTerm)
-                var containsExpression =
-                    Expression.Call(relatedPropertyExpression, containsMethod!, searchTermExpression);
-                var safeContainsExpression = Expression.AndAlso(nullCheck, containsExpression);
-
-                combinedExpression = combinedExpression == null
-                    ? safeContainsExpression
-                    : Expression.OrElse(combinedExpression, safeContainsExpression);
-            }
-        }
-
-        // Get collection navigation properties
-        var collectionNavigationProperties = typeof(T)
-            .GetProperties()
-            .Where(p => IsCollectionType(p.PropertyType))
-            .ToList();
-
-        // Process each collection navigation property
-        foreach (var navProperty in collectionNavigationProperties)
-        {
-            var collectionType = navProperty.PropertyType;
-            Type elementType;
-
-            // Get the element type from the collection
-            if (collectionType.IsGenericType)
-            {
-                elementType = collectionType.GetGenericArguments()[0];
-            }
-            else if (collectionType.IsArray)
-            {
-                elementType = collectionType.GetElementType()!;
-            }
-            else
-            {
-                // Skip if we can't determine the element type
-                continue;
-            }
-
-            var relatedSearchableProperties = elementType
-                .GetProperties()
-                .Where(p => p.GetCustomAttributes(typeof(SearchableAttribute), true).Length != 0 &&
-                            p.PropertyType == typeof(string))
-                .ToList();
-
-            if (relatedSearchableProperties.Count == 0)
-                continue;
-
-            foreach (var relatedProperty in relatedSearchableProperties)
-            {
-                // Build an expression to check if any item in the collection has the search term
-                // x => x.CollectionProperty != null && x.CollectionProperty.Any(item => item.SearchableProperty.Contains(searchTerm))
-
-                var collectionExpression = Expression.Property(entityParameter, navProperty);
-
-                // Check for null collection
-                var nullCheck = Expression.NotEqual(collectionExpression,
-                    Expression.Constant(null, navProperty.PropertyType));
-
-                // Create the Any() method parameter: item => item.SearchableProperty.Contains(searchTerm)
-                var itemParam = Expression.Parameter(elementType, "item");
-                var itemProperty = Expression.Property(itemParam, relatedProperty);
-                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
-                var searchTermExpression = Expression.Constant(searchTerm);
-                var containsExpression = Expression.Call(itemProperty, containsMethod!, searchTermExpression);
-                var predicate = Expression.Lambda(containsExpression, itemParam);
-
-                // Get the Any() method for the collection type
-                var anyMethod = typeof(Enumerable).GetMethods()
-                    .First(m => m.Name == "Any" && m.GetParameters().Length == 2)
-                    .MakeGenericMethod(elementType);
-
-                // Create the Any() method call
-                var anyExpression = Expression.Call(anyMethod, collectionExpression, predicate);
-
-                // Combine with null check
-                var safeAnyExpression = Expression.AndAlso(nullCheck, anyExpression);
-
-                combinedExpression = combinedExpression == null
-                    ? safeAnyExpression
-                    : Expression.OrElse(combinedExpression, safeAnyExpression);
-            }
-        }
-
-        return combinedExpression == null
-            ? null
-            : Expression.Lambda<Func<T, bool>>(combinedExpression, entityParameter);
-    }
-
-    private static bool IsCollectionType(Type type)
-    {
-        if (type == typeof(string))
-            return false;
-
-        // Check if the type is an array
-        if (type.IsArray)
-            return true;
-
-        // Check if the type implements IEnumerable<T>
-        if (type.IsGenericType)
-        {
-            var genericTypeDefinition = type.GetGenericTypeDefinition();
-            if (genericTypeDefinition == typeof(IEnumerable<>) ||
-                genericTypeDefinition == typeof(ICollection<>) ||
-                genericTypeDefinition == typeof(IList<>))
-            {
-                return true;
-            }
-        }
-
-        // Check interfaces to find IEnumerable<T> implementations
-        return type.GetInterfaces().Any(i =>
-            i.IsGenericType &&
-            (i.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
-             i.GetGenericTypeDefinition() == typeof(ICollection<>) ||
-             i.GetGenericTypeDefinition() == typeof(IList<>)));
     }
 }

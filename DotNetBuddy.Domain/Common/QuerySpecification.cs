@@ -149,18 +149,18 @@ public class QuerySpecification<T>
         if (string.IsNullOrWhiteSpace(propertyName))
             return this;
 
-        var propertyInfo = typeof(T).GetProperty(propertyName, 
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | 
+        var propertyInfo = typeof(T).GetProperty(propertyName,
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance |
             System.Reflection.BindingFlags.IgnoreCase);
 
         if (propertyInfo is null)
             return this;
-        
+
         var parameter = Expression.Parameter(typeof(T), "x");
         var property = Expression.Property(parameter, propertyInfo);
         var conversion = Expression.Convert(property, typeof(object));
         var lambda = Expression.Lambda<Func<T, object>>(conversion, parameter);
-        
+
         return AddOrderBy(lambda, sortDirection);
     }
 

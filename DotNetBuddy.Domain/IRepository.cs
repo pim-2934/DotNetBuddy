@@ -313,6 +313,12 @@ public interface IRepository<T, TKey> where T : class, IEntity<TKey>
     Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, QueryOptions options = QueryOptions.None);
 
     /// <summary>
+    /// Provides an IQueryable interface to construct and execute LINQ queries on the repository, enabling advanced query composition.
+    /// </summary>
+    /// <returns>An IQueryable instance representing the collection of entities in the repository, allowing for further query building.</returns>
+    IQueryable<T> Query();
+
+    /// <summary>
     /// Creates a new query specification instance for defining advanced query operations
     /// for the specified entity type.
     /// </summary>
