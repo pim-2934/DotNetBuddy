@@ -37,6 +37,12 @@ public class Repository<TEntity, TKey>(DbContext context)
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(IEnumerable<TKey> ids, IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
+    {
+        return await queryable.Where(x => ids.Contains(x.Id!)).ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IEntityPagedResult<TEntity, TKey>> GetPagedAsync(IQueryable<TEntity> queryable, int page,
         int pageSize,
         CancellationToken cancellationToken = default)
@@ -60,6 +66,13 @@ public class Repository<TEntity, TKey>(DbContext context)
     public async Task<TEntity?> GetAsync(TKey id, CancellationToken cancellationToken = default)
     {
         return await DbSet.FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<TEntity?> GetAsync(TKey id, IQueryable<TEntity> queryable,
+        CancellationToken cancellationToken = default)
+    {
+        return await queryable.FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />

@@ -34,6 +34,16 @@ public interface IRepository<T, TKey> where T : class, IEntity<TKey>
     Task<IReadOnlyList<T>> GetRangeAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Asynchronously retrieves a range of entities based on the specified identifiers and queryable source.
+    /// </summary>
+    /// <param name="ids">The collection of entity identifiers to retrieve.</param>
+    /// <param name="queryable">The queryable source representing the dataset from which the entities will be retrieved.</param>
+    /// <param name="cancellationToken">Optional. A cancellation token to cancel the asynchronous operation.</param>
+    /// <returns>A task that represents the asynchronous operation, containing a read-only list of entities that match the specified identifiers.</returns>
+    Task<IReadOnlyList<T>> GetRangeAsync(IEnumerable<TKey> ids, IQueryable<T> queryable,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Asynchronously retrieves a paged collection of items from the queryable data source.
     /// </summary>
     /// <param name="queryable">The queryable data source used to retrieve the paged items.</param>
@@ -59,6 +69,15 @@ public interface IRepository<T, TKey> where T : class, IEntity<TKey>
     /// <param name="cancellationToken">Optional. A cancellation token that can be used to cancel the asynchronous operation.</param>
     /// <returns>A task that represents the asynchronous operation, containing the entity matching the specified identifier, or null if not found.</returns>
     Task<T?> GetAsync(TKey id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Asynchronously retrieves an entity that matches the specified identifier and queryable filter.
+    /// </summary>
+    /// <param name="id">The unique identifier of the entity to retrieve.</param>
+    /// <param name="queryable">The queryable source used to filter the entity.</param>
+    /// <param name="cancellationToken">Optional. A cancellation token to cancel the asynchronous operation.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the entity that matches the specified identifier and queryable, or null if no such entity is found.</returns>
+    Task<T?> GetAsync(TKey id, IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously determines whether any elements in the provided queryable source satisfy the specified criteria.
