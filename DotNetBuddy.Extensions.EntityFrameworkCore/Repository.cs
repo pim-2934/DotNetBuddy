@@ -1,252 +1,81 @@
-﻿using System.Linq.Expressions;
-using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
+﻿using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
-using DotNetBuddy.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore;
 
 /// <inheritdoc />
-public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where T : class, IEntity<TKey>
+public class Repository<TEntity, TKey>(DbContext context)
+    : IRepository<TEntity, TKey> where TEntity : class, IEntity<TKey>
 {
     /// <summary>
     /// Represents the set of entities of a specific type that can be queried or updated within the database context.
     /// Facilitates LINQ queries and database operations for managing entity data.
     /// </summary>
-    protected readonly DbSet<T> DbSet = context.Set<T>();
+    protected readonly DbSet<TEntity> DbSet = context.Set<TEntity>();
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> GetRangeAsync(
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes)
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(CancellationToken cancellationToken = default)
     {
-        return await DbSet
-            .ApplyQueryIncludes(includes)
-            .ApplyQueryOptions(options)
-            .ToListAsync();
+        return await DbSet.ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> GetRangeAsync(QuerySpecification<T> spec,
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(IQueryable<TEntity> queryable,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.ApplySpecification(spec).ToListAsync(cancellationToken);
+        return await queryable.ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> GetRangeAsync(
-        Expression<Func<T, bool>> predicate,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes
-    )
-    {
-        return await DbSet
-            .ApplyQueryIncludes(includes)
-            .ApplyQueryOptions(options)
-            .Where(predicate)
-            .ToListAsync();
-    }
-
-    /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> GetRangeAsync(IEnumerable<TKey> ids, QuerySpecification<T> spec,
+    public async Task<IReadOnlyList<TEntity>> GetRangeAsync(IEnumerable<TKey> ids,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.Where(x => ids.Contains(x.Id!)).ApplySpecification(spec).ToListAsync(cancellationToken);
+        return await DbSet.Where(x => ids.Contains(x.Id!)).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> GetRangeAsync(
-        IEnumerable<TKey> ids,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes)
-    {
-        return await DbSet
-            .ApplyQueryIncludes(includes)
-            .ApplyQueryOptions(options)
-            .Where(x => ids.Contains(x.Id!))
-            .ToListAsync();
-    }
-
-    /// <inheritdoc />
-    public async Task<IEntityPagedResult<T, TKey>> GetPagedAsync(QuerySpecification<T> spec,
-        CancellationToken cancellationToken = default)
-    {
-        if (spec.Page is null)
-            throw new BuddyException("Page number must be set in the specification.");
-
-        var totalCount = await DbSet.ApplySpecification(spec, false).CountAsync(cancellationToken);
-        var items = await DbSet.ApplySpecification(spec).ToListAsync(cancellationToken);
-
-        return new EntityPagedResult<T, TKey>(items, totalCount, spec.Page!.Value, spec.PageSize);
-    }
-
-    /// <inheritdoc />
-    public async Task<IEntityPagedResult<T, TKey>> GetPagedAsync(
-        int pageNumber,
+    public async Task<IEntityPagedResult<TEntity, TKey>> GetPagedAsync(IQueryable<TEntity> queryable, int page,
         int pageSize,
-        Expression<Func<T, bool>>? predicate = null,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes)
+        CancellationToken cancellationToken = default)
     {
-        var query = DbSet.ApplyQueryIncludes(includes).ApplyQueryOptions(options);
-
-        if (predicate is not null)
-            query = query.Where(predicate);
-
-        var totalCount = await query.CountAsync();
-
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
+        var totalCount = await queryable.CountAsync(cancellationToken);
+        var items = await queryable
+            .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
-        return new EntityPagedResult<T, TKey>(items, totalCount, pageNumber, pageSize);
+        return new EntityPagedResult<TEntity, TKey>(items, totalCount, page, pageSize);
     }
 
     /// <inheritdoc />
-    public async Task<IEntityPagedResult<T, TKey>> GetPagedAsync(
-        int pageNumber,
-        int pageSize,
-        IEnumerable<TKey> ids,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes)
+    public async Task<TEntity?> GetAsync(IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
     {
-        var idsArray = ids.ToArray();
-        var query = DbSet
-            .ApplyQueryIncludes(includes)
-            .ApplyQueryOptions(options)
-            .Where(x => idsArray.Contains(x.Id!));
-
-        var totalCount = await query.CountAsync();
-
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        return new EntityPagedResult<T, TKey>(items, totalCount, pageNumber, pageSize);
+        return await queryable.FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> SearchAsync(string searchTerm, QuerySpecification<T> spec,
-        CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetAsync(TKey id, CancellationToken cancellationToken = default)
     {
-        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
-        if (predicate is not null)
-            spec.AddPredicate(predicate);
-
-        return await GetRangeAsync(spec, cancellationToken);
+        return await DbSet.FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> SearchAsync(
-        string searchTerm,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes)
+    public async Task<bool> AnyAsync(IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
     {
-        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
-        if (predicate is null)
-            return [];
-
-        return await GetRangeAsync(predicate, options, includes);
+        return await queryable.AnyAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IEntityPagedResult<T, TKey>> SearchPagedAsync(string searchTerm, QuerySpecification<T> spec,
-        CancellationToken cancellationToken = default)
+    public async Task<bool> AnyAsync(TKey id, CancellationToken cancellationToken = default)
     {
-        if (spec.Page is null)
-            throw new BuddyException("Page number must be set in the specification.");
-
-        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
-        if (predicate is not null)
-            spec.AddPredicate(predicate);
-
-        return await GetPagedAsync(spec, cancellationToken);
+        return await DbSet.AnyAsync(x => x.Id!.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IEntityPagedResult<T, TKey>> SearchPagedAsync(
-        string searchTerm,
-        int pageNumber,
-        int pageSize,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes)
-    {
-        var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm);
-        if (predicate is null)
-            return new EntityPagedResult<T, TKey>([], 0, pageNumber, pageSize);
-
-        return await GetPagedAsync(pageNumber, pageSize, predicate, options, includes);
-    }
-
-    /// <inheritdoc />
-    public async Task<T?> GetAsync(QuerySpecification<T> spec, CancellationToken cancellationToken = default)
-    {
-        return await DbSet.ApplySpecification(spec).FirstOrDefaultAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<T?> GetAsync(
-        Expression<Func<T, bool>> predicate,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes
-    )
-    {
-        return await DbSet
-            .ApplyQueryIncludes(includes)
-            .ApplyQueryOptions(options)
-            .Where(predicate)
-            .FirstOrDefaultAsync();
-    }
-
-    /// <inheritdoc />
-    public async Task<T?> GetAsync(TKey id, QuerySpecification<T> spec, CancellationToken cancellationToken = default)
-    {
-        return await DbSet.ApplySpecification(spec).FirstOrDefaultAsync(x => x.Id!.Equals(id), cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<T?> GetAsync(
-        TKey id,
-        QueryOptions options = QueryOptions.None,
-        params Expression<Func<T, object>>[] includes
-    )
-    {
-        return await DbSet
-            .ApplyQueryIncludes(includes)
-            .ApplyQueryOptions(options)
-            .FirstOrDefaultAsync(x => x.Id!.Equals(id));
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> AnyAsync(QuerySpecification<T> spec, CancellationToken cancellationToken = default)
-    {
-        return await DbSet.ApplySpecification(spec).AnyAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, QueryOptions options = QueryOptions.None)
-    {
-        return await DbSet.ApplyQueryOptions(options).AnyAsync(predicate);
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> AnyAsync(TKey id, QuerySpecification<T> spec, CancellationToken cancellationToken = default)
-    {
-        return await DbSet.ApplySpecification(spec).AnyAsync(x => x.Id!.Equals(id), cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> AnyAsync(TKey id, QueryOptions options = QueryOptions.None)
-    {
-        return await DbSet.ApplyQueryOptions(options).AnyAsync(x => x.Id!.Equals(id));
-    }
-
-    /// <inheritdoc />
-    public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
+    public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await DbSet.AddAsync(entity, cancellationToken);
 
@@ -254,7 +83,8 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<T>> AddAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<TEntity>> AddAsync(IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default)
     {
         var entitiesList = entities.ToArray();
         await DbSet.AddRangeAsync(entitiesList, cancellationToken);
@@ -263,13 +93,13 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public void UpdateShallow(T entity)
+    public void UpdateShallow(TEntity entity)
     {
         context.Entry(entity).State = EntityState.Modified;
     }
 
     /// <inheritdoc />
-    public void UpdateDeep(T entity)
+    public void UpdateDeep(TEntity entity)
     {
         DbSet.Update(entity);
     }
@@ -277,7 +107,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     /// <inheritdoc />
     public async Task DeleteAsync(TKey id, bool forceHardDelete = false, CancellationToken cancellationToken = default)
     {
-        var entity = await GetAsync(id, MakeSpecification(), cancellationToken);
+        var entity = await GetAsync(id, cancellationToken);
 
         if (entity != null)
         {
@@ -297,7 +127,7 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     public async Task DeleteRangeAsync(IEnumerable<TKey> ids, bool forceHardDelete = false,
         CancellationToken cancellationToken = default)
     {
-        var entities = await GetRangeAsync(ids, MakeSpecification(), cancellationToken);
+        var entities = await GetRangeAsync(ids, cancellationToken);
 
         var entitiesList = entities.ToArray();
 
@@ -323,35 +153,20 @@ public class Repository<T, TKey>(DbContext context) : IRepository<T, TKey> where
     }
 
     /// <inheritdoc />
-    public async Task<int> CountAsync(QuerySpecification<T> spec, CancellationToken cancellationToken = default)
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
-        return await DbSet.ApplySpecification(spec).CountAsync(cancellationToken);
+        return await DbSet.CountAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<int> CountAsync(
-        Expression<Func<T, bool>>? predicate = null,
-        QueryOptions options = QueryOptions.None)
+    public async Task<int> CountAsync(IQueryable<TEntity> queryable, CancellationToken cancellationToken = default)
     {
-        var query = DbSet.ApplyQueryOptions(options);
-
-        if (predicate != null)
-        {
-            query = query.Where(predicate);
-        }
-
-        return await query.CountAsync();
+        return await queryable.CountAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public IQueryable<T> Query()
+    public IQueryable<TEntity> MakeQuery(QueryOptions options = QueryOptions.None)
     {
-        return DbSet.AsQueryable();
-    }
-
-    /// <inheritdoc />
-    public QuerySpecification<T> MakeSpecification()
-    {
-        return new QuerySpecification<T>();
+        return DbSet.ApplyQueryOptions(options).AsQueryable();
     }
 }

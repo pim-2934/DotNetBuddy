@@ -1,8 +1,4 @@
-﻿using System.Linq.Expressions;
-using DotNetBuddy.Domain.Common;
-using DotNetBuddy.Domain.Enums;
-using DotNetBuddy.Domain.Exceptions;
-using DotNetBuddy.Infrastructure.Utilities;
+﻿using DotNetBuddy.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
@@ -14,86 +10,6 @@ namespace DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
 public static class QueryableExtensions
 {
     /// <summary>
-    /// Applies the specified query specification to the provided IQueryable data source.
-    /// This includes filtering, ordering, pagination, and the inclusion of related entities.
-    /// </summary>
-    /// <typeparam name="T">The type of the entities in the data source.</typeparam>
-    /// <param name="query">The IQueryable data source to which the specification will be applied.</param>
-    /// <param name="spec">The specification containing the rules and options to apply to the query.</param>
-    /// <param name="applyPaging">Indicates whether paging should be applied. If set to true, pagination logic will be executed.</param>
-    /// <returns>The IQueryable data source modified according to the supplied specification rules.</returns>
-    public static IQueryable<T> ApplySpecification<T>(
-        this IQueryable<T> query,
-        QuerySpecification<T> spec,
-        bool applyPaging = true) where T : class
-    {
-        query = spec.Predicates.Aggregate(query, (current, predicate) => current.Where(predicate));
-        query = query.ApplyQueryOptions(spec.Options);
-        query = query.ApplyQueryIncludes(spec.Includes.ToArray());
-
-        if (spec.OrderBy.Count > 0)
-        {
-            var isFirst = true;
-            foreach (var (keySelector, sortDirection) in spec.OrderBy)
-            {
-                if (isFirst)
-                {
-                    query = sortDirection == SortDirection.Ascending
-                        ? query.OrderBy(keySelector)
-                        : query.OrderByDescending(keySelector);
-                    isFirst = false;
-                }
-                else
-                {
-                    query = sortDirection == SortDirection.Ascending
-                        ? ((IOrderedQueryable<T>)query).ThenBy(keySelector)
-                        : ((IOrderedQueryable<T>)query).ThenByDescending(keySelector);
-                }
-            }
-        }
-
-        if (applyPaging && spec.Page is not null)
-            query = query.Skip((spec.Page.Value - 1) * spec.PageSize).Take(spec.PageSize);
-
-        return query;
-    }
-
-    /// <summary>
-    /// Applies the specified query includes to the provided queryable data source.
-    /// This allows for the inclusion of related entities in the query result.
-    /// </summary>
-    /// <typeparam name="T">The type of entity in the query.</typeparam>
-    /// <param name="query">The queryable data source to which includes will be applied.</param>
-    /// <param name="includes">An array of expressions specifying the related entities to include in the query.</param>
-    /// <returns>A queryable data source with the specified includes applied.</returns>
-    public static IQueryable<T> ApplyQueryIncludes<T>(
-        this IQueryable<T> query,
-        params Expression<Func<T, object>>[] includes)
-        where T : class
-    {
-        if (includes.Length == 0)
-            return query;
-
-        var includePaths = new Dictionary<string, string>();
-        foreach (var include in includes)
-        {
-            var path = ExpressionPathVisitor.GetPropertyPath(include);
-            if (!string.IsNullOrEmpty(path))
-            {
-                includePaths[path] = path;
-            }
-        }
-
-        var orderedPaths = includePaths.Values
-            .OrderBy(p => p.Length)
-            .ToList();
-
-        return orderedPaths
-            .Where(path => !orderedPaths.Any(p => p != path && path.StartsWith(p + ".")))
-            .Aggregate(query, (current, path) => current.Include(path));
-    }
-
-    /// <summary>
     /// Applies specific query options to an IQueryable instance, modifying its behavior
     /// based on the provided flags for tracking, query filters, and execution strategy.
     /// </summary>
@@ -104,30 +20,9 @@ public static class QueryableExtensions
     public static IQueryable<T> ApplyQueryOptions<T>(this IQueryable<T> query, QueryOptions option)
         where T : class
     {
-        if (option.HasFlag(QueryOptions.AsNoTracking) &&
-            option.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
-        {
-            throw new BuddyException("Cannot specify both AsNoTracking and AsNoTrackingWithIdentityResolution.");
-        }
-
-        if (option.HasFlag(QueryOptions.AsNoTracking))
-        {
-            query = query.AsNoTracking();
-        }
-
-        if (option.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
-        {
-            query = query.AsNoTrackingWithIdentityResolution();
-        }
-
-        if (option.HasFlag(QueryOptions.IgnoreQueryFilters))
+        if (option.HasFlag(QueryOptions.WithSoftDeleted))
         {
             query = query.IgnoreQueryFilters();
-        }
-
-        if (option.HasFlag(QueryOptions.UseSplitQuery))
-        {
-            query = query.AsSplitQuery();
         }
 
         return query;

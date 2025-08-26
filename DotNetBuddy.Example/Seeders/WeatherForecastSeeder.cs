@@ -1,7 +1,6 @@
 using DotNetBuddy.Application.Utilities;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
-using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Example.Configs;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
@@ -39,8 +38,7 @@ public class WeatherForecastSeeder(
 
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        var locations = await unitOfWork.Repository<Location, Guid>()
-            .GetRangeAsync(new QuerySpecification<Location>(), cancellationToken);
+        var locations = await unitOfWork.Repository<Location, Guid>().GetRangeAsync(cancellationToken);
         var location = locations.First();
 
         await SeederHelper.SeedManyAsync<WeatherForecast, Guid>

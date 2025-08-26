@@ -1,5 +1,5 @@
 using DotNetBuddy.Domain.Attributes;
-using DotNetBuddy.Extensions.EntityFrameworkCore.Utilities;
+using DotNetBuddy.Infrastructure.Utilities;
 
 namespace DotNetBuddy.Tests.Unit;
 
