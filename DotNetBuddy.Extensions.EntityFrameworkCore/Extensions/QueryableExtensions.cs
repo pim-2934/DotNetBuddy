@@ -27,27 +27,25 @@ public static class QueryableExtensions
         QuerySpecification<T> spec,
         bool applyPaging = true) where T : class
     {
-        if (spec.Predicate is not null)
-            query = query.Where(spec.Predicate);
-
+        query = spec.Predicates.Aggregate(query, (current, predicate) => current.Where(predicate));
         query = query.ApplyQueryOptions(spec.Options);
         query = query.ApplyQueryIncludes(spec.Includes.ToArray());
 
         if (spec.OrderBy.Count > 0)
         {
             var isFirst = true;
-            foreach (var (keySelector, ascending) in spec.OrderBy)
+            foreach (var (keySelector, sortDirection) in spec.OrderBy)
             {
                 if (isFirst)
                 {
-                    query = ascending
+                    query = sortDirection == SortDirection.Ascending
                         ? query.OrderBy(keySelector)
                         : query.OrderByDescending(keySelector);
                     isFirst = false;
                 }
                 else
                 {
-                    query = ascending
+                    query = sortDirection == SortDirection.Ascending
                         ? ((IOrderedQueryable<T>)query).ThenBy(keySelector)
                         : ((IOrderedQueryable<T>)query).ThenByDescending(keySelector);
                 }
@@ -101,33 +99,33 @@ public static class QueryableExtensions
     /// </summary>
     /// <typeparam name="T">The type of entity in the query.</typeparam>
     /// <param name="query">The query to which the options will be applied.</param>
-    /// <param name="options">The options defining how the query should be modified.</param>
+    /// <param name="option">The options defining how the query should be modified.</param>
     /// <returns>The modified query with the specified options applied.</returns>
-    public static IQueryable<T> ApplyQueryOptions<T>(this IQueryable<T> query, QueryOptions options)
+    public static IQueryable<T> ApplyQueryOptions<T>(this IQueryable<T> query, QueryOptions option)
         where T : class
     {
-        if (options.HasFlag(QueryOptions.AsNoTracking) &&
-            options.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
+        if (option.HasFlag(QueryOptions.AsNoTracking) &&
+            option.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
         {
             throw new BuddyException("Cannot specify both AsNoTracking and AsNoTrackingWithIdentityResolution.");
         }
 
-        if (options.HasFlag(QueryOptions.AsNoTracking))
+        if (option.HasFlag(QueryOptions.AsNoTracking))
         {
             query = query.AsNoTracking();
         }
 
-        if (options.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
+        if (option.HasFlag(QueryOptions.AsNoTrackingWithIdentityResolution))
         {
             query = query.AsNoTrackingWithIdentityResolution();
         }
 
-        if (options.HasFlag(QueryOptions.IgnoreQueryFilters))
+        if (option.HasFlag(QueryOptions.IgnoreQueryFilters))
         {
             query = query.IgnoreQueryFilters();
         }
 
-        if (options.HasFlag(QueryOptions.UseSplitQuery))
+        if (option.HasFlag(QueryOptions.UseSplitQuery))
         {
             query = query.AsSplitQuery();
         }

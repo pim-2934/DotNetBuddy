@@ -20,13 +20,13 @@ public class QuerySpecification<T>
     private const int DefaultPageSize = 50;
 
     /// <summary>
-    /// Represents the predicate expression used to filter entities in a query specification.
+    /// Represents a collection of predicates used to filter the entities when querying data.
     /// </summary>
     /// <remarks>
-    /// This property defines a LINQ expression that specifies the criteria used to filter the query results.
-    /// When set, it determines which entities satisfy the condition and should be included in the query results.
+    /// Each predicate is an expression defining a condition that entities must satisfy to be included in the query result.
+    /// Multiple predicates can be combined to form a more complex filter logic.
     /// </remarks>
-    public Expression<Func<T, bool>>? Predicate { get; private set; }
+    public IReadOnlyList<Expression<Func<T, bool>>> Predicates { get; private set; } = [];
 
     /// <summary>
     /// Specifies the collection of navigation properties to include in the query result.
@@ -38,7 +38,7 @@ public class QuerySpecification<T>
     /// that the related data is retrieved alongside the primary entity, reducing the need
     /// for subsequent queries.
     /// </remarks>
-    public List<Expression<Func<T, object>>> Includes { get; }
+    public IReadOnlyList<Expression<Func<T, object>>> Includes { get; private set; } = [];
 
     /// <summary>
     /// Represents the configuration options that dictate how a query is processed.
@@ -61,7 +61,11 @@ public class QuerySpecification<T>
     /// are applied sequentially to sort the query results. It is commonly used to define and
     /// manage ordered data retrieval within query specifications.
     /// </remarks>
-    public List<(Expression<Func<T, object>> KeySelector, bool Ascending)> OrderBy { get; }
+    public IReadOnlyList<(Expression<Func<T, object>> KeySelector, SortDirection sortDirection)> OrderBy
+    {
+        get;
+        private set;
+    } = [];
 
     /// <summary>
     /// Specifies the current page of results to retrieve in paginated queries.
@@ -85,20 +89,19 @@ public class QuerySpecification<T>
     public int PageSize { get; private set; } = DefaultPageSize;
 
     /// <summary>
-    /// Represents a base implementation for constructing specifications used to query entities.
+    /// Encapsulates criteria for querying entities, including filtering expressions, sorting,
+    /// and other optional parameters to refine query results.
     /// </summary>
     public QuerySpecification()
     {
-        Includes = [];
-        OrderBy = [];
     }
 
     /// <summary>
     /// Represents a query specification that provides filtering, sorting, includes, and pagination capabilities for querying entities.
     /// </summary>
-    public QuerySpecification(Expression<Func<T, bool>> predicate) : this()
+    public QuerySpecification(Expression<Func<T, bool>> predicateExpression) : this()
     {
-        Predicate = predicate;
+        AddPredicate(predicateExpression);
     }
 
     /// <summary>
@@ -109,22 +112,56 @@ public class QuerySpecification<T>
     /// </param>
     public QuerySpecification<T> AddInclude(Expression<Func<T, object>> includeExpression)
     {
-        Includes.Add(includeExpression);
+        var includes = Includes.ToList();
+        includes.Add(includeExpression);
+        Includes = includes;
 
         return this;
     }
 
     /// <summary>
-    /// Adds an ordering expression to the query specification for sorting entities.
+    /// Adds an ordering expression to the query specification, specifying the field and the sort direction.
     /// </summary>
-    /// <param name="orderByExpression">The expression specifying the property to sort by.</param>
-    /// <param name="ascending">Indicates whether to sort in ascending order. Defaults to true if not specified.</param>
-    /// <returns>The updated query specification with the added ordering expression.</returns>
-    public QuerySpecification<T> AddOrderBy(Expression<Func<T, object>> orderByExpression, bool ascending = true)
+    /// <param name="orderByExpression">An expression specifying the property to be used for ordering.</param>
+    /// <param name="sortDirection">The direction of the sort (ascending or descending). By default, it is ascending.</param>
+    /// <returns>The current instance of <see cref="QuerySpecification{T}"/> with the specified ordering added.</returns>
+    public QuerySpecification<T> AddOrderBy(
+        Expression<Func<T, object>> orderByExpression,
+        SortDirection sortDirection = SortDirection.Ascending)
     {
-        OrderBy.Add((orderByExpression, ascending));
+        var orderBy = OrderBy.ToList();
+        orderBy.Add((orderByExpression, sortDirection));
+        OrderBy = orderBy;
 
         return this;
+    }
+
+    /// <summary>
+    /// Adds an order-by clause to the query specification based on the property name and sort direction.
+    /// </summary>
+    /// <param name="propertyName">The name of the property to sort by.</param>
+    /// <param name="sortDirection">The direction of sorting, either ascending or descending. Defaults to ascending.</param>
+    /// <returns>The updated query specification with the added order-by clause.</returns>
+    public QuerySpecification<T> AddOrderBy(
+        string propertyName,
+        SortDirection sortDirection = SortDirection.Ascending)
+    {
+        if (string.IsNullOrWhiteSpace(propertyName))
+            return this;
+
+        var propertyInfo = typeof(T).GetProperty(propertyName, 
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | 
+            System.Reflection.BindingFlags.IgnoreCase);
+
+        if (propertyInfo is null)
+            return this;
+        
+        var parameter = Expression.Parameter(typeof(T), "x");
+        var property = Expression.Property(parameter, propertyInfo);
+        var conversion = Expression.Convert(property, typeof(object));
+        var lambda = Expression.Lambda<Func<T, object>>(conversion, parameter);
+        
+        return AddOrderBy(lambda, sortDirection);
     }
 
     /// <summary>
@@ -144,11 +181,14 @@ public class QuerySpecification<T>
     /// <summary>
     /// Sets the predicate expression used to filter the query results.
     /// </summary>
-    /// <param name="predicate">The predicate expression to apply as a filter.</param>
+    /// <param name="predicateExpression">The predicate expression to apply as a filter.</param>
     /// <returns>An instance of <see cref="QuerySpecification{T}"/> with the specified predicate applied.</returns>
-    public QuerySpecification<T> SetPredicate(Expression<Func<T, bool>> predicate)
+    public QuerySpecification<T> AddPredicate(Expression<Func<T, bool>> predicateExpression)
     {
-        Predicate = predicate;
+        var predicates = Predicates.ToList();
+        predicates.Add(predicateExpression);
+
+        Predicates = predicates;
 
         return this;
     }

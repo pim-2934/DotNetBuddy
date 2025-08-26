@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DotNetBuddy.Example.Tests;
 
-// ReSharper disable once ClassNeverInstantiated.Global
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)

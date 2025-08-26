@@ -17,7 +17,6 @@ namespace DotNetBuddy.Infrastructure.Filters;
 /// </example>
 /// <see cref="Microsoft.AspNetCore.Mvc.Filters.IActionFilter"/>
 /// <see cref="ModelStateInvalidException"/>
-// ReSharper disable once ClassNeverInstantiated.Global
 public class ModelStateValidationFilter : IActionFilter
 {
     /// <summary>
