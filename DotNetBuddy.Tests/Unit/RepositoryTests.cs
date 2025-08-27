@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
+using DotNetBuddy.Infrastructure.Extensions;
 using DotNetBuddy.Tests.RepositoryEntities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Tests.Unit;
 
@@ -91,7 +93,7 @@ public class RepositoryTests
         var result = await repository.GetRangeAsync();
 
         // Assert
-        Assert.Equal(5, result.Count());
+        Assert.Equal(5, result.Count);
     }
 
     [Fact]
@@ -103,7 +105,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetRangeAsync(e => e.Name.Contains("3"));
+        var result = await repository.GetRangeAsync(x => x.Where(e => e.Name.Contains('3')));
 
         // Assert
         Assert.Single(result);
@@ -126,7 +128,7 @@ public class RepositoryTests
         var result = await repository.GetRangeAsync(selectedIds);
 
         // Assert
-        Assert.Equal(2, result.Count());
+        Assert.Equal(2, result.Count);
         Assert.All(result, entity => Assert.Contains(entity.Id, selectedIds));
     }
 
@@ -142,35 +144,10 @@ public class RepositoryTests
         var result = await repository.GetPagedAsync(2, 5);
 
         // Assert
-        Assert.Equal(5, result.Items.Count());
+        Assert.Equal(5, result.Items.Count);
         Assert.Equal(2, result.PageNumber);
         Assert.Equal(5, result.PageSize);
         Assert.Equal(20, result.TotalCount);
-        Assert.Equal(4, result.TotalPages);
-        Assert.True(result.HasPreviousPage);
-        Assert.True(result.HasNextPage);
-    }
-
-    [Fact]
-    public async Task GetPagedAsync_WithIds_ReturnsPaginatedResultsForIds()
-    {
-        // Arrange
-        var dbContext = TestDbContext.CreateContext(nameof(GetPagedAsync_WithIds_ReturnsPaginatedResultsForIds));
-        await SeedTestData(dbContext, 20);
-        var repository = new Repository<Entity, Guid>(dbContext);
-
-        // Get a subset of IDs using repository
-        var allEntities = await repository.GetRangeAsync();
-        var selectedIds = allEntities.Take(10).Select(e => e.Id).ToList();
-
-        // Act
-        var result = await repository.GetPagedAsync(2, 3, selectedIds);
-
-        // Assert
-        Assert.Equal(3, result.Items.Count());
-        Assert.Equal(2, result.PageNumber);
-        Assert.Equal(3, result.PageSize);
-        Assert.Equal(10, result.TotalCount);
         Assert.Equal(4, result.TotalPages);
         Assert.True(result.HasPreviousPage);
         Assert.True(result.HasNextPage);
@@ -185,7 +162,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.SearchAsync("Entity 5");
+        var result = await repository.GetRangeAsync(x => x.Search("Entity 5"));
 
         // Assert
         Assert.Single(result);
@@ -201,7 +178,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.SearchPagedAsync("Entity", 2, 5);
+        var result = await repository.GetPagedAsync(x => x.Search("Entity"), 2, 5);
 
         // Assert
         Assert.Equal(5, result.Items.Count());
@@ -220,7 +197,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetAsync(e => e.Name == "Test Entity 3");
+        var result = await repository.GetAsync(x => x.Where(e => e.Name == "Test Entity 3"));
 
         // Assert
         Assert.NotNull(result);
@@ -256,7 +233,7 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var result = await repository.AnyAsync(e => e.Name == "Test Entity 3");
+        var result = await repository.AnyAsync(x => x.Where(e => e.Name == "Test Entity 3"));
 
         // Assert
         Assert.True(result);
@@ -331,7 +308,7 @@ public class RepositoryTests
         await dbContext.SaveChangesAsync();
 
         // Assert
-        Assert.Equal(2, result.Count());
+        Assert.Equal(2, result.Count);
         Assert.Equal(2, await repository.CountAsync());
     }
 
@@ -440,41 +417,10 @@ public class RepositoryTests
         var repository = new Repository<Entity, Guid>(dbContext);
 
         // Act
-        var count = await repository.CountAsync(e => e.Name.Contains("5"));
+        var count = await repository.CountAsync(x => x.Where(e => e.Name.Contains('5')));
 
         // Assert
         Assert.Equal(1, count);
-    }
-
-    [Fact]
-    public async Task SearchAsync_WithEmptyTerm_ReturnsEmptyCollection()
-    {
-        // Arrange
-        var dbContext = TestDbContext.CreateContext(nameof(SearchAsync_WithEmptyTerm_ReturnsEmptyCollection));
-        await SeedTestData(dbContext);
-        var repository = new Repository<Entity, Guid>(dbContext);
-
-        // Act
-        var result = await repository.SearchAsync("");
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task SearchPagedAsync_WithEmptyTerm_ReturnsEmptyPagedResult()
-    {
-        // Arrange
-        var dbContext = TestDbContext.CreateContext(nameof(SearchPagedAsync_WithEmptyTerm_ReturnsEmptyPagedResult));
-        await SeedTestData(dbContext);
-        var repository = new Repository<Entity, Guid>(dbContext);
-
-        // Act
-        var result = await repository.SearchPagedAsync("", 1, 10);
-
-        // Assert
-        Assert.Empty(result.Items);
-        Assert.Equal(0, result.TotalCount);
     }
 
     [Fact]
@@ -715,7 +661,10 @@ public class RepositoryTests
         Assert.Null(deletedEntity);
 
         // But we can verify it exists with DeletedAt set by using IgnoreQueryFilters
-        var deletedEntityIgnoringFilters = await repository.GetAsync(entityId, QueryOptions.IgnoreQueryFilters);
+        var deletedEntityIgnoringFilters = await repository.GetAsync(
+            entityId,
+            QueryOptions.WithSoftDeleted
+        );
 
         Assert.NotNull(deletedEntityIgnoringFilters);
         Assert.NotNull(deletedEntityIgnoringFilters.DeletedAt);
@@ -744,8 +693,9 @@ public class RepositoryTests
 
         // But we can verify they exist with DeletedAt set by using IgnoreQueryFilters
         var deletedEntities = await repository.GetRangeAsync(
-            idsToDelete,
-            QueryOptions.IgnoreQueryFilters);
+            x => x.Where(e => idsToDelete.Contains(e.Id)),
+            QueryOptions.WithSoftDeleted
+        );
 
         Assert.Equal(3, deletedEntities.Count);
         Assert.All(deletedEntities, entity => Assert.NotNull(entity.DeletedAt));
@@ -779,8 +729,9 @@ public class RepositoryTests
 
         // Verify soft-deletable entity exists when ignoring filters
         var deletedSoftEntity = await softDeletableRepository.GetAsync(
-            softDeletableEntity.Id,
-            QueryOptions.IgnoreQueryFilters);
+            x => x.Where(e => e.Id == softDeletableEntity.Id),
+            QueryOptions.WithSoftDeleted
+        );
 
         Assert.NotNull(deletedSoftEntity);
         Assert.NotNull(deletedSoftEntity.DeletedAt);
@@ -817,8 +768,9 @@ public class RepositoryTests
 
         // But they should be visible when ignoring filters
         var deletedSoftEntities = await softDeletableRepository.GetRangeAsync(
-            softDeletableIds,
-            QueryOptions.IgnoreQueryFilters);
+            x => x.Where(e => softDeletableIds.Contains(e.Id)),
+            QueryOptions.WithSoftDeleted
+        );
 
         Assert.Equal(2, deletedSoftEntities.Count);
         Assert.All(deletedSoftEntities, entity => Assert.NotNull(entity.DeletedAt));
@@ -846,7 +798,8 @@ public class RepositoryTests
         Assert.Null(result);
 
         // Verify the entity still exists when ignoring filters
-        var softDeletedEntity = await repository.GetAsync(entity.Id, QueryOptions.IgnoreQueryFilters);
+        var softDeletedEntity =
+            await repository.GetAsync(x => x.Where(e => e.Id == entity.Id), QueryOptions.WithSoftDeleted);
         Assert.NotNull(softDeletedEntity);
         Assert.NotNull(softDeletedEntity.DeletedAt);
     }
@@ -877,7 +830,7 @@ public class RepositoryTests
         Assert.Equal(3, result.Count);
 
         // Verify all entities exist when ignoring filters
-        var allEntities = await repository.GetRangeAsync(options: QueryOptions.IgnoreQueryFilters);
+        var allEntities = await repository.GetRangeAsync(QueryOptions.WithSoftDeleted);
         Assert.Equal(5, allEntities.Count);
     }
 
@@ -890,13 +843,13 @@ public class RepositoryTests
         var repository = new Repository<NavigationEntity, Guid>(dbContext);
 
         // Act
-        var result = await repository.GetRangeAsync(
-            x => x.Parent == null,
-            QueryOptions.None,
-            x => x.Parent!,
-            x => x.Parent!.Parent!,
-            x => x.Children,
-            x => x.Parent!.Children
+        var result = await repository.GetRangeAsync(x => x
+            .Where(y => y.Parent == null)
+            .Include(y => y.Parent)
+            .ThenInclude(y => y!.Parent)
+            .Include(y => y.Parent)
+            .ThenInclude(y => y!.Children)
+            .Include(y => y.Children)
         );
 
         // Assert
@@ -1042,7 +995,8 @@ public class RepositoryTests
     public async Task UpdateShallow_WithChangedUnchangeableValue_ThrowsValidationException()
     {
         // Arrange
-        var dbContext = TestDbContext.CreateContext(nameof(UpdateShallow_WithChangedUnchangeableValue_ThrowsValidationException));
+        var dbContext =
+            TestDbContext.CreateContext(nameof(UpdateShallow_WithChangedUnchangeableValue_ThrowsValidationException));
         var repository = new Repository<ComplexEntity, Guid>(dbContext);
 
         // First add a valid entity with an initial UnchangeableValue
@@ -1078,7 +1032,8 @@ public class RepositoryTests
     public async Task UpdateDeep_WithChangedUnchangeableValue_ThrowsValidationException()
     {
         // Arrange
-        var dbContext = TestDbContext.CreateContext(nameof(UpdateDeep_WithChangedUnchangeableValue_ThrowsValidationException));
+        var dbContext =
+            TestDbContext.CreateContext(nameof(UpdateDeep_WithChangedUnchangeableValue_ThrowsValidationException));
         var repository = new Repository<ComplexEntity, Guid>(dbContext);
 
         // First add a valid entity with an initial UnchangeableValue
@@ -1135,7 +1090,7 @@ public class RepositoryTests
 
         retrievedEntity.BaseValue = 20; // Change other property
         retrievedEntity.BelowBaseValue = 10; // Change other property
-                                             // UnchangeableValue remains the same
+        // UnchangeableValue remains the same
 
         // Act
         repository.UpdateShallow(retrievedEntity);
@@ -1148,5 +1103,4 @@ public class RepositoryTests
         Assert.Equal(10, updatedEntity.BelowBaseValue);
         Assert.Equal(42, updatedEntity.UnchangeableValue);
     }
-
 }

@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Domain;
-using DotNetBuddy.Domain.Common;
 using DotNetBuddy.Domain.Enums;
 
 namespace DotNetBuddy.Application.Utilities;
@@ -28,9 +27,8 @@ public static class SeederHelper
         CancellationToken cancellationToken = default
     ) where TEntity : class, IEntity<TKey>
     {
-        var spec = new QuerySpecification<TEntity>(predicate).SetOptions(QueryOptions.IgnoreQueryFilters);
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(spec, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(x => x.Where(predicate), QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
@@ -49,9 +47,8 @@ public static class SeederHelper
         CancellationToken cancellationToken = default)
         where TEntity : class, IEntity<TKey>
     {
-        var spec = new QuerySpecification<TEntity>().SetOptions(QueryOptions.IgnoreQueryFilters);
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(entity.Id, spec, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(entity.Id, QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
@@ -73,9 +70,8 @@ public static class SeederHelper
     {
         entity.Id = id;
 
-        var spec = new QuerySpecification<TEntity>().SetOptions(QueryOptions.IgnoreQueryFilters);
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(id, spec, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(entity.Id, QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entity, cancellationToken);
         }
@@ -98,9 +94,8 @@ public static class SeederHelper
         CancellationToken cancellationToken = default
     ) where TEntity : class, IEntity<TKey>
     {
-        var spec = new QuerySpecification<TEntity>(predicate).SetOptions(QueryOptions.IgnoreQueryFilters);
-
-        if (!await unitOfWork.Repository<TEntity, TKey>().AnyAsync(spec, cancellationToken))
+        if (!await unitOfWork.Repository<TEntity, TKey>()
+                .AnyAsync(x => x.Where(predicate), QueryOptions.WithSoftDeleted, cancellationToken))
         {
             await unitOfWork.Repository<TEntity, TKey>().AddAsync(entities, cancellationToken);
         }
