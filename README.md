@@ -20,53 +20,75 @@ It encourages clean architecture principles and supports out-of-the-box patterns
 
 ## Quick Start
 
-### 1. Install DotNetBuddy
+### 1) Install packages
+Using CLI:
+- dotnet add package DotNetBuddy.Application
+- dotnet add package DotNetBuddy.Domain
+- dotnet add package DotNetBuddy.Infrastructure
+- dotnet add package DotNetBuddy.Presentation
 
+EF Core support (optional):
+- dotnet add package DotNetBuddy.Extensions.EntityFrameworkCore
+
+### 2) Register services (Program.cs)
 ```csharp
-builder.Services.AddBuddy<DatabaseContext>();
-```
+using DotNetBuddy.Infrastructure.Extensions;
+using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions; // optional EF helpers
 
-### 2. Configure Database and Auditing
+var builder = WebApplication.CreateBuilder(args);
 
-```csharp
-services.AddDbContext<DatabaseContext>((provider, options) =>
+// Discover installers and configs, register core services
+builder.Services.AddBuddy();
+
+// EF Core helpers: IRepository/UnitOfWork for your DbContext
+builder.Services.AddBuddyEfExtension<DatabaseContext>();
+
+// Your DbContext with Buddy interceptors (audit, validation, etc.)
+builder.Services.AddDbContext<DatabaseContext>((_, options) =>
 {
-    options.AddBuddyInterceptors(provider);
+    options
+        .AddBuddyInterceptors()
+        // choose your provider
+        //.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
+        //.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+        ;
 });
 ```
 
-### 3. Enable Global Exception Handling
-
+### 3) Enable global exception handling
 ```csharp
+using DotNetBuddy.Presentation.Extensions;
+
+var app = builder.Build();
 app.UseBuddyExceptions();
 ```
 
-### 4. Create Your First Seeder (Optional)
-
+### 4) Seed data (optional)
+Create a seeder by implementing ISeeder. It will be discovered and registered automatically.
 ```csharp
+using DotNetBuddy.Domain;
+
 public class DevUserSeeder(IUnitOfWork uow) : ISeeder
 {
     public string[] Environments => new[] { "Development" };
 
-    public async Task SeedAsync()
+    public async Task SeedAsync(CancellationToken ct = default)
     {
-        if (!await uow.Repository<User, Guid>().AnyAsync(u => u.Email == "admin@example.com"))
+        if (!await uow.Repository<User, Guid>().AnyAsync(x => x.Where(y.Email == "admin@example.com"), ct))
         {
-            await uow.Repository<User, Guid>().AddAsync(new User { Email = "admin@example.com" });
-            await uow.SaveAsync();
+            await uow.Repository<User, Guid>().AddAsync(new User { Email = "admin@example.com" }, ct);
+            await uow.SaveAsync(ct);
         }
     }
 }
 ```
-
-Run seeders with:
-
+Run seeders manually when needed:
 ```csharp
-await BuddyUtils.RunSeeders(services, hostEnvironment);
+using DotNetBuddy.Application.Utilities;
+
+await BuddyUtils.RunSeeders(app.Services, app.Environment);
 ```
-
-Or allow seeders to run on boot:
-
+Or run them automatically on app start via configuration (appsettings.json):
 ```json
 {
   "Buddy": {
@@ -74,6 +96,8 @@ Or allow seeders to run on boot:
   }
 }
 ```
+
+That’s it. Map your endpoints/controllers and run the app.
 
 ---
 
