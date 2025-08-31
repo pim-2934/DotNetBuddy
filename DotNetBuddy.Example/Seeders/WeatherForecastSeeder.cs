@@ -40,7 +40,7 @@ public class WeatherForecastSeeder(
     {
         var locations = await unitOfWork.Repository<Location, Guid>()
             .GetRangeAsync(cancellationToken: cancellationToken);
-        var location = locations.First();
+        var location = locations[0];
 
         await SeederHelper.SeedManyAsync<WeatherForecast, Guid>
         (
@@ -50,6 +50,7 @@ public class WeatherForecastSeeder(
                 .Select
                 (index => new WeatherForecast
                 {
+                    Id = BuddyUtils.GenerateDeterministicGuid($"Weather Forecast {index}"),
                     Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
                     TemperatureC = Random.Shared.Next(-20, 55),
                     Summary = Summaries[Random.Shared.Next(Summaries.Length)],
