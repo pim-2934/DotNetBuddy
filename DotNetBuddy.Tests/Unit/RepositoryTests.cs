@@ -51,17 +51,17 @@ public class RepositoryTests
                     Id = Guid.NewGuid(),
                     Parent = new NavigationEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.NewGuid()
                     },
                     Children =
                     [
                         new NavigationEntity
                         {
-                            Id = Guid.NewGuid(),
+                            Id = Guid.NewGuid()
                         },
                         new NavigationEntity
                         {
-                            Id = Guid.NewGuid(),
+                            Id = Guid.NewGuid()
                         }
                     ]
                 },
@@ -69,11 +69,11 @@ public class RepositoryTests
                 [
                     new NavigationEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.NewGuid()
                     },
                     new NavigationEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.NewGuid()
                     }
                 ]
             });
