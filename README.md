@@ -18,6 +18,19 @@ It encourages clean architecture principles and supports out-of-the-box patterns
 | **DotNetBuddy.Presentation**                   | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)                        | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Presentation?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Presentation/)           |
 | **DotNetBuddy.Extensions.EntityFrameworkCore** | [![NuGet](https://img.shields.io/nuget/v/DotNetBuddy.Extensions.EntityFrameworkCore?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Extensions.EntityFrameworkCore/) | [![Downloads](https://img.shields.io/nuget/dt/DotNetBuddy.Extensions.EntityFrameworkCore?style=flat-square)](https://www.nuget.org/packages/DotNetBuddy.Extensions.EntityFrameworkCore/) |
 
+## Requirements
+
+- .NET 8 or higher
+- Microsoft.Extensions.DependencyInjection
+- Microsoft.EntityFrameworkCore
+- Microsoft.EntityFrameworkCore.Design
+
+ A provider package depending on your database:  
+- **SQL Server** → `Microsoft.EntityFrameworkCore.SqlServer`
+- **PostgreSQL** → `Npgsql.EntityFrameworkCore.PostgreSQL`
+- **MySQL** (Pomelo) → `Pomelo.EntityFrameworkCore.MySql`
+---
+
 ## Quick Start
 
 ### 1) Install packages
@@ -46,11 +59,14 @@ builder.Services.AddBuddyEfExtension<DatabaseContext>();
 // Your DbContext with Buddy interceptors (audit, validation, etc.)
 builder.Services.AddDbContext<DatabaseContext>((_, options) =>
 {
+    var connectionString = builder.Configuration.GetConnectionString("Default");
+
     options
         .AddBuddyInterceptors()
         // choose your provider
-        //.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
-        //.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+        //.UseSqlServer(connectionString)
+        //.UseNpgsql(connectionString)
+        //.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         ;
 });
 ```
@@ -112,14 +128,6 @@ That’s it. Map your endpoints/controllers and run the app.
 - [Database Access](./Docs/Database.md)
 - [Data Seeding](./Docs/Seeders.md)
 - [Soft Deletion](./Docs/SoftDelete.md)
-
----
-
-## Requirements
-
-- .NET 8 or higher
-- Microsoft.Extensions.DependencyInjection
-- Microsoft.EntityFrameworkCore
 
 ---
 
