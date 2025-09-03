@@ -14,10 +14,10 @@ public static class QueryableExtensions
     /// <typeparam name="T">The type of the elements in the sequence.</typeparam>
     /// <param name="queryable">The source sequence to order.</param>
     /// <param name="orderByExpression">An expression specifying the property to sort by.</param>
-    /// <param name="sortDirection">The sorting direction, either ascending or descending. Defaults to ascending.</param>
+    /// <param name="sortDirection">The sorting direction, either ascending or descending.</param>
     /// <returns>An IQueryable representing the ordered sequence.</returns>
     public static IQueryable<T> OrderBy<T>(this IQueryable<T> queryable, Expression<Func<T, object>> orderByExpression,
-        SortDirection sortDirection = SortDirection.Ascending)
+        SortDirection sortDirection)
         where T : class
     {
         return sortDirection == SortDirection.Ascending
@@ -31,10 +31,10 @@ public static class QueryableExtensions
     /// <typeparam name="T">The type of elements in the queryable sequence.</typeparam>
     /// <param name="queryable">The sequence to be ordered.</param>
     /// <param name="propertyName">The name of the property to order by.</param>
-    /// <param name="sortDirection">The direction in which to order the elements, ascending by default.</param>
+    /// <param name="sortDirection">The direction in which to order the elements.</param>
     /// <returns>An <see cref="IQueryable{T}"/> containing the ordered elements.</returns>
     public static IQueryable<T> OrderBy<T>(this IQueryable<T> queryable, string propertyName,
-        SortDirection sortDirection = SortDirection.Ascending)
+        SortDirection sortDirection)
         where T : class
     {
         if (string.IsNullOrWhiteSpace(propertyName))
