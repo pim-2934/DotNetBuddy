@@ -4,6 +4,7 @@ using DotNetBuddy.Domain.Enums;
 using DotNetBuddy.Infrastructure.Extensions;
 using DotNetBuddy.Tests.RepositoryEntities;
 using Microsoft.EntityFrameworkCore;
+using ValidationException = DotNetBuddy.Domain.Exceptions.ValidationException;
 
 namespace DotNetBuddy.Tests.Unit;
 
@@ -50,17 +51,17 @@ public class RepositoryTests
                     Id = Guid.NewGuid(),
                     Parent = new NavigationEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.NewGuid()
                     },
                     Children =
                     [
                         new NavigationEntity
                         {
-                            Id = Guid.NewGuid(),
+                            Id = Guid.NewGuid()
                         },
                         new NavigationEntity
                         {
-                            Id = Guid.NewGuid(),
+                            Id = Guid.NewGuid()
                         }
                     ]
                 },
@@ -68,11 +69,11 @@ public class RepositoryTests
                 [
                     new NavigationEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.NewGuid()
                     },
                     new NavigationEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.NewGuid()
                     }
                 ]
             });
@@ -892,7 +893,7 @@ public class RepositoryTests
         });
 
         // Verify the validation message matches our expectation
-        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Message);
+        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Detail);
     }
 
     [Fact]
@@ -953,7 +954,7 @@ public class RepositoryTests
             await dbContext.SaveChangesAsync();
         });
 
-        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Message);
+        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Detail);
     }
 
     [Fact]
@@ -988,7 +989,7 @@ public class RepositoryTests
             await dbContext.SaveChangesAsync();
         });
 
-        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Message);
+        Assert.Contains("Bar is not allowed to be greater than Foo", exception.Detail);
     }
 
     [Fact]
@@ -1025,7 +1026,7 @@ public class RepositoryTests
         });
 
         // Verify the validation message matches our expectation
-        Assert.Contains("UnchangeableValue cannot be modified once set", exception.Message);
+        Assert.Contains("UnchangeableValue cannot be modified once set", exception.Detail);
     }
 
     [Fact]
@@ -1062,7 +1063,7 @@ public class RepositoryTests
         });
 
         // Verify the validation message matches our expectation
-        Assert.Contains("UnchangeableValue cannot be modified once set", exception.Message);
+        Assert.Contains("UnchangeableValue cannot be modified once set", exception.Detail);
     }
 
     [Fact]

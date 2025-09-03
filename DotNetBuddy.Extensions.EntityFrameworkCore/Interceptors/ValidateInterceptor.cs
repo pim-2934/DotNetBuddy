@@ -3,6 +3,7 @@ using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using ValidationException = DotNetBuddy.Domain.Exceptions.ValidationException;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore.Interceptors;
 
