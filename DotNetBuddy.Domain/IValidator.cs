@@ -12,8 +12,6 @@ public interface IValidator<in TSource, in TInput> where TSource : class where T
     /// <summary>
     /// Validates the provided source object against the input parameters using a registered validator.
     /// </summary>
-    /// <typeparam name="TSource">The type of the source object being validated.</typeparam>
-    /// <typeparam name="TInput">The type of the input parameters used for validation.</typeparam>
     /// <param name="source">The source object to be validated.</param>
     /// <param name="input">The input parameters against which the source object is validated.</param>
     /// <returns>A collection of <see cref="ValidationResult"/> objects containing validation results.
