@@ -16,7 +16,6 @@ public static class DbContextOptionsBuilderExtensions
     public static DbContextOptionsBuilder AddBuddyInterceptors(this DbContextOptionsBuilder builder)
     {
         builder.AddInterceptors(new AuditInterceptor());
-        builder.AddInterceptors(new ValidateInterceptor());
 
         return builder;
     }

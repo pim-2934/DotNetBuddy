@@ -2,7 +2,7 @@ using DotNetBuddy.Application.Utilities;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
 using DotNetBuddy.Example.Configs;
-using DotNetBuddy.Example.Models;
+using DotNetBuddy.Example.Entities;
 using DotNetBuddy.Example.Repositories.Interfaces;
 using Microsoft.Extensions.Options;
 

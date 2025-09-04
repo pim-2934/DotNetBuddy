@@ -1,5 +1,5 @@
 ﻿using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
-using DotNetBuddy.Tests.RepositoryEntities;
+using DotNetBuddy.Tests.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Tests;

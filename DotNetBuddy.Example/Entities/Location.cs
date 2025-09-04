@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Domain;
 
-namespace DotNetBuddy.Example.Models;
+namespace DotNetBuddy.Example.Entities;
 
 public class Location : IAuditableEntity<Guid>, ISoftDeletableEntity<Guid>
 {
