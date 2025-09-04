@@ -17,7 +17,7 @@ public static class BuddyUtils
     /// <param name="env">The hosting environment information used to filter seeders by environment name.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public static async Task RunSeeders(IServiceProvider provider, IHostEnvironment env,
+    public static async Task RunSeedersAsync(IServiceProvider provider, IHostEnvironment env,
         CancellationToken cancellationToken = default)
     {
         foreach (var seeder in provider.CreateScope().ServiceProvider.GetServices<ISeeder>())

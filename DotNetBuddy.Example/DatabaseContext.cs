@@ -1,5 +1,5 @@
+using DotNetBuddy.Example.Entities;
 using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
-using DotNetBuddy.Example.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Example;

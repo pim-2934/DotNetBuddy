@@ -1,5 +1,5 @@
 using DotNetBuddy.Domain;
-using DotNetBuddy.Example.Models;
+using DotNetBuddy.Example.Entities;
 
 namespace DotNetBuddy.Example.Repositories.Interfaces;
 
