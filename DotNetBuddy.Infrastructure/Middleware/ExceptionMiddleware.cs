@@ -45,7 +45,7 @@ public class ExceptionMiddleware(RequestDelegate next)
 
             var problemDetails = new ProblemDetails
             {
-                Title = ex.Title,
+                Title = ex.GetType().Name.Replace("Exception", string.Empty),
                 Detail = ex.Detail,
                 Status = ex.StatusCode,
                 Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}",

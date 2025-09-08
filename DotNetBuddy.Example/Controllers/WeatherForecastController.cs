@@ -1,5 +1,4 @@
 using DotNetBuddy.Domain;
-using DotNetBuddy.Domain.Exceptions;
 using DotNetBuddy.Example.Contracts;
 using DotNetBuddy.Example.Entities;
 using DotNetBuddy.Example.Exceptions;
@@ -56,12 +55,6 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork, I
         return weatherForecast;
     }
 
-    [HttpGet("GetException")]
-    public Task GetException()
-    {
-        throw new BuddyHttpException("This is a test exception", "Test", StatusCodes.Status418ImATeapot);
-    }
-
     [HttpGet("Crash")]
     public Task Crash()
     {
@@ -71,7 +64,7 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork, I
     // Consider using AutoMapper or similar for DTO-to-entity mapping.
     private static void MapDtoIntoEntity(ref WeatherForecast entity, WeatherForecastUpdateDto dto)
     {
-        entity.Date = dto.Date;
+        entity.Date = dto.Date!.Value;
         entity.TemperatureC = dto.TemperatureC;
         entity.Summary = dto.Summary;
     }

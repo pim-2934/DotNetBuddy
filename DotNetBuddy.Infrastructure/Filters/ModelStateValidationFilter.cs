@@ -1,4 +1,4 @@
-using DotNetBuddy.Infrastructure.Exceptions;
+using DotNetBuddy.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace DotNetBuddy.Infrastructure.Filters;
@@ -8,7 +8,7 @@ namespace DotNetBuddy.Infrastructure.Filters;
 /// </summary>
 /// <remarks>
 /// This filter checks the `ModelState` for validity during the `OnActionExecuting` phase of the request pipeline.
-/// If the `ModelState` is invalid, it throws a <see cref="ModelStateInvalidException"/>,
+/// If the `ModelState` is invalid, it throws a <see cref="ValidationFailedException"/>,
 /// which encapsulates the validation errors.
 /// </remarks>
 /// <example>
@@ -16,7 +16,7 @@ namespace DotNetBuddy.Infrastructure.Filters;
 /// or other configuration mechanism.
 /// </example>
 /// <see cref="Microsoft.AspNetCore.Mvc.Filters.IActionFilter"/>
-/// <see cref="ModelStateInvalidException"/>
+/// <see cref="ValidationFailedException"/>
 public class ModelStateValidationFilter : IActionFilter
 {
     /// <summary>
@@ -26,15 +26,17 @@ public class ModelStateValidationFilter : IActionFilter
     /// The context associated with the executing action, containing information
     /// such as the `ModelState` and the HTTP request.
     /// </param>
-    /// <exception cref="ModelStateInvalidException">
+    /// <exception cref="ValidationFailedException">
     /// Thrown if the `ModelState` is invalid, encapsulating the details of the validation errors.
     /// </exception>
     public void OnActionExecuting(ActionExecutingContext context)
     {
         if (!context.ModelState.IsValid)
-        {
-            throw new ModelStateInvalidException(context.ModelState);
-        }
+            throw new ValidationFailedException(context.ModelState
+                .Where(x => x.Value is not null && x.Value!.Errors.Any())
+                .SelectMany(x => x.Value!.Errors)
+                .Select(e => e.ErrorMessage)
+            );
     }
 
     /// <inheritdoc />

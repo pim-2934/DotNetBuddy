@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Domain;
-using ValidationException = DotNetBuddy.Domain.Exceptions.ValidationException;
+using DotNetBuddy.Domain.Exceptions;
 
 namespace DotNetBuddy.Application.Services;
 
@@ -26,6 +26,6 @@ public class ValidationService(IServiceProvider serviceProvider) : IValidationSe
         var validationResults = Validate(source, input).ToList();
 
         if (validationResults.Count != 0)
-            throw new ValidationException(string.Join(",", validationResults.Select(x => x.ErrorMessage)));
+            throw new ValidationFailedException(validationResults.Select(x => x.ErrorMessage ?? string.Empty));
     }
 }
