@@ -1,5 +1,5 @@
+using DotNetBuddy.Example.Entities;
 using DotNetBuddy.Extensions.EntityFrameworkCore;
-using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
 
 namespace DotNetBuddy.Example.Repositories;

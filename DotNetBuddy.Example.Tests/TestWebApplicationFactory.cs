@@ -31,7 +31,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             using var scope = services.BuildServiceProvider().CreateScope();
             var serviceProvider = scope.ServiceProvider;
 
-            BuddyUtils.RunSeeders(serviceProvider, serviceProvider.GetRequiredService<IWebHostEnvironment>()).Wait();
+            BuddyUtils.RunSeedersAsync(serviceProvider, serviceProvider.GetRequiredService<IWebHostEnvironment>()).Wait();
         });
     }
 }

@@ -2,9 +2,9 @@
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
 
-namespace DotNetBuddy.Tests.RepositoryEntities;
+namespace DotNetBuddy.Tests.Entities;
 
-public class AuditableEntity : IAuditableEntity<Guid>
+public class Entity : IEntity<Guid>
 {
     public Guid Id { get; set; }
 
@@ -15,5 +15,4 @@ public class AuditableEntity : IAuditableEntity<Guid>
     public string? Description { get; set; }
 
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
 }

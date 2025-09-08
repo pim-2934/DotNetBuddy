@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DotNetBuddy.Domain;
 
-namespace DotNetBuddy.Example.Models;
+namespace DotNetBuddy.Example.Entities;
 
 public sealed class WeatherForecast : IAuditableEntity<Guid>, ISoftDeletableEntity<Guid>
 {
@@ -17,8 +17,8 @@ public sealed class WeatherForecast : IAuditableEntity<Guid>, ISoftDeletableEnti
     public DateTime? DeletedAt { get; set; }
 
     // Data
-    public DateOnly Date { get; init; }
-    public int TemperatureC { get; init; }
+    public DateOnly Date { get; set; }
+    public int TemperatureC { get; set; }
 
     [StringLength(255)]
     public string? Summary { get; set; }

@@ -13,7 +13,7 @@ public class StartupSeederHostedService(IServiceProvider provider, IWebHostEnvir
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await BuddyUtils.RunSeeders(provider, env);
+        await BuddyUtils.RunSeedersAsync(provider, env, cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />

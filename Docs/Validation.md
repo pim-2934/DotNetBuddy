@@ -1,86 +1,84 @@
-# Entity Validation
+# Validation (Request/Entity Pair)
 
 ## Purpose
 
-Enables automatic validation of entity data according to business rules, ensuring data integrity and consistency.
+Provide a simple, explicit, and decoupled validation mechanism by defining validators for a specific source object (typically an entity/read model) and an input object (typically a DTO/command). Validators are discovered via DI and can be invoked through a centralized `IValidationService`.
 
-## Interfaces
+## Core Interfaces
 
-- `IValidatableEntity<TKey>`  
-  Extends `IEntity<TKey>` and `IValidatableObject`, and provides:
-    - `IEnumerable<ValidationResult> Validate(ValidationContext validationContext)`
+- `IValidator<TSource, TInput>`
+  - Defines `IEnumerable<ValidationResult> Validate(TSource source, TInput input)`.
+  - Return an empty sequence when the input is valid.
+- `IValidationService`
+  - `IEnumerable<ValidationResult> Validate<TSource, TInput>(TSource source, TInput input)`
+  - `void ValidateOrThrow<TSource, TInput>(TSource source, TInput input)` which throws `DotNetBuddy.Domain.Exceptions.ValidationException` if any errors exist.
 
-## Setup
-
-To enable validation, implement the `IValidatableEntity<TKey>` interface on your entity classes:
+## Installation / Setup
 
 ```csharp
-services.AddDbContext<DatabaseContext>((provider, options) =>
-{
-    options.AddBuddyInterceptors(provider);
-});
+services.AddBuddy();
 ```
 
-## Usage
+If some assemblies containing validators are not loaded yet at the time of registration, you can pass their AssemblyName to preload them:
 
-```csharp 
-public class ComplexEntity : IValidatableEntity<Guid>
+```csharp
+services.AddBuddy(typeof(SomeProjectMarker).Assembly.GetName());
+```
+
+## Creating a Validator
+
+Implement `IValidator<TSource, TInput>` for the pair you need to validate.
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+using DotNetBuddy.Domain;
+using DotNetBuddy.Example.Contracts;
+using DotNetBuddy.Example.Entities;
+
+namespace DotNetBuddy.Example.Validators;
+
+public class WeatherForecastUpdateValidator : IValidator<WeatherForecast, WeatherForecastUpdateDto>
 {
-    public Guid Id { get; set; }
-    public int BaseValue { get; set; }
-    public int BelowBaseValue { get; set; }
-    public int UnchangeableValue { get; set; }
-    
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    public IEnumerable<ValidationResult> Validate(WeatherForecast source, WeatherForecastUpdateDto input)
     {
-        // Basic validation - ensure BelowBaseValue doesn't exceed BaseValue
-        if (BelowBaseValue > BaseValue)
-        {
-            yield return new ValidationResult("BelowBaseValue is not allowed to be greater than BaseValue.", [nameof(BelowBaseValue)]);
-        }
-        
-        // You can access entity state and original values from the validation context
-        if (validationContext.Items.TryGetValue(ValidationContextKeys.EntityState, out var entityState) &&
-            entityState is EntityState.Modified)
-        {
-            // Access the entity state (Added, Modified, Deleted, etc.)
-            // This helps customize validation based on the current state of the entity
-            if (validationContext.Items.TryGetValue(ValidationContextKeys.OriginalValues, out var originalValues) &&
-                originalValues is Dictionary<string, object?> originalValuesDict)
-            {
-                // Access original property values before changes
-                // Useful for validation rules that depend on what changed
-                
-                // Example: Prevent UnchangeableValue from being modified once set
-                if (originalValuesDict.TryGetValue(nameof(UnchangeableValue), out var originalValue) &&
-                    originalValue is int originalIntValue &&
-                    originalIntValue != UnchangeableValue)
-                {
-                    yield return new ValidationResult(
-                        "UnchangeableValue cannot be modified once set.",
-                        [nameof(UnchangeableValue)]
-                    );
-                }
-            }
-        }
+        if (source.TemperatureC < input.TemperatureC)
+            yield return new ValidationResult("Temperature cannot be greater than the original value.");
+
+        if (source.Summary == input.Summary)
+            yield return new ValidationResult("Summary cannot be the same as the original value.");
     }
 }
 ```
 
-## Additional Context Information
-The validation context provides additional information that can be useful for complex validation scenarios:
-- **EntityState**: Available via `ValidationContextKeys.EntityState`
-  - Contains the current state of the entity (Added, Modified, Deleted, etc.)
-  - Useful for applying different validation rules based on the operation being performed
+You can optionally supply member names when relevant to tie an error to a specific field:
 
-- **OriginalValues**: Available via `ValidationContextKeys.OriginalValues`
-  - Contains the original property values before any changes were made
-  - Enables validation based on what has changed, rather than just current values
-  - Particularly useful for ensuring valid transitions between states
+```csharp
+yield return new ValidationResult("Bar is not allowed to be greater than Foo.", new[] { nameof(input.BelowBaseValue) });
+```
 
-## Notes
+## Using the Validation Service
 
-- The `Validate` method allows for custom validation logic beyond simple annotations.
-- Validation errors are returned as `ValidationResult` objects with specific property names.
-- Works with both simple and complex validation rules.
-- Context-aware validation allows for more sophisticated business rules.
+Inject `IValidationService` where needed (e.g., in controllers, handlers, or services) and call `Validate` or `ValidateOrThrow`.
+
+```csharp
+public SomeService(IValidationService validationService)
+{
+    public async Task DoSomethingAsync(object source, object input)
+    {
+        // throws ValidationException if any errors exist.
+        var results = await _validationService.ValidateOrThrow(source, input);
+    }
+}
+```
+
+### Behavior when no validator is registered
+- `Validate` returns an empty sequence.
+- `ValidateOrThrow` does not throw.
+This allows you to add validators incrementally without breaking flows.
+
+## Notes & Tips
+
+- Keep validators focused on business rules that involve both the current state (source) and the desired change (input).
+- Validators are plain classes and do not depend on EF or a specific persistence mechanism.
+- Use `ValidateOrThrow` to centralize error handling.
+- You can have multiple validators across different request/entity pairs. The DI system resolves the exact `IValidator<TSource, TInput>` matching the pair you validate.
