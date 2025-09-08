@@ -9,5 +9,4 @@
 /// The exception conforms to the RFC 9110 standards through its inheritance of the <see cref="Rfc9110Exception"/> class.
 /// </remarks>
 /// <seealso cref="Rfc9110Exception"/>
-public class ValidationException(string detail, int statusCode = 400)
-    : Rfc9110Exception("One or more validation errors occurred.", detail, statusCode);
+public class ValidationException(string detail, int statusCode = 400) : Rfc9110Exception(detail, statusCode);

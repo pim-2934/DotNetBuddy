@@ -1,3 +1,5 @@
+using DotNetBuddy.Domain;
+using DotNetBuddy.Example.Contracts;
 using DotNetBuddy.Example.Entities;
 using DotNetBuddy.Example.Exceptions;
 using DotNetBuddy.Example.Repositories.Interfaces;
