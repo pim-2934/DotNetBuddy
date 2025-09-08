@@ -4,7 +4,10 @@ namespace DotNetBuddy.Example.Contracts;
 
 public class WeatherForecastUpdateDto
 {
-    public DateOnly Date { get; init; }
+    [Required]
+    public DateOnly? Date { get; init; }
+
+    [Required]
     public int TemperatureC { get; init; }
 
     [StringLength(255)]

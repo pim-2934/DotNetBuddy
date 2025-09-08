@@ -55,17 +55,6 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork, I
         return weatherForecast;
     }
 
-    [HttpPost]
-    public async Task<WeatherForecast> Create(
-        WeatherForecast weatherForecast,
-        CancellationToken cancellationToken = default)
-    {
-        await extendedUnitOfWork.WeatherForecasts.AddAsync(weatherForecast, cancellationToken);
-        await extendedUnitOfWork.SaveAsync(cancellationToken);
-
-        return weatherForecast;
-    }
-
     [HttpGet("Crash")]
     public Task Crash()
     {
@@ -75,7 +64,7 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork, I
     // Consider using AutoMapper or similar for DTO-to-entity mapping.
     private static void MapDtoIntoEntity(ref WeatherForecast entity, WeatherForecastUpdateDto dto)
     {
-        entity.Date = dto.Date;
+        entity.Date = dto.Date!.Value;
         entity.TemperatureC = dto.TemperatureC;
         entity.Summary = dto.Summary;
     }

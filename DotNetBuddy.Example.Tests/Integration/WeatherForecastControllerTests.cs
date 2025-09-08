@@ -171,7 +171,7 @@ public class WeatherForecastControllerTests(TestWebApplicationFactory factory)
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.NotNull(problem);
-        Assert.Equal("One or more validation errors occurred.", problem.Title);
+        Assert.Equal("ValidationFailed", problem.Title);
         Assert.Equal(400, problem.Status);
     }
 
