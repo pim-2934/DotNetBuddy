@@ -9,8 +9,7 @@ namespace DotNetBuddy.Domain.Exceptions;
 /// It includes standard properties for specifying HTTP status codes as well as detailed error information.
 /// </remarks>
 /// <seealso cref="System.Exception"/>
-public abstract class Rfc9110Exception(string title, string detail, int statusCode)
-    : Exception
+public abstract class Rfc9110Exception(string detail, int statusCode) : Exception
 {
     /// <summary>
     /// Gets or sets the HTTP status code associated with the exception.
@@ -29,14 +28,4 @@ public abstract class Rfc9110Exception(string title, string detail, int statusCo
     /// typically used to identify the issue in a human-readable or machine-readable format.
     /// </remarks>
     public string? Detail { get; } = detail;
-
-    /// <summary>
-    /// Gets or sets the descriptive message associated with the exception.
-    /// </summary>
-    /// <remarks>
-    /// This property provides a human-readable explanation of the error, offering
-    /// additional context or details regarding the exception. It is typically used
-    /// to convey meaningful information to the client or end user.
-    /// </remarks>
-    public string Title { get; } = title;
 }

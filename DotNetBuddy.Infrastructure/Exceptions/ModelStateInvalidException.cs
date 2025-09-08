@@ -17,7 +17,6 @@ namespace DotNetBuddy.Infrastructure.Exceptions;
 /// <seealso cref="Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary"/>
 public class ModelStateInvalidException(ModelStateDictionary modelState) : Rfc9110Exception
 (
-    "One or more validation errors occurred.",
     string.Join
     (
         ", ",

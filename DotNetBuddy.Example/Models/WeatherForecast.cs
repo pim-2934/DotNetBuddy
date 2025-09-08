@@ -19,9 +19,12 @@ public sealed class WeatherForecast : IAuditableEntity<Guid>, ISoftDeletableEnti
     // Data
     public DateOnly Date { get; init; }
     public int TemperatureC { get; init; }
-    [StringLength(255)] public string? Summary { get; set; }
+
+    [StringLength(255)]
+    public string? Summary { get; set; }
 
     public Location? Location { get; set; }
 
-    [NotMapped] public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    [NotMapped]
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

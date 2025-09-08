@@ -1,4 +1,3 @@
-using DotNetBuddy.Domain.Exceptions;
 using DotNetBuddy.Example.Exceptions;
 using DotNetBuddy.Example.Models;
 using DotNetBuddy.Example.Repositories.Interfaces;
@@ -33,10 +32,15 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork) :
         return weatherForecast;
     }
 
-    [HttpGet("GetException")]
-    public Task GetException()
+    [HttpPost]
+    public async Task<WeatherForecast> Create(
+        WeatherForecast weatherForecast,
+        CancellationToken cancellationToken = default)
     {
-        throw new BuddyHttpException("This is a test exception", "Test", StatusCodes.Status418ImATeapot);
+        await extendedUnitOfWork.WeatherForecasts.AddAsync(weatherForecast, cancellationToken);
+        await extendedUnitOfWork.SaveAsync(cancellationToken);
+
+        return weatherForecast;
     }
 
     [HttpGet("Crash")]

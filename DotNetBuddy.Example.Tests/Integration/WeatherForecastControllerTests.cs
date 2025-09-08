@@ -92,32 +92,7 @@ public class WeatherForecastControllerTests(TestWebApplicationFactory factory)
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.NotNull(error);
-        Assert.Equal("NotFound", error.Detail);
-    }
-
-    [Fact]
-    public async Task GetException_ReturnsTeapotStatusCode()
-    {
-        // Act
-        var response = await _client.GetAsync("/WeatherForecast/GetException");
-
-        // Assert
-        Assert.Equal(418, (int)response.StatusCode);
-    }
-
-    [Fact]
-    public async Task GetException_ReturnsExpectedErrorMessage()
-    {
-        // Act
-        var response = await _client.GetAsync("/WeatherForecast/GetException");
-        var content = await response.Content.ReadAsStringAsync();
-        var error = JsonConvert.DeserializeObject<ProblemDetails>(content);
-
-        // Assert
-        Assert.NotNull(error);
-        Assert.Equal("Test", error.Detail);
-        Assert.Equal("This is a test exception", error.Title);
-        Assert.Equal(418, error.Status);
+        Assert.Equal("NotFound", error.Title);
     }
 
     [Fact]
