@@ -14,8 +14,10 @@ public interface IValidationService
     /// <typeparam name="TInput">The type of the input object used for validation. Must be a reference type.</typeparam>
     /// <param name="source">The source object to validate.</param>
     /// <param name="input">The input object used for validation.</param>
-    /// <returns>A collection of <see cref="ValidationResult"/> objects containing validation results. Returns an empty collection if no validator is registered or if no validation errors are found.</returns>
-    IEnumerable<ValidationResult> Validate<TSource, TInput>(TSource source, TInput input)
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>An asynchronous stream of <see cref="ValidationResult"/> objects containing validation results. Returns an empty stream if no validator is registered or if no validation errors are found.</returns>
+    IAsyncEnumerable<ValidationResult> ValidateAsync<TSource, TInput>(TSource source, TInput input,
+        CancellationToken cancellationToken = default)
         where TSource : class where TInput : class;
 
     /// <summary>
@@ -26,6 +28,8 @@ public interface IValidationService
     /// <typeparam name="TInput">The type of the input object used for validation. Must be a reference type.</typeparam>
     /// <param name="source">The source object to validate.</param>
     /// <param name="input">The input object used for validation.</param>
-    /// <returns>A collection of <see cref="ValidationResult"/> objects containing validation results. If any validation errors are found, an exception is thrown, and this method does not return normally.</returns>
-    void ValidateOrThrow<TSource, TInput>(TSource source, TInput input) where TSource : class where TInput : class;
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>A task that represents the asynchronous operation. If any validation errors are found, an exception is thrown, and this task does not complete successfully.</returns>
+    Task ValidateOrThrowAsync<TSource, TInput>(TSource source, TInput input,
+        CancellationToken cancellationToken = default) where TSource : class where TInput : class;
 }

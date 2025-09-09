@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Application.Services;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Tests.Entities;
@@ -17,7 +18,7 @@ public class ValidationServiceTests
     }
 
     [Fact]
-    public void Validate_WhenNoValidatorRegistered_ReturnsEmptyCollection()
+    public async Task Validate_WhenNoValidatorRegistered_ReturnsEmptyCollection()
     {
         // Arrange: build provider without registering any validator
         var services = new ServiceCollection();
@@ -29,17 +30,21 @@ public class ValidationServiceTests
         var input = new ComplexEntity { Id = source.Id, BaseValue = 1, BelowBaseValue = 2, UnchangeableValue = 8 };
 
         // Act
-        var results = service.Validate(source, input).ToList();
+        var results = new List<ValidationResult>();
+        await foreach (var result in service.ValidateAsync(source, input))
+        {
+            results.Add(result);
+        }
 
         // Assert
         Assert.Empty(results);
     }
 
     [Fact]
-    public void Validate_WithRegisteredValidator_ReturnsExpectedFailures()
+    public async Task Validate_WithRegisteredValidator_ReturnsExpectedFailures()
     {
         // Arrange
-        using var provider = BuildProviderWithValidator();
+        await using var provider = BuildProviderWithValidator();
         var service = provider.GetRequiredService<IValidationService>();
 
         var source = new ComplexEntity { Id = Guid.NewGuid(), BaseValue = 10, BelowBaseValue = 5, UnchangeableValue = 7 };
@@ -49,7 +54,11 @@ public class ValidationServiceTests
         var input = new ComplexEntity { Id = source.Id, BaseValue = 3, BelowBaseValue = 9, UnchangeableValue = 8 };
 
         // Act
-        var results = service.Validate(source, input).ToList();
+        var results = new List<ValidationResult>();
+        await foreach (var result in service.ValidateAsync(source, input))
+        {
+            results.Add(result);
+        }
 
         // Assert
         Assert.Equal(2, results.Count);
@@ -58,17 +67,21 @@ public class ValidationServiceTests
     }
 
     [Fact]
-    public void Validate_WithValidInput_ReturnsEmpty()
+    public async Task Validate_WithValidInput_ReturnsEmpty()
     {
         // Arrange
-        using var provider = BuildProviderWithValidator();
+        await using var provider = BuildProviderWithValidator();
         var service = provider.GetRequiredService<IValidationService>();
 
         var source = new ComplexEntity { Id = Guid.NewGuid(), BaseValue = 10, BelowBaseValue = 5, UnchangeableValue = 7 };
         var input = new ComplexEntity { Id = source.Id, BaseValue = 9, BelowBaseValue = 4, UnchangeableValue = 7 };
 
         // Act
-        var results = service.Validate(source, input).ToList();
+        var results = new List<ValidationResult>();
+        await foreach (var result in service.ValidateAsync(source, input))
+        {
+            results.Add(result);
+        }
 
         // Assert
         Assert.Empty(results);
