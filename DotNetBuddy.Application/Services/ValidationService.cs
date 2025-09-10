@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Exceptions;
 
@@ -11,19 +12,33 @@ namespace DotNetBuddy.Application.Services;
 public class ValidationService(IServiceProvider serviceProvider) : IValidationService
 {
     /// <inheritdoc />
-    public IEnumerable<ValidationResult> Validate<TSource, TInput>(TSource source, TInput input)
+    public async IAsyncEnumerable<ValidationResult> ValidateAsync<TSource, TInput>(TSource source, TInput input,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
         where TSource : class where TInput : class
     {
         var validator = serviceProvider.GetService(typeof(IValidator<TSource, TInput>));
 
-        return validator is null ? [] : ((IValidator<TSource, TInput>)validator).Validate(source, input);
+        if (validator is null)
+            yield break;
+
+        await foreach (var result in ((IValidator<TSource, TInput>)validator).ValidateAsync(source, input,
+                           cancellationToken))
+        {
+            yield return result;
+        }
     }
 
     /// <inheritdoc />
-    public void ValidateOrThrow<TSource, TInput>(TSource source, TInput input)
+    public async Task ValidateOrThrowAsync<TSource, TInput>(TSource source, TInput input,
+        CancellationToken cancellationToken = default)
         where TSource : class where TInput : class
     {
-        var validationResults = Validate(source, input).ToList();
+        var validationResults = new List<ValidationResult>();
+
+        await foreach (var result in ValidateAsync(source, input, cancellationToken))
+        {
+            validationResults.Add(result);
+        }
 
         if (validationResults.Count != 0)
             throw new ValidationFailedException(validationResults.Select(x => x.ErrorMessage ?? string.Empty));

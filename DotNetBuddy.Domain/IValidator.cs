@@ -10,11 +10,13 @@ namespace DotNetBuddy.Domain;
 public interface IValidator<in TSource, in TInput> where TSource : class where TInput : class
 {
     /// <summary>
-    /// Validates the provided source object against the input parameters using a registered validator.
+    /// Validates the provided source object against the input parameters using a registered validator service.
     /// </summary>
     /// <param name="source">The source object to be validated.</param>
-    /// <param name="input">The input parameters against which the source object is validated.</param>
-    /// <returns>A collection of <see cref="ValidationResult"/> objects containing validation results.
-    /// Returns an empty collection if no validator is registered or no validation errors occur.</returns>
-    IEnumerable<ValidationResult> Validate(TSource source, TInput input);
+    /// <param name="input">The input object containing the validation criteria.</param>
+    /// <param name="cancellationToken">An optional token to observe for cancellation requests.</param>
+    /// <returns>A collection of <see cref="ValidationResult"/> objects that represent the results of validation.
+    /// If no validator is registered, or if no validation errors occur, an empty collection is returned.</returns>
+    IAsyncEnumerable<ValidationResult> ValidateAsync(TSource source, TInput input,
+        CancellationToken cancellationToken = default);
 }

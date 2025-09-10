@@ -24,7 +24,7 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork, I
             cancellationToken: cancellationToken
         ) ?? throw new NotFoundException("Weather forecast not found.");
 
-        validationService.ValidateOrThrow(weatherForecast, dto);
+        await validationService.ValidateOrThrowAsync(weatherForecast, dto, cancellationToken);
         MapDtoIntoEntity(ref weatherForecast, dto);
 
         extendedUnitOfWork.WeatherForecasts.UpdateShallow(weatherForecast);
