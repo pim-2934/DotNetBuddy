@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using DotNetBuddy.Domain.Enums;
 
-namespace DotNetBuddy.Infrastructure.Extensions;
+namespace DotNetBuddy.Application.Extensions;
 
 /// <summary>
 /// Provides extension methods for IQueryable to perform advanced query operations such as ordering and searching.
