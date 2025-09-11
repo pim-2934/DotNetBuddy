@@ -28,7 +28,7 @@ public interface IValidator<in TItem, in TInput> where TItem : class where TInpu
     /// <summary>
     /// Validates the provided source object against input parameters using the appropriate validator service implementation.
     /// </summary>
-    /// <param name="source">The source object to be validated.</param>
+    /// <param name="item">The source object to be validated.</param>
     /// <param name="input">The input object containing new data.</param>
     /// <param name="cancellationToken">An optional token used to observe cancellation requests.</param>
     /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation results.
