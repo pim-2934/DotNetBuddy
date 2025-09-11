@@ -22,10 +22,10 @@ namespace DotNetBuddy.Infrastructure.Installers;
 public class ValidatorsInstaller : IInstaller
 {
     /// <summary>
-    /// Registers validator implementations in the dependency injection container by discovering all types that implement the
-    /// generic <see cref="IValidator{TRequest, TResponse}"/> interface within the application domain's current assemblies.
+    /// Installs services required for validation within the application by discovering and
+    /// registering appropriate validator types, and setting up the validation service.
     /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the discovered validators should be registered.</param>
+    /// <param name="services">A collection of service descriptors used to configure the services for the application.</param>
     public void Install(IServiceCollection services)
     {
         using var provider = services.BuildServiceProvider();
@@ -37,17 +37,28 @@ public class ValidatorsInstaller : IInstaller
                 t is { IsClass: true, IsAbstract: false, IsPublic: true } &&
                 t.GetInterfaces().Any(i =>
                     i.IsGenericType &&
-                    i.GetGenericTypeDefinition() == typeof(IValidator<,>)
+                    (i.GetGenericTypeDefinition() == typeof(IValidator<>) ||
+                     i.GetGenericTypeDefinition() == typeof(IValidator<,>))
                 )
             )
             .ToList();
 
         foreach (var type in validatorTypes)
         {
-            var interfaceTypes = type.GetInterfaces()
+            var singleGenericInterfaces = type
+                .GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
+
+            foreach (var interfaceType in singleGenericInterfaces)
+            {
+                services.AddScoped(interfaceType, type);
+            }
+
+            var doubleGenericInterfaces = type
+                .GetInterfaces()
                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<,>));
 
-            foreach (var interfaceType in interfaceTypes)
+            foreach (var interfaceType in doubleGenericInterfaces)
             {
                 services.AddScoped(interfaceType, type);
             }
