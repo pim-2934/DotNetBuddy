@@ -1,6 +1,6 @@
+using DotNetBuddy.Application.Extensions;
 using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
-using DotNetBuddy.Infrastructure.Extensions;
 using DotNetBuddy.Tests.Entities;
 using Microsoft.EntityFrameworkCore;
 

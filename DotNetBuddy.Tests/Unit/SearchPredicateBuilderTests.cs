@@ -1,5 +1,5 @@
+using DotNetBuddy.Application.Utilities;
 using DotNetBuddy.Domain.Attributes;
-using DotNetBuddy.Infrastructure.Utilities;
 
 namespace DotNetBuddy.Tests.Unit;
 

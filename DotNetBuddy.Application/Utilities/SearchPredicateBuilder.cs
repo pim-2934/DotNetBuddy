@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using DotNetBuddy.Domain.Attributes;
 
-namespace DotNetBuddy.Infrastructure.Utilities;
+namespace DotNetBuddy.Application.Utilities;
 
 /// <summary>
 /// Builds search predicates for entities based on properties marked with <see cref="SearchableAttribute"/>.
