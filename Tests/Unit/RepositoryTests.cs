@@ -1,10 +1,10 @@
 using DotNetBuddy.Application.Extensions;
-using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
-using DotNetBuddy.Tests.Entities;
+using DotNetBuddy.Extensions.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Tests.Entities;
 
-namespace DotNetBuddy.Tests.Unit;
+namespace Tests.Unit;
 
 public class RepositoryTests
 {

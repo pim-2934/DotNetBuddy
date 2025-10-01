@@ -1,6 +1,6 @@
 ﻿using DotNetBuddy.Domain;
 
-namespace DotNetBuddy.Tests.Entities;
+namespace Tests.Entities;
 
 public class NavigationEntity : IEntity<Guid>
 {

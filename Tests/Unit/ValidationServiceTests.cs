@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Application.Services;
 using DotNetBuddy.Domain;
-using DotNetBuddy.Tests.Entities;
-using DotNetBuddy.Tests.Validators;
 using Microsoft.Extensions.DependencyInjection;
+using Tests.Entities;
+using Tests.Validators;
 
-namespace DotNetBuddy.Tests.Unit;
+namespace Tests.Unit;
 
 public class ValidationServiceTests
 {

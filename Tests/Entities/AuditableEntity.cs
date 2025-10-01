@@ -2,7 +2,7 @@
 using DotNetBuddy.Domain;
 using DotNetBuddy.Domain.Attributes;
 
-namespace DotNetBuddy.Tests.Entities;
+namespace Tests.Entities;
 
 public class AuditableEntity : IAuditableEntity<Guid>
 {

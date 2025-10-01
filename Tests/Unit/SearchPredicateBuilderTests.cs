@@ -1,7 +1,7 @@
 using DotNetBuddy.Application.Utilities;
 using DotNetBuddy.Domain.Attributes;
 
-namespace DotNetBuddy.Tests.Unit;
+namespace Tests.Unit;
 
 public class SearchPredicateBuilderTests
 {

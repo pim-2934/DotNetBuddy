@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using DotNetBuddy.Domain;
-using DotNetBuddy.Tests.Entities;
+using Tests.Entities;
 
-namespace DotNetBuddy.Tests.Validators;
+namespace Tests.Validators;
 
 public class ComplexEntityUpdateValidator : IValidator<ComplexEntity, ComplexEntity>
 {

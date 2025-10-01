@@ -1,8 +1,8 @@
 ﻿using DotNetBuddy.Extensions.EntityFrameworkCore.Extensions;
-using DotNetBuddy.Tests.Entities;
 using Microsoft.EntityFrameworkCore;
+using Tests.Entities;
 
-namespace DotNetBuddy.Tests;
+namespace Tests;
 
 public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(options)
 {
