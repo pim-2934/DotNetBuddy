@@ -59,7 +59,7 @@ public class SearchPredicateBuilderTests
             new Root { Name = "Z", Child = new Child { Title = "Other" } }
         };
 
-        var expr = SearchPredicateBuilder.Build<Root>("World");
+        var expr = SearchPredicateBuilder.Build<Root>("World", true);
         Assert.NotNull(expr);
 
         var compiled = expr.Compile();
@@ -79,7 +79,7 @@ public class SearchPredicateBuilderTests
             new Root { Name = "Z", Children = [new Child { Title = "Baz" }] }
         };
 
-        var expr = SearchPredicateBuilder.Build<Root>("Bar");
+        var expr = SearchPredicateBuilder.Build<Root>("Bar", true);
         Assert.NotNull(expr);
 
         var compiled = expr.Compile();
