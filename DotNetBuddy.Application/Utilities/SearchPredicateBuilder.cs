@@ -27,7 +27,7 @@ public static class SearchPredicateBuilder
         Expression? orChain = null;
 
         orChain = OrElse(orChain, BuildDirectPropertiesPredicate(typeof(TEntity), parameter, searchTerm));
-        
+
         if (searchRelations)
         {
             orChain = OrElse(orChain, BuildSingleNavigationPredicate(typeof(TEntity), parameter, searchTerm));
