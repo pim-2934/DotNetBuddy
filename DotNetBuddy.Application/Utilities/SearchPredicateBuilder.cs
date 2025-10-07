@@ -11,12 +11,14 @@ public static class SearchPredicateBuilder
 {
     /// <summary>
     /// Builds a search predicate expression for the given entity type and search term.
-    /// Returns null if the search term is null or whitespace.
+    /// If the search term is null or whitespace, the method returns null.
+    /// Supports optional relation searching for single and collection navigation properties.
     /// </summary>
-    /// <typeparam name="TEntity">Entity type</typeparam>
-    /// <param name="searchTerm">Term to search for</param>
-    /// <returns>Expression or null if the search term is empty</returns>
-    public static Expression<Func<TEntity, bool>>? Build<TEntity>(string searchTerm)
+    /// <typeparam name="TEntity">The type of entity for which the predicate is built.</typeparam>
+    /// <param name="searchTerm">The term to search for in the entity properties. Null or whitespace results in no predicate.</param>
+    /// <param name="searchRelations">Indicates whether to include related entities in the search. Default is false.</param>
+    /// <returns>An expression representing the search predicate, or null if the search term is empty.</returns>
+    public static Expression<Func<TEntity, bool>>? Build<TEntity>(string searchTerm, bool searchRelations = false)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
             return null;
@@ -25,8 +27,12 @@ public static class SearchPredicateBuilder
         Expression? orChain = null;
 
         orChain = OrElse(orChain, BuildDirectPropertiesPredicate(typeof(TEntity), parameter, searchTerm));
-        orChain = OrElse(orChain, BuildSingleNavigationPredicate(typeof(TEntity), parameter, searchTerm));
-        orChain = OrElse(orChain, BuildCollectionNavigationPredicate(typeof(TEntity), parameter, searchTerm));
+
+        if (searchRelations)
+        {
+            orChain = OrElse(orChain, BuildSingleNavigationPredicate(typeof(TEntity), parameter, searchTerm));
+            orChain = OrElse(orChain, BuildCollectionNavigationPredicate(typeof(TEntity), parameter, searchTerm));
+        }
 
         return Expression.Lambda<Func<TEntity, bool>>(orChain, parameter);
     }
