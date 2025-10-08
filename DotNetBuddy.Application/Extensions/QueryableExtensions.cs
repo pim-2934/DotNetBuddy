@@ -65,7 +65,7 @@ public static class QueryableExtensions
     /// <param name="searchTerm">The term to search for within the queryable collection.</param>
     /// <param name="searchRelations">Indicates whether to include related entities in the search.</param>
     /// <returns>The filtered queryable collection if a valid predicate is built; otherwise, the unmodified queryable.</returns>
-    public static IQueryable<T> Search<T>(this IQueryable<T> queryable, string searchTerm, bool searchRelations = false)
+    public static IQueryable<T> Search<T>(this IQueryable<T> queryable, string searchTerm, bool searchRelations = true)
         where T : class
     {
         var predicate = Utilities.SearchPredicateBuilder.Build<T>(searchTerm, searchRelations);

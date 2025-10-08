@@ -10,8 +10,10 @@ public class SearchPredicateBuilderTests
         [Searchable]
         public string? Name { get; set; }
 
+        [Searchable]
         public Child? Child { get; set; }
 
+        [Searchable]
         public List<Child> Children { get; set; } = [];
     }
 
@@ -59,7 +61,7 @@ public class SearchPredicateBuilderTests
             new Root { Name = "Z", Child = new Child { Title = "Other" } }
         };
 
-        var expr = SearchPredicateBuilder.Build<Root>("World", true);
+        var expr = SearchPredicateBuilder.Build<Root>("World");
         Assert.NotNull(expr);
 
         var compiled = expr.Compile();
@@ -79,7 +81,7 @@ public class SearchPredicateBuilderTests
             new Root { Name = "Z", Children = [new Child { Title = "Baz" }] }
         };
 
-        var expr = SearchPredicateBuilder.Build<Root>("Bar", true);
+        var expr = SearchPredicateBuilder.Build<Root>("Bar");
         Assert.NotNull(expr);
 
         var compiled = expr.Compile();
