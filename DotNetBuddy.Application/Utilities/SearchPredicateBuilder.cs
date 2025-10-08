@@ -1,126 +1,230 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using DotNetBuddy.Domain.Attributes;
 
 namespace DotNetBuddy.Application.Utilities;
 
 /// <summary>
 /// Builds search predicates for entities based on properties marked with <see cref="SearchableAttribute"/>.
-/// Supports direct string properties, single navigation properties and collection navigations.
 /// </summary>
 public static class SearchPredicateBuilder
 {
     /// <summary>
     /// Builds a search predicate expression for the given entity type and search term.
-    /// If the search term is null or whitespace, the method returns null.
-    /// Supports optional relation searching for single and collection navigation properties.
+    /// Searches properties and navigation properties marked with [Searchable] attribute.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity for which the predicate is built.</typeparam>
-    /// <param name="searchTerm">The term to search for in the entity properties. Null or whitespace results in no predicate.</param>
-    /// <param name="searchRelations">Indicates whether to include related entities in the search. Default is false.</param>
+    /// <param name="searchTerm">The term to search for in the entity properties.</param>
+    /// <param name="includeRelations">Whether to include navigation properties in the search. Default is true.</param>
     /// <returns>An expression representing the search predicate, or null if the search term is empty.</returns>
-    public static Expression<Func<TEntity, bool>>? Build<TEntity>(string searchTerm, bool searchRelations = false)
+    public static Expression<Func<TEntity, bool>>? Build<TEntity>(string searchTerm, bool includeRelations = true)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
             return null;
 
         var parameter = Expression.Parameter(typeof(TEntity), "x");
-        Expression? orChain = null;
+        var body = BuildEntitySearchExpression(typeof(TEntity), parameter, searchTerm, includeRelations);
 
-        orChain = OrElse(orChain, BuildDirectPropertiesPredicate(typeof(TEntity), parameter, searchTerm));
+        return body == null ? _ => false : Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+    }
 
-        if (searchRelations)
+    private static Expression? BuildEntitySearchExpression(
+        Type entityType,
+        Expression instance,
+        string searchTerm,
+        bool includeRelations,
+        HashSet<Type>? visitedTypes = null)
+    {
+        visitedTypes ??= [];
+        if (!visitedTypes.Add(entityType))
+            return null;
+
+        var result = BuildStringPropertiesSearchExpression(entityType, instance, searchTerm);
+
+        if (includeRelations)
         {
-            orChain = OrElse(orChain, BuildSingleNavigationPredicate(typeof(TEntity), parameter, searchTerm));
-            orChain = OrElse(orChain, BuildCollectionNavigationPredicate(typeof(TEntity), parameter, searchTerm));
+            result = CombineWithOr(
+                result,
+                BuildNavigationPropertiesSearchExpression(entityType, instance, searchTerm, visitedTypes)
+            );
         }
 
-        return Expression.Lambda<Func<TEntity, bool>>(orChain, parameter);
+        return result;
     }
 
-    private static Expression? BuildDirectPropertiesPredicate(Type entityType, ParameterExpression parameter,
-        string term)
+    private static Expression? BuildNavigationPropertiesSearchExpression(
+        Type entityType,
+        Expression instance,
+        string searchTerm,
+        HashSet<Type> visitedTypes)
     {
-        return GetSearchableStringProperties(entityType)
-            .Select(prop => Expression.Property(parameter, prop))
-            .Select(member => ContainsOnMember(member, term))
-            .Aggregate<Expression?, Expression?>(null, OrElse);
+        var collectionsSearch = BuildCollectionNavigationsSearchExpression(
+            entityType, instance, searchTerm, visitedTypes);
+
+        var singleNavsSearch = BuildSingleNavigationsSearchExpression(
+            entityType, instance, searchTerm, visitedTypes);
+
+        return CombineWithOr(collectionsSearch, singleNavsSearch);
     }
 
-    private static Expression? BuildSingleNavigationPredicate(Type entityType, ParameterExpression parameter,
-        string term)
+    private static Expression? BuildStringPropertiesSearchExpression(
+        Type entityType,
+        Expression instance,
+        string searchTerm)
     {
-        var singleNavProps = entityType
-            .GetProperties()
-            .Where(p => p.PropertyType.IsClass && p.PropertyType != typeof(string) && !p.PropertyType.IsArray &&
-                        !IsCollectionType(p.PropertyType));
+        var stringProps = GetSearchablePropertiesOfType(entityType, typeof(string));
+        if (stringProps.Count == 0)
+            return null;
 
-        return (from nav in singleNavProps
-                let relatedType = nav.PropertyType
-                let relatedSearchables = GetSearchableStringProperties(relatedType)
-                where relatedSearchables.Any()
-                let relatedInstance = Expression.Property(parameter, nav)
-                let notNull = Expression.NotEqual(relatedInstance, Expression.Constant(null, nav.PropertyType))
-                from relProp in relatedSearchables
-                let relatedMember = Expression.Property(relatedInstance, relProp)
-                let contains = ContainsOnMember(relatedMember, term)
-                select Expression.AndAlso(notNull, contains))
-            .Aggregate<BinaryExpression, Expression?>(null, OrElse);
+        return stringProps
+            .Select(prop => BuildPropertyContainsExpression(instance, prop, searchTerm))
+            .Aggregate<Expression, Expression?>(null, CombineWithOr);
     }
 
-    private static Expression? BuildCollectionNavigationPredicate(Type entityType, ParameterExpression parameter,
-        string term)
+    private static Expression? BuildCollectionNavigationsSearchExpression(
+        Type entityType,
+        Expression instance,
+        string searchTerm,
+        HashSet<Type> visitedTypes)
     {
-        Expression? orChain = null;
+        var collectionProps = GetSearchableCollectionProperties(entityType);
+        if (collectionProps.Count == 0)
+            return null;
 
-        var collectionProps = entityType
-            .GetProperties()
-            .Where(p => IsCollectionType(p.PropertyType));
+        Expression? result = null;
 
-        foreach (var nav in collectionProps)
+        foreach (var prop in collectionProps)
         {
-            if (!TryGetElementType(nav.PropertyType, out var elementType))
-                continue;
+            Expression? propSearch = BuildCollectionPropertySearchExpression(
+                instance, prop, searchTerm, visitedTypes);
 
-            var relatedSearchables = GetSearchableStringProperties(elementType).ToArray();
-            if (relatedSearchables.Length == 0)
-                continue;
-
-            var collectionMember = Expression.Property(parameter, nav);
-            var notNull = Expression.NotEqual(collectionMember, Expression.Constant(null, nav.PropertyType));
-
-            orChain = (from relProp in relatedSearchables
-                       let item = Expression.Parameter(elementType, "item")
-                       let itemMember = Expression.Property(item, relProp)
-                       let contains = ContainsOnMember(itemMember, term)
-                       select Expression.Lambda(contains, item)
-                    into predicate
-                       select BuildAnyCall(collectionMember, elementType, predicate)
-                    into any
-                       select Expression.AndAlso(notNull, any))
-                .Aggregate(orChain, OrElse);
+            if (propSearch != null)
+            {
+                result = result == null ? propSearch : Expression.OrElse(result, propSearch);
+            }
         }
 
-        return orChain;
+        return result;
     }
 
-    private static IEnumerable<System.Reflection.PropertyInfo> GetSearchableStringProperties(Type type)
+    private static Expression? BuildCollectionPropertySearchExpression(
+        Expression instance,
+        PropertyInfo collectionProp,
+        string searchTerm,
+        HashSet<Type> visitedTypes)
     {
-        return type
-            .GetProperties()
-            .Where(p => p.PropertyType == typeof(string) &&
-                        p.GetCustomAttributes(typeof(SearchableAttribute), true).Length != 0);
+        if (!TryGetElementType(collectionProp.PropertyType, out var elementType))
+            return null;
+
+        var itemParam = Expression.Parameter(elementType, "item");
+        var itemSearchExpression = BuildEntitySearchExpression(
+            elementType, itemParam, searchTerm, true, [.. visitedTypes]);
+
+        if (itemSearchExpression == null)
+            return null;
+
+        var collectionAccess = Expression.Property(instance, collectionProp);
+        var nullCheck = Expression.NotEqual(collectionAccess, Expression.Constant(null, collectionProp.PropertyType));
+
+        var anyLambda = Expression.Lambda(itemSearchExpression, itemParam);
+        var anyCall = BuildAnyCall(collectionAccess, elementType, anyLambda);
+
+        return Expression.AndAlso(nullCheck, anyCall);
     }
 
-    private static Expression ContainsOnMember(Expression memberExpression, string term)
+    private static Expression? BuildSingleNavigationsSearchExpression(
+        Type entityType,
+        Expression instance,
+        string searchTerm,
+        HashSet<Type> visitedTypes)
+    {
+        var singleNavProps = GetSearchableSingleNavigationProperties(entityType);
+        if (!singleNavProps.Any())
+            return null;
+
+        Expression? result = null;
+
+        foreach (var prop in singleNavProps)
+        {
+            Expression? propSearch = BuildSingleNavigationPropertySearchExpression(
+                instance, prop, searchTerm, visitedTypes);
+
+            if (propSearch != null)
+            {
+                result = result == null ? propSearch : Expression.OrElse(result, propSearch);
+            }
+        }
+
+        return result;
+    }
+
+    private static Expression? BuildSingleNavigationPropertySearchExpression(
+        Expression instance,
+        PropertyInfo navProp,
+        string searchTerm,
+        HashSet<Type> visitedTypes)
+    {
+        var navAccess = Expression.Property(instance, navProp);
+        var nullCheck = Expression.NotEqual(navAccess, Expression.Constant(null, navProp.PropertyType));
+
+        var navSearch = BuildEntitySearchExpression(
+            navProp.PropertyType, navAccess, searchTerm, true, [.. visitedTypes]);
+
+        return navSearch == null ? null : Expression.AndAlso(nullCheck, navSearch);
+    }
+
+    private static Expression BuildPropertyContainsExpression(
+        Expression instance,
+        PropertyInfo property,
+        string searchTerm)
+    {
+        var propAccess = Expression.Property(instance, property);
+        return BuildStringContainsExpression(propAccess, searchTerm);
+    }
+
+    private static Expression BuildStringContainsExpression(Expression stringProperty, string searchTerm)
     {
         var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)])!;
-        var termConst = Expression.Constant(term);
-        return Expression.Call(memberExpression, containsMethod, termConst);
+        var searchTermExpr = Expression.Constant(searchTerm);
+
+        // Add null check for the string property
+        var nullCheck = Expression.NotEqual(stringProperty, Expression.Constant(null, typeof(string)));
+        var contains = Expression.Call(stringProperty, containsMethod, searchTermExpr);
+
+        return Expression.AndAlso(nullCheck, contains);
     }
 
-    private static Expression OrElse(Expression? left, Expression? right)
+    private static IReadOnlyCollection<PropertyInfo> GetSearchablePropertiesOfType(
+        Type entityType,
+        Type propertyType)
     {
-        if (left == null) return right ?? left!;
+        return entityType.GetProperties()
+            .Where(p => p.PropertyType == propertyType &&
+                        p.GetCustomAttributes(typeof(SearchableAttribute), true).Length > 0)
+            .ToArray();
+    }
+
+    private static IReadOnlyCollection<PropertyInfo> GetSearchableCollectionProperties(Type entityType)
+    {
+        return entityType.GetProperties()
+            .Where(p => IsCollectionType(p.PropertyType) &&
+                        p.GetCustomAttributes(typeof(SearchableAttribute), true).Length > 0)
+            .ToArray();
+    }
+
+    private static IReadOnlyCollection<PropertyInfo> GetSearchableSingleNavigationProperties(Type entityType)
+    {
+        return entityType.GetProperties()
+            .Where(p => p.GetCustomAttributes(typeof(SearchableAttribute), true).Length > 0 &&
+                        p.PropertyType != typeof(string) &&
+                        p.PropertyType.IsClass &&
+                        !IsCollectionType(p.PropertyType))
+            .ToArray();
+    }
+
+    private static Expression? CombineWithOr(Expression? left, Expression? right)
+    {
+        if (left == null) return right;
         if (right == null) return left;
 
         return Expression.OrElse(left, right);
@@ -128,24 +232,22 @@ public static class SearchPredicateBuilder
 
     private static bool TryGetElementType(Type collectionType, out Type elementType)
     {
+        elementType = null!;
+
         if (collectionType.IsArray)
         {
             elementType = collectionType.GetElementType()!;
             return true;
         }
 
-        if (collectionType.IsGenericType)
-        {
-            var args = collectionType.GetGenericArguments();
-            if (args.Length == 1)
-            {
-                elementType = args[0];
-                return true;
-            }
-        }
+        if (!collectionType.IsGenericType) return false;
 
-        elementType = null!;
-        return false;
+        var args = collectionType.GetGenericArguments();
+
+        if (args.Length != 1) return false;
+
+        elementType = args[0];
+        return true;
     }
 
     private static Expression BuildAnyCall(Expression collection, Type elementType, LambdaExpression predicate)
@@ -166,21 +268,17 @@ public static class SearchPredicateBuilder
         if (type.IsArray)
             return true;
 
-        if (type.IsGenericType)
-        {
-            var genericTypeDefinition = type.GetGenericTypeDefinition();
-            if (genericTypeDefinition == typeof(IEnumerable<>) ||
-                genericTypeDefinition == typeof(ICollection<>) ||
-                genericTypeDefinition == typeof(IList<>))
-            {
-                return true;
-            }
-        }
+        if (!type.IsGenericType)
+            return type.GetInterfaces().Any(i =>
+                i.IsGenericType &&
+                (i.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
+                 i.GetGenericTypeDefinition() == typeof(ICollection<>) ||
+                 i.GetGenericTypeDefinition() == typeof(IList<>)));
 
-        return type.GetInterfaces().Any(i =>
-            i.IsGenericType &&
-            (i.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
-             i.GetGenericTypeDefinition() == typeof(ICollection<>) ||
-             i.GetGenericTypeDefinition() == typeof(IList<>)));
+        var genericTypeDefinition = type.GetGenericTypeDefinition();
+        return genericTypeDefinition == typeof(IEnumerable<>) ||
+               genericTypeDefinition == typeof(ICollection<>) ||
+               genericTypeDefinition == typeof(IList<>) ||
+               genericTypeDefinition == typeof(List<>);
     }
 }

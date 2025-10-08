@@ -121,6 +121,7 @@ That’s it. Map your endpoints/controllers and run the app.
 - [Configuration System](./Docs/Configs.md)
 - [Exception Handling](./Docs/Exceptions.md)
 - [Installers](./Docs/Installers.md)
+- [Search](./Docs/Search.md)
 
 ## Extension: EntityFrameworkCore
 - [Audit System](./Docs/Audit.md)
