@@ -16,9 +16,8 @@ app.UseBuddyExceptions();
 
 ```csharp
 public class AccountInactiveException(string message)
-    : Rfc9110Exception
+    : ResponseException
     (
-        nameof(AccountInactiveException).Replace("Exception", string.Empty),
         message,
         StatusCodes.Status401Unauthorized
     );
@@ -43,5 +42,5 @@ Results in valid RFC 9110 compliant response:
 
 ## Features
 
-- Handles and serializes exceptions using RFC 9110 compliance.
+- Handles and serializes exceptions using RFC 7807 compliance.
 - Outputs JSON error responses.

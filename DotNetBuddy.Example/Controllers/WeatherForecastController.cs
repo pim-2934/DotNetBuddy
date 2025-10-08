@@ -61,6 +61,17 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork, I
         throw new ApplicationException("Crash and Burn");
     }
 
+    [HttpGet("Exception")]
+    public Task Exception()
+    {
+        throw new TranslatableWithVariablesException("Something went wrong!", new Dictionary<string, object>
+        {
+            {
+                "Foo", "Bar"
+            }
+        });
+    }
+
     // Consider using AutoMapper or similar for DTO-to-entity mapping.
     private static void MapDtoIntoEntity(ref WeatherForecast entity, WeatherForecastUpdateDto dto)
     {

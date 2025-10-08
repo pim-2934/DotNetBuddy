@@ -9,5 +9,5 @@ namespace DotNetBuddy.Example.Exceptions;
 /// This exception is specifically designed for scenarios where a resource is requested by the client
 /// but does not exist, returning a standardized HTTP 404 Not Found status code.
 /// </remarks>
-/// <seealso cref="Rfc9110Exception"/>
-public class NotFoundException(string message) : Rfc9110Exception(message, StatusCodes.Status404NotFound);
+/// <seealso cref="ResponseException"/>
+public class NotFoundException(string message) : ResponseException(message, StatusCodes.Status404NotFound);

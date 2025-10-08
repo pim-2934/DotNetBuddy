@@ -3,6 +3,7 @@ using System.Text;
 using DotNetBuddy.Application.Utilities;
 using DotNetBuddy.Example.Contracts;
 using DotNetBuddy.Example.Entities;
+using DotNetBuddy.Example.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -117,6 +118,25 @@ public class WeatherForecastControllerTests(TestWebApplicationFactory factory)
         // Assert
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         Assert.NotEmpty(content);
+    }
+
+    [Fact]
+    public async Task Exception_ReturnsProblemDetailsWithMetadata()
+    {
+        // Act
+        var response = await _client.GetAsync("/WeatherForecast/Exception");
+        var content = await response.Content.ReadAsStringAsync();
+        var problemDetails = JsonConvert.DeserializeObject<TranslatableWithVariablesException>(content);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.NotNull(problemDetails);
+        Assert.Equal("Something went wrong!", problemDetails.Detail);
+
+        // Validate metadata exists and contains expected values
+        Assert.NotNull(problemDetails.Metadata);
+        Assert.True(problemDetails.Metadata.ContainsKey("Foo"));
+        Assert.Equal("Bar", problemDetails.Metadata["Foo"]);
     }
 
     [Fact]
