@@ -7,50 +7,45 @@ using Microsoft.AspNetCore.Mvc;
 namespace DotNetBuddy.Infrastructure.Middleware;
 
 /// <summary>
-/// Middleware for handling exceptions conforming to the RFC 9110 specification in an ASP.NET Core application.
+/// Middleware component for handling exceptions and generating appropriate HTTP responses.
 /// </summary>
 /// <remarks>
-/// This middleware is responsible for intercepting exceptions of type <see cref="DotNetBuddy.Domain.Exceptions.Rfc9110Exception"/>
-/// during the request pipeline and formatting them as HTTP Problem Details responses, as specified by RFC 9110.
+/// The <c>ExceptionMiddleware</c> intercepts exceptions of type <c>ResponseException</c> thrown
+/// during the request pipeline, converts them into structured problem details responses,
+/// and sends them back to the client with the appropriate HTTP status code and content type.
+/// It formats the response as a JSON object conforming to the "application/problem+json"
+/// specification. Additional metadata including request instance and optional trace
+/// identifiers are added to the response for enhanced debugging purposes.
 /// </remarks>
-/// <example>
-/// Use this middleware in the request pipeline to provide consistent error response handling for API clients.
-/// </example>
-/// <param name="next">The next middleware in the request pipeline.</param>
-/// <exception cref="DotNetBuddy.Domain.Exceptions.Rfc9110Exception">
-/// Thrown when an exception conforming to the RFC 9110 standard occurs in the application.
-/// </exception>
 public class ExceptionMiddleware(RequestDelegate next)
 {
     /// <summary>
-    /// Handles exceptions in the HTTP request pipeline by catching <see cref="Rfc9110Exception"/>
-    /// and returning structured error responses that comply with RFC 9110 standards.
+    /// Handles incoming HTTP requests, invokes the next middleware in the pipeline, and processes exceptions
+    /// of type <see cref="ResponseException"/> to generate appropriate HTTP responses.
     /// </summary>
-    /// <param name="httpContext">The HTTP context that provides information about the current HTTP request.</param>
-    /// <returns>
-    /// A <see cref="Task"/> representing the asynchronous middleware operation. If an
-    /// <see cref="Rfc9110Exception"/> is caught, the task writes a structured problem detail
-    /// response to the client.
-    /// </returns>
+    /// <param name="httpContext">The <see cref="HttpContext"/> for the current HTTP request.</param>
+    /// <returns>A <see cref="Task"/> that represents the asynchronous operation of the middleware logic.</returns>
     public async Task InvokeAsync(HttpContext httpContext)
     {
         try
         {
             await next(httpContext);
         }
-        catch (Rfc9110Exception ex)
+        catch (ResponseException ex)
         {
             httpContext.Response.StatusCode = ex.StatusCode;
             httpContext.Response.ContentType = "application/problem+json";
 
             var problemDetails = new ProblemDetails
             {
-                Title = ex.GetType().Name.Replace("Exception", string.Empty),
+                Title = ex.GetTranslationKey(),
                 Detail = ex.Detail,
                 Status = ex.StatusCode,
                 Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}",
+
                 Extensions =
                 {
+                    ["metadata"] = ex.Metadata,
                     ["requestId"] = httpContext.TraceIdentifier
                 }
             };
