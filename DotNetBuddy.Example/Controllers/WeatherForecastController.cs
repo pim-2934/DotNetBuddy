@@ -64,12 +64,10 @@ public class WeatherForecastController(IExtendedUnitOfWork extendedUnitOfWork, I
     [HttpGet("Exception")]
     public Task Exception()
     {
-        throw new TranslatableWithVariablesException("Something went wrong!", new Dictionary<string, object>
+        throw new TranslatableWithMetadataException("Something went wrong!")
         {
-            {
-                "Foo", "Bar"
-            }
-        });
+            Foo = "Bar"
+        };
     }
 
     // Consider using AutoMapper or similar for DTO-to-entity mapping.

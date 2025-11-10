@@ -45,7 +45,7 @@ public class ExceptionMiddleware(RequestDelegate next)
 
                 Extensions =
                 {
-                    ["metadata"] = ex.Metadata,
+                    ["metadata"] = ex.GetMetadata(),
                     ["requestId"] = httpContext.TraceIdentifier
                 }
             };

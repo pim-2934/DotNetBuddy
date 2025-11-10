@@ -3,7 +3,7 @@ using System.Text;
 using DotNetBuddy.Application.Utilities;
 using DotNetBuddy.Example.Contracts;
 using DotNetBuddy.Example.Entities;
-using DotNetBuddy.Example.Exceptions;
+using DotNetBuddy.Example.Tests.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -126,7 +126,7 @@ public class WeatherForecastControllerTests(TestWebApplicationFactory factory)
         // Act
         var response = await _client.GetAsync("/WeatherForecast/Exception");
         var content = await response.Content.ReadAsStringAsync();
-        var problemDetails = JsonConvert.DeserializeObject<TranslatableWithVariablesException>(content);
+        var problemDetails = JsonConvert.DeserializeObject<ProblemDetailsResponseWithMetadata>(content);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

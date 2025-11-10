@@ -1,3 +1,5 @@
+using DotNetBuddy.Domain.Attributes;
+
 namespace DotNetBuddy.Domain.Exceptions;
 
 /// <summary>
@@ -8,7 +10,7 @@ namespace DotNetBuddy.Domain.Exceptions;
 /// and optional metadata for exception handling in the application. It also provides a method to retrieve a translation key
 /// derived from the exception type.
 /// </remarks>
-public abstract class ResponseException(string detail, int statusCode, Dictionary<string, object>? metadata = null)
+public abstract class ResponseException(string detail, int statusCode)
     : Exception
 {
     /// <summary>
@@ -30,15 +32,6 @@ public abstract class ResponseException(string detail, int statusCode, Dictionar
     public string? Detail { get; } = detail;
 
     /// <summary>
-    /// Gets the metadata associated with the exception.
-    /// </summary>
-    /// <remarks>
-    /// This property provides additional metadata represented as key-value pairs, allowing for
-    /// extended context or supplementary information regarding the specific exception instance.
-    /// </remarks>
-    public Dictionary<string, object>? Metadata { get; } = metadata;
-
-    /// <summary>
     /// Retrieves the translation key for the exception by removing the "Exception"
     /// suffix from the exception type name.
     /// </summary>
@@ -47,4 +40,30 @@ public abstract class ResponseException(string detail, int statusCode, Dictionar
     /// without the "Exception" suffix.
     /// </returns>
     public string GetTranslationKey() => GetType().Name.Replace("Exception", string.Empty);
+
+    /// <summary>
+    /// Retrieves metadata from the exception by collecting properties marked with the
+    /// <see cref="ResponseMetadataAttribute"/> attribute.
+    /// </summary>
+    /// <returns>
+    /// A dictionary containing the names of properties marked with <see cref="ResponseMetadataAttribute"/>
+    /// as keys and their corresponding values as dictionary values. If no such properties exist,
+    /// an empty dictionary is returned.
+    /// </returns>
+    public Dictionary<string, object?> GetMetadata()
+    {
+        var metadata = new Dictionary<string, object?>();
+
+        var properties = GetType()
+            .GetProperties()
+            .Where(p => p.GetCustomAttributes(typeof(ResponseMetadataAttribute), inherit: true).Any());
+
+        foreach (var property in properties)
+        {
+            var value = property.GetValue(this);
+            metadata[property.Name] = value;
+        }
+
+        return metadata;
+    }
 }

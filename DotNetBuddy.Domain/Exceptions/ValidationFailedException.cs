@@ -8,8 +8,4 @@ namespace DotNetBuddy.Domain.Exceptions;
 /// The exception aggregates all validation errors into a single error message.
 /// </remarks>
 /// <seealso cref="ResponseException"/>
-public class ValidationFailedException(IEnumerable<string> errors) : ResponseException
-(
-    string.Join(", ", errors),
-    400
-);
+public class ValidationFailedException(IEnumerable<string> errors) : ResponseException(string.Join(", ", errors), 400);
