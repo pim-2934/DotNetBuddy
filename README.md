@@ -2,11 +2,10 @@
 [![Source](https://img.shields.io/badge/-Source%20Code-181717?logo=GitHub&style=flat-square)](https://github.com/pim-2934/DotNetBuddy)
 [![License](https://img.shields.io/github/license/pim-2934/DotNetBuddy?style=flat-square)](https://github.com/pim-2934/DotNetBuddy/blob/main/LICENSE)
 
-## Overview
-**DotNetBuddy** is a .NET framework designed to simplify and streamline common application concerns such as configuration,
-dependency injection, database access, auditing, exception handling, and data seeding.
+## What is this?
+**DotNetBuddy** is a grab-bag of small utilities and experiments for .NET apps. It focuses on practical helpers you can drop into a project: configuration wiring, DI shortcuts, EF Core helpers, auditing, exception handling, and simple data seeding.
 
-It encourages clean architecture principles and supports out-of-the-box patterns like Unit of Work and Repository.
+This is not a best-practices framework. It’s a work-in-progress toolbox — expect rough edges and changes. Use what helps; ignore the rest.
 
 ## 📦 NuGet Packages
 
