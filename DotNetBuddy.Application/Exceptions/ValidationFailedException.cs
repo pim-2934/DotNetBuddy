@@ -1,4 +1,4 @@
-namespace DotNetBuddy.Domain.Exceptions;
+namespace DotNetBuddy.Application.Exceptions;
 
 /// <summary>
 /// Represents an exception that occurs when validation fails.

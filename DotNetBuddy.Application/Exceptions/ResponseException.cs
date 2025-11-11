@@ -1,6 +1,6 @@
 using DotNetBuddy.Domain.Attributes;
 
-namespace DotNetBuddy.Domain.Exceptions;
+namespace DotNetBuddy.Application.Exceptions;
 
 /// <summary>
 /// Represents the base class for application-specific exceptions that include additional details about the error.

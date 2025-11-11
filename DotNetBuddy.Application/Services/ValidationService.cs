@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using DotNetBuddy.Application.Exceptions;
 using DotNetBuddy.Domain;
-using DotNetBuddy.Domain.Exceptions;
 
 namespace DotNetBuddy.Application.Services;
 

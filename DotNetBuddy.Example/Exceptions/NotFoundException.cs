@@ -1,4 +1,4 @@
-﻿using DotNetBuddy.Domain.Exceptions;
+﻿using DotNetBuddy.Application.Exceptions;
 
 namespace DotNetBuddy.Example.Exceptions;
 

@@ -1,5 +1,5 @@
-﻿using DotNetBuddy.Domain.Attributes;
-using DotNetBuddy.Domain.Exceptions;
+﻿using DotNetBuddy.Application.Exceptions;
+using DotNetBuddy.Domain.Attributes;
 
 namespace DotNetBuddy.Example.Exceptions;
 
