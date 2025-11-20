@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DotNetBuddy.Domain.Exceptions;
 
 namespace DotNetBuddy.Domain;
 
@@ -49,8 +48,7 @@ public interface IValidationService
     ) where TItem : class;
 
     /// <summary>
-    /// Validates the specified source object using the provided input object, and throws a <see cref="ValidationFailedException"/>
-    /// if any validation errors are encountered.
+    /// Validates the specified source object using the provided input object.
     /// </summary>
     /// <typeparam name="TItem">The type of the source object to validate.</typeparam>
     /// <typeparam name="TInput">The type of the input object used for validation.</typeparam>
@@ -58,7 +56,6 @@ public interface IValidationService
     /// <param name="input">The input object against which the source object is validated.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the validation process.</param>
     /// <returns>A task that represents the asynchronous validation operation.</returns>
-    /// <exception cref="ValidationFailedException">Thrown when validation fails and errors are present.</exception>
     Task ValidateOrThrowAsync<TItem, TInput>(
         TItem item,
         TInput input,

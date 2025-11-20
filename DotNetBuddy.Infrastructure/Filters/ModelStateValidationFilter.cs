@@ -1,4 +1,4 @@
-using DotNetBuddy.Domain.Exceptions;
+using DotNetBuddy.Application.Exceptions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace DotNetBuddy.Infrastructure.Filters;

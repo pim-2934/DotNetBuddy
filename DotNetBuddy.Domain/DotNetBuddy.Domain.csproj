@@ -10,7 +10,7 @@
         <LangVersion>12.0</LangVersion>
 
         <Authors>Pim</Authors>
-        <Description>DotNetBuddy is a .NET framework designed to simplify and streamline common application concerns.</Description>
+        <Description>DotNetBuddy is a grab-bag of small utilities and experiments for .NET apps.</Description>
         <PackageTags>EFCore;UnitOfWork;Repositories;Exceptions;Installers;Configs;</PackageTags>
         <RepositoryUrl>https://github.com/pim-2934/DotNetBuddy</RepositoryUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
