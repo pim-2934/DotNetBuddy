@@ -7,7 +7,7 @@ public class Location : IAuditableEntity<Guid>, ISoftDeletableEntity<Guid>
 {
     public Guid Id { get; set; }
 
-    [StringLength(255)] public required string Name { get; set; }
+    [Required, StringLength(255)] public required string Name { get; set; }
 
     public virtual ICollection<WeatherForecast> WeatherForecasts { get; set; } = [];
 

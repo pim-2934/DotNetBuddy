@@ -1,10 +1,12 @@
-﻿using DotNetBuddy.Domain;
+﻿using System.ComponentModel.DataAnnotations;
+using DotNetBuddy.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetBuddy.Extensions.EntityFrameworkCore;
 
 /// <inheritdoc />
-public class UnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext : DbContext
+public class UnitOfWork<TContext>(TContext context)
+    : IUnitOfWork where TContext : DbContext
 {
     private readonly Dictionary<Type, object> _repositories = new();
 
@@ -25,6 +27,16 @@ public class UnitOfWork<TContext>(TContext context) : IUnitOfWork where TContext
     /// <inheritdoc />
     public async Task<int> SaveAsync(CancellationToken cancellationToken = default)
     {
+        var entries = context.ChangeTracker.Entries()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified)
+            .Select(e => e.Entity);
+
+        foreach (var entity in entries)
+        {
+            var validationContext = new ValidationContext(entity);
+            Validator.ValidateObject(entity, validationContext, validateAllProperties: true);
+        }
+
         return await context.SaveChangesAsync(cancellationToken);
     }
 

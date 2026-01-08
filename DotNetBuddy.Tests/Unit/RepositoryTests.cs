@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using DotNetBuddy.Application.Extensions;
 using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
@@ -892,5 +893,45 @@ public class RepositoryTests
         Assert.Equal(validEntity.Id, savedEntity.Id);
         Assert.Equal(10, savedEntity.BaseValue);
         Assert.Equal(5, savedEntity.BelowBaseValue);
+    }
+
+    [Fact]
+    public async Task AddAsync_WithMissingRequiredName_ThrowsValidationException()
+    {
+        // Arrange
+        var dbContext = TestDbContext.CreateContext(nameof(AddAsync_WithMissingRequiredName_ThrowsValidationException));
+        var unitOfWork = new UnitOfWork<TestDbContext>(dbContext);
+        var repository = unitOfWork.Repository<Entity, Guid>();
+
+        var entity = new Entity
+        {
+            Id = Guid.NewGuid(),
+            Name = "",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Act & Assert
+        await repository.AddAsync(entity);
+        await Assert.ThrowsAsync<ValidationException>(() => unitOfWork.SaveAsync());
+    }
+
+    [Fact]
+    public async Task AddAsync_WithNameExceedingLength_ThrowsValidationException()
+    {
+        // Arrange
+        var dbContext = TestDbContext.CreateContext(nameof(AddAsync_WithNameExceedingLength_ThrowsValidationException));
+        var unitOfWork = new UnitOfWork<TestDbContext>(dbContext);
+        var repository = unitOfWork.Repository<Entity, Guid>();
+
+        var entity = new Entity
+        {
+            Id = Guid.NewGuid(),
+            Name = new string('A', 101), // Name has [StringLength(100)]
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Act & Assert
+        await repository.AddAsync(entity);
+        await Assert.ThrowsAsync<ValidationException>(() => unitOfWork.SaveAsync());
     }
 }
