@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DotNetBuddy.Application.Exceptions;
 using DotNetBuddy.Application.Extensions;
 using DotNetBuddy.Extensions.EntityFrameworkCore;
 using DotNetBuddy.Domain.Enums;
@@ -912,7 +913,7 @@ public class RepositoryTests
 
         // Act & Assert
         await repository.AddAsync(entity);
-        await Assert.ThrowsAsync<ValidationException>(() => unitOfWork.SaveAsync());
+        await Assert.ThrowsAsync<ValidationFailedException>(() => unitOfWork.SaveAsync());
     }
 
     [Fact]
@@ -932,6 +933,6 @@ public class RepositoryTests
 
         // Act & Assert
         await repository.AddAsync(entity);
-        await Assert.ThrowsAsync<ValidationException>(() => unitOfWork.SaveAsync());
+        await Assert.ThrowsAsync<ValidationFailedException>(() => unitOfWork.SaveAsync());
     }
 }
