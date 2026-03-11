@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DotNetBuddy.Application.Exceptions;
 using DotNetBuddy.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,10 +32,17 @@ public class UnitOfWork<TContext>(TContext context)
             .Where(e => e.State is EntityState.Added or EntityState.Modified)
             .Select(e => e.Entity);
 
-        foreach (var entity in entries)
+        try
         {
-            var validationContext = new ValidationContext(entity);
-            Validator.ValidateObject(entity, validationContext, validateAllProperties: true);
+            foreach (var entity in entries)
+            {
+                var validationContext = new ValidationContext(entity);
+                Validator.ValidateObject(entity, validationContext, validateAllProperties: true);
+            }
+        }
+        catch (ValidationException ex)
+        {
+            throw new ValidationFailedException([ex.Message]);
         }
 
         return await context.SaveChangesAsync(cancellationToken);
